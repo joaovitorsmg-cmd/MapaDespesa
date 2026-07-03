@@ -39,9 +39,9 @@ html,body{background:var(--fundo);color:var(--cinza);max-width:100%;overflow-x:h
 .filters{background:var(--branco);border-radius:8px;padding:14px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .f-group{display:flex;flex-direction:column;gap:4px}
 .f-group label{font-size:11px;font-weight:700;color:var(--azul);text-transform:uppercase}
-.f-group select,.f-group input{padding:7px 10px;border:1px solid #ccd;border-radius:5px;font-size:13px;min-width:160px}
+.f-group select,.f-group input:not([type=checkbox]){padding:7px 10px;border:1px solid #ccd;border-radius:5px;font-size:13px;min-width:160px}
 .f-group select:focus,.f-group input:focus{outline:none;border-color:var(--azul)}
-.chk-label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cinza);cursor:pointer;padding:7px 0;white-space:nowrap}
+.chk-label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cinza);cursor:pointer;padding:7px 0;max-width:280px}
 .chk-label input{width:16px;height:16px;cursor:pointer;flex-shrink:0}
 body.hide-auditor .col-auditor{display:none}
 .toolbar-end{margin-left:auto}
@@ -134,23 +134,24 @@ tbody tr:hover{background:#F5F8FF}
 .periodo-badge{background:var(--azul);color:#fff;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700}
 .empty{text-align:center;padding:40px;color:#aaa;font-size:14px}
 
-/* LEGENDA DE GRÁFICO */
-.chart-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:#666;margin-bottom:10px}
-.chart-legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
-.dot-azul{background:var(--azul)}.dot-vermelho{background:var(--vermelho)}
-
-/* CARDS MOBILE — Comparativo Filiais (substitui a tabela larga em telas pequenas) */
-.cmp-cards{display:none}
-.cmp-card{background:var(--branco);border-radius:8px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:10px;border-left:4px solid var(--azul)}
-.cmp-card.alert{border-left-color:var(--vermelho);background:#FFFAFA}
-.cmp-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px}
-.cmp-card-fil{font-size:14px;font-weight:800;color:var(--azul-esc)}
-.cmp-card-loja{font-size:11px;color:#888;margin-top:2px}
-.cmp-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.cmp-card-stat{background:var(--fundo);border-radius:6px;padding:8px 10px}
-.cmp-card-stat .lbl{font-size:9px;color:#888;text-transform:uppercase;font-weight:700}
-.cmp-card-stat .val{font-size:14px;font-weight:800;color:var(--azul-esc);margin-top:2px}
-.cmp-card-peers{font-size:11px;color:#666;border-top:1px solid #eee;padding-top:8px;margin-top:2px}
+/* COMPARATIVO FILIAIS — grupos de faturamento parecido */
+.cmp-intro{font-size:13px;color:#555;line-height:1.6;margin-bottom:16px;max-width:900px}
+.cmp-destaque{background:#FFF5F5;border-left:4px solid var(--vermelho);border-radius:8px;padding:14px 16px;margin-bottom:10px;font-size:13px;line-height:1.6}
+.cmp-destaque b{color:var(--azul-esc)}
+.cmp-destaque .tag{display:inline-block;background:var(--vermelho);color:#fff;font-size:10px;font-weight:800;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-right:8px}
+.grp-card{background:var(--branco);border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:16px;margin-bottom:14px}
+.grp-card.flag{box-shadow:0 0 0 2px var(--vermelho),0 1px 4px rgba(0,0,0,.08)}
+.grp-card-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--fundo)}
+.grp-card-head h4{font-size:13px;font-weight:800;color:var(--azul-esc)}
+.grp-card-head .n{font-size:11px;color:#888;font-weight:600}
+.grp-row{padding:7px 0}
+.grp-row-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;margin-bottom:4px}
+.grp-row-top .nome{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grp-row-top .fat{color:#888;font-size:10px;margin-left:6px;white-space:nowrap}
+.grp-row-pct{font-weight:800;white-space:nowrap}
+.grp-bar-track{background:var(--fundo);border-radius:4px;height:14px;overflow:hidden}
+.grp-bar-fill{height:100%;border-radius:4px}
+.grp-sozinhas{font-size:12px;color:#888;margin-top:6px}
 
 /* =========================================================
    MOBILE — fluido em telas pequenas
@@ -158,8 +159,6 @@ tbody tr:hover{background:#F5F8FF}
 @media(max-width:768px){
   .charts-grid,.top3{grid-template-columns:1fr}
   .export-cards-grid{grid-template-columns:1fr}
-  .cmp-desktop-only{display:none}
-  .cmp-cards{display:block}
 }
 
 @media(max-width:640px){
@@ -177,7 +176,8 @@ tbody tr:hover{background:#F5F8FF}
 
   .filters{padding:12px;flex-direction:column;align-items:stretch}
   .f-group{width:100%}
-  .f-group select,.f-group input{width:100%;min-width:0;font-size:16px;padding:9px 10px}
+  .f-group select,.f-group input:not([type=checkbox]){width:100%;min-width:0;font-size:16px;padding:9px 10px}
+  .chk-label{max-width:none}
   .filters .btn{width:100%}
   .toolbar-end{margin-left:0;width:100%}
   .icon-toolbar .ico-btn-light{flex:1;justify-content:center}
@@ -190,8 +190,6 @@ tbody tr:hover{background:#F5F8FF}
   .chart-box{padding:12px}
 
   .upload-zone{padding:24px 14px}
-
-  .cmp-card-grid{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -421,26 +419,26 @@ tbody tr:hover{background:#F5F8FF}
 <div class="content" id="content-tab-comparativo">
   <div class="filters">
     <div class="f-group">
-      <label>Faixa de Faturamento Parecido</label>
+      <label>Quão parecido o faturamento precisa ser</label>
       <select id="cmp-tol" onchange="renderComparativo()">
-        <option value="10">± 10%</option>
-        <option value="15" selected>± 15%</option>
-        <option value="20">± 20%</option>
-        <option value="25">± 25%</option>
+        <option value="10">Bem parecido (± 10%)</option>
+        <option value="15" selected>Parecido (± 15%)</option>
+        <option value="20">Um pouco parecido (± 20%)</option>
+        <option value="25">Mais aberto (± 25%)</option>
       </select>
     </div>
     <div class="f-group">
-      <label>Alertar Diferença de Gasto ≥</label>
+      <label>A partir de quantos pontos já é diferença grande</label>
       <select id="cmp-mindiff" onchange="renderComparativo()">
-        <option value="5">5 p.p.</option>
-        <option value="8" selected>8 p.p.</option>
-        <option value="10">10 p.p.</option>
-        <option value="15">15 p.p.</option>
+        <option value="5">5 pontos</option>
+        <option value="8" selected>8 pontos</option>
+        <option value="10">10 pontos</option>
+        <option value="15">15 pontos</option>
       </select>
     </div>
     <div class="f-group">
       <label>&nbsp;</label>
-      <label class="chk-label"><input type="checkbox" id="cmp-only-alert" onchange="renderComparativo()"> Mostrar só alertas</label>
+      <label class="chk-label"><input type="checkbox" id="cmp-only-alert" onchange="renderComparativo()"> Mostrar só grupos com diferença grande</label>
     </div>
     <div class="toolbar-end icon-toolbar">
       <button class="ico-btn-light" onclick="exportTable('tbl-comparativo','comparativo_filiais')"><span class="ico-ic">📥</span>Exportar PNG</button>
@@ -448,22 +446,17 @@ tbody tr:hover{background:#F5F8FF}
     </div>
   </div>
 
-  <div class="section-title">⚖️ Filiais com faturamento parecido, mas gasto discrepante</div>
+  <div class="section-title">⚖️ Comparativo de Filiais</div>
+  <p class="cmp-intro">Agrupamos as filiais que faturam praticamente o mesmo valor. Dentro de cada grupo, quanto mais comprida e mais vermelha a barra, mais essa filial gasta em relação ao que fatura — mesmo faturando quase igual às vizinhas do grupo.</p>
+
   <div class="kpi-grid" id="cmp-stats" style="margin-bottom:18px"></div>
 
-  <div class="charts-grid" style="grid-template-columns:1fr;margin-bottom:18px">
-    <div class="chart-box">
-      <h3>🔎 Faturamento x % Desp/Fat</h3>
-      <div class="chart-legend">
-        <span><i class="dot dot-azul"></i>Dentro do esperado</span>
-        <span><i class="dot dot-vermelho"></i>Discrepância ≥ limite selecionado</span>
-      </div>
-      <div class="chart-wrap" style="height:360px"><canvas id="ch-comparativo"></canvas></div>
-    </div>
-  </div>
+  <div id="cmp-destaques"></div>
 
-  <div class="tbl-box cmp-desktop-only">
-    <h3>📋 Filiais comparáveis (faturamento parecido) ordenadas pela maior diferença de % Desp/Fat</h3>
+  <div id="cmp-grupos"></div>
+
+  <div class="tbl-box" style="margin-top:4px">
+    <h3>📋 Tabela detalhada — todas as filiais e seu grupo de faturamento parecido</h3>
     <table id="tbl-comparativo">
       <thead>
         <tr>
@@ -472,16 +465,12 @@ tbody tr:hover{background:#F5F8FF}
           <th>Regional</th>
           <th class="num">Fat. Realizado</th>
           <th class="num">% Desp/Fat</th>
-          <th class="num">Média dos Pares</th>
-          <th class="num">Diferença</th>
-          <th>Filiais Comparáveis</th>
+          <th>Grupo (faixa de faturamento parecido)</th>
         </tr>
       </thead>
       <tbody id="body-comparativo"></tbody>
     </table>
   </div>
-
-  <div class="cmp-cards" id="cmp-cards"></div>
 </div>
 
 <!-- ======================== TAB: EXPORT PNG ======================== -->
@@ -1003,125 +992,146 @@ function renderTabGrupos(){
 // =========================================================
 // COMPARATIVO DE FILIAIS (faturamento parecido, gasto discrepante)
 // =========================================================
-function computeComparativo(tolPerc){
-  const filiais = DATA.filiais.filter(f=>f.FAT_REAL>0);
-  return filiais.map(f=>{
+// Agrupa filiais em faixas de faturamento parecido: começa pela filial de
+// maior faturamento ainda sem grupo (âncora), junta a ela toda filial
+// (também sem grupo) dentro de ±tolPerc%, e repete para a próxima âncora
+// livre. Isso forma grupos coesos (todo mundo no grupo perto da âncora),
+// diferente de simplesmente ligar pares em cadeia — que acabaria juntando
+// quase todas as filiais num grupo só, sem nenhum limite prático de "parecido".
+function computeGruposComparativo(tolPerc){
+  const filiais=[...DATA.filiais].filter(f=>f.FAT_REAL>0).sort((a,b)=>b.FAT_REAL-a.FAT_REAL);
+  const usados=new Set();
+  const grupos=[];
+  filiais.forEach((f,i)=>{
+    if(usados.has(f.SIGLA))return;
     const lo=f.FAT_REAL*(1-tolPerc/100), hi=f.FAT_REAL*(1+tolPerc/100);
-    const peers=filiais.filter(x=>x.ID_FILIAL!==f.ID_FILIAL && x.FAT_REAL>=lo && x.FAT_REAL<=hi);
-    const peerAvg = peers.length ? peers.reduce((s,x)=>s+x.PERC_DESP,0)/peers.length : null;
-    const diff = peerAvg!=null ? f.PERC_DESP-peerAvg : null;
-    return {...f, peerAvg, diff, peerCount:peers.length, peerList:peers.map(p=>p.SIGLA||p.ID_FILIAL)};
-  }).filter(f=>f.peerCount>0);
+    const membros=[f];
+    usados.add(f.SIGLA);
+    for(let j=i+1;j<filiais.length;j++){
+      const g=filiais[j];
+      if(usados.has(g.SIGLA))continue;
+      if(g.FAT_REAL>=lo && g.FAT_REAL<=hi){ membros.push(g); usados.add(g.SIGLA); }
+    }
+    if(membros.length>=2){
+      const ordenado=[...membros].sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
+      const fats=membros.map(m=>m.FAT_REAL), percs=membros.map(m=>m.PERC_DESP);
+      grupos.push({
+        filiais:ordenado, sozinha:false,
+        fatMin:Math.min(...fats), fatMax:Math.max(...fats),
+        max:ordenado[0], min:ordenado[ordenado.length-1],
+        gap:Math.max(...percs)-Math.min(...percs)
+      });
+    }else{
+      grupos.push({filiais:membros, sozinha:true, fatMin:f.FAT_REAL, fatMax:f.FAT_REAL, gap:0});
+    }
+  });
+  return grupos;
 }
+
+function pctClass(v){ return v>20?'tx-neg':v<13?'tx-pos':'tx-warn'; }
+function pctColor(v){ return v>20?'#C62828':v<13?'#1B8A3C':'#F2A900'; }
 
 function renderComparativo(){
   if(!DATA)return;
   const tol=parseInt(document.getElementById('cmp-tol').value||15,10);
   const minDiff=parseInt(document.getElementById('cmp-mindiff').value||8,10);
   const onlyAlert=document.getElementById('cmp-only-alert').checked;
-  const universo=DATA.filiais.filter(f=>f.FAT_REAL>0).length;
-  const comp=computeComparativo(tol).sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff));
-  const alertas=comp.filter(f=>Math.abs(f.diff)>=minDiff);
-  const lista=onlyAlert?alertas:comp;
+
+  const todosGrupos=computeGruposComparativo(tol);
+  const grupos=todosGrupos.filter(g=>!g.sozinha);
+  const sozinhas=todosGrupos.filter(g=>g.sozinha).map(g=>g.filiais[0]);
+  const gruposComAlerta=grupos.filter(g=>g.gap>=minDiff);
+  const gruposExibidos=(onlyAlert?gruposComAlerta:grupos).slice().sort((a,b)=>b.gap-a.gap);
+  const destaques=[...gruposComAlerta].sort((a,b)=>b.gap-a.gap).slice(0,3);
 
   document.getElementById('cmp-stats').innerHTML=`
     <div class="kpi">
       <div class="kpi-label">🏢 Filiais Avaliadas</div>
-      <div class="kpi-val">${universo}</div>
+      <div class="kpi-val">${todosGrupos.reduce((s,g)=>s+g.filiais.length,0)}</div>
       <div class="kpi-sub">com faturamento realizado > 0</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">🔗 Com Pares Comparáveis</div>
-      <div class="kpi-val">${comp.length}</div>
+      <div class="kpi-label">🔗 Grupos Formados</div>
+      <div class="kpi-val">${grupos.length}</div>
       <div class="kpi-sub">faixa de faturamento parecido ±${tol}%</div>
     </div>
-    <div class="kpi ${alertas.length>0?'vermelho':'verde'}">
-      <div class="kpi-label">⚠️ Alertas de Discrepância</div>
-      <div class="kpi-val">${alertas.length}</div>
-      <div class="kpi-sub">diferença de gasto ≥ ${minDiff} p.p. vs pares</div>
+    <div class="kpi ${gruposComAlerta.length>0?'vermelho':'verde'}">
+      <div class="kpi-label">⚠️ Grupos com Diferença Grande</div>
+      <div class="kpi-val">${gruposComAlerta.length}</div>
+      <div class="kpi-sub">diferença ≥ ${minDiff} pontos dentro do grupo</div>
     </div>
   `;
 
-  const emptyMsg = onlyAlert
-    ? 'Nenhum alerta encontrado nesta faixa/limite — tente reduzir o limite de diferença'
-    : 'Nenhuma filial encontrou pares com faturamento parecido nesta faixa';
-
-  const b=document.getElementById('body-comparativo');
-  if(!lista.length){
-    b.innerHTML=`<tr><td colspan="8" class="empty">${emptyMsg}</td></tr>`;
-  }else{
-    b.innerHTML=lista.map(f=>{
-      const isAlert=Math.abs(f.diff)>=minDiff;
-      const diffCls = isAlert ? (f.diff>0?'tx-neg':'tx-pos') : '';
-      return `<tr${isAlert?' style="background:#FFF5F5"':''}>
-        <td><span class="sigla">${f.SIGLA||f.ID_FILIAL}</span>${isAlert?' ⚠️':''}</td>
-        <td>${f.LOJA||'—'}</td>
-        <td>${f.REGIONAL||'—'}</td>
-        <td class="num">${fmtM(f.FAT_REAL)}</td>
-        <td class="num ${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</td>
-        <td class="num">${fmtP(f.peerAvg)}</td>
-        <td class="num ${diffCls}">${f.diff>0?'+':''}${fmtP(f.diff)}</td>
-        <td style="font-size:11px">${f.peerCount} filial(is): ${f.peerList.slice(0,6).join(', ')}${f.peerList.length>6?'…':''}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  renderComparativoCards(lista, minDiff, emptyMsg);
-  renderComparativoChart(comp, minDiff);
+  renderDestaques(destaques);
+  renderGruposCards(gruposExibidos, sozinhas, minDiff);
+  renderTabelaComparativo(todosGrupos);
 }
 
-function renderComparativoCards(lista, minDiff, emptyMsg){
-  const c=document.getElementById('cmp-cards');
-  if(!lista.length){
-    c.innerHTML=`<div class="empty">${emptyMsg}</div>`;
-    return;
-  }
-  c.innerHTML=lista.map(f=>{
-    const isAlert=Math.abs(f.diff)>=minDiff;
-    const diffCls = isAlert ? (f.diff>0?'tx-neg':'tx-pos') : '';
-    return `<div class="cmp-card${isAlert?' alert':''}">
-      <div class="cmp-card-top">
-        <div>
-          <span class="sigla">${f.SIGLA||f.ID_FILIAL}</span>${isAlert?' ⚠️':''}
-          <div class="cmp-card-loja">${f.LOJA||'—'} · ${f.REGIONAL||'—'}</div>
-        </div>
-      </div>
-      <div class="cmp-card-grid">
-        <div class="cmp-card-stat"><div class="lbl">Fat. Realizado</div><div class="val">${fmtM(f.FAT_REAL)}</div></div>
-        <div class="cmp-card-stat"><div class="lbl">% Desp/Fat</div><div class="val ${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</div></div>
-        <div class="cmp-card-stat"><div class="lbl">Média dos Pares</div><div class="val">${fmtP(f.peerAvg)}</div></div>
-        <div class="cmp-card-stat"><div class="lbl">Diferença</div><div class="val ${diffCls}">${f.diff>0?'+':''}${fmtP(f.diff)}</div></div>
-      </div>
-      <div class="cmp-card-peers">${f.peerCount} filial(is) comparável(is): ${f.peerList.slice(0,6).join(', ')}${f.peerList.length>6?'…':''}</div>
+function renderDestaques(destaques){
+  const el=document.getElementById('cmp-destaques');
+  if(!destaques.length){ el.innerHTML=''; return; }
+  el.innerHTML=destaques.map(g=>{
+    const mx=g.max, mn=g.min;
+    return `<div class="cmp-destaque">
+      <span class="tag">Atenção</span>
+      <b>${mx.SIGLA} (${mx.LOJA})</b> gasta <b>${fmtP(mx.PERC_DESP)}</b> do faturamento —
+      ${g.gap.toFixed(1)} pontos a mais que <b>${mn.SIGLA} (${mn.LOJA})</b>, que gasta ${fmtP(mn.PERC_DESP)}.
+      As duas faturam valores parecidos: ${fmtM(mx.FAT_REAL)} vs ${fmtM(mn.FAT_REAL)}.
     </div>`;
   }).join('');
 }
 
-function renderComparativoChart(comp, minDiff){
-  destroyChart('ch-comparativo');
-  const ctx=document.getElementById('ch-comparativo').getContext('2d');
-  charts_reg['ch-comparativo']=new Chart(ctx,{
-    type:'scatter',
-    data:{datasets:[{
-      label:'Filiais',
-      data:comp.map(f=>({x:f.FAT_REAL,y:f.PERC_DESP,sigla:f.SIGLA||f.ID_FILIAL,diff:f.diff})),
-      backgroundColor:comp.map(f=>Math.abs(f.diff)>=minDiff?'#C62828':'#0D47A1'),
-      pointRadius:comp.map(f=>Math.abs(f.diff)>=minDiff?7:4),
-      pointHoverRadius:9
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:c=>{
-          const p=c.raw;
-          return `${p.sigla}: ${fmtM(p.x)} | ${p.y.toFixed(2)}% Desp/Fat (Δ ${p.diff>0?'+':''}${p.diff.toFixed(1)} p.p. vs pares)`;
-        }}}
-      },
-      scales:{
-        x:{title:{display:true,text:'Faturamento Realizado',font:{size:11}},ticks:{callback:v=>fmtM(v),font:{size:9}}},
-        y:{title:{display:true,text:'% Despesa/Faturamento',font:{size:11}},ticks:{callback:v=>v+'%',font:{size:9}}}
-      }}
+function renderGruposCards(gruposExibidos, sozinhas, minDiff){
+  const el=document.getElementById('cmp-grupos');
+  const maxPercAll=Math.max(...DATA.filiais.map(f=>f.PERC_DESP), 1)*1.05;
+  let html='';
+  if(!gruposExibidos.length){
+    html=`<div class="empty">Nenhum grupo encontrado nesta faixa/limite. Tente aumentar a faixa de faturamento parecido ou reduzir o limite de diferença.</div>`;
+  }else{
+    html=gruposExibidos.map(g=>{
+      const flag=g.gap>=minDiff;
+      const rows=g.filiais.map(f=>{
+        const w=Math.min(100,(f.PERC_DESP/maxPercAll)*100);
+        return `<div class="grp-row">
+          <div class="grp-row-top">
+            <span class="nome"><span class="sigla">${f.SIGLA}</span> ${f.LOJA||'—'}<span class="fat">${fmtM(f.FAT_REAL)}</span></span>
+            <span class="grp-row-pct ${pctClass(f.PERC_DESP)}">${fmtP(f.PERC_DESP)}</span>
+          </div>
+          <div class="grp-bar-track"><div class="grp-bar-fill" style="width:${w}%;background:${pctColor(f.PERC_DESP)}"></div></div>
+        </div>`;
+      }).join('');
+      return `<div class="grp-card${flag?' flag':''}">
+        <div class="grp-card-head">
+          <h4>${flag?'⚠️ ':''}Faturamento parecido: ${fmtM(g.fatMin)} – ${fmtM(g.fatMax)}</h4>
+          <span class="n">${g.filiais.length} filiais · diferença de ${g.gap.toFixed(1)} pontos entre quem mais e quem menos gasta</span>
+        </div>
+        ${rows}
+      </div>`;
+    }).join('');
+  }
+  if(sozinhas.length){
+    html += `<div class="grp-sozinhas">Sem outra filial de faturamento parecido nesta faixa: ${sozinhas.map(f=>f.SIGLA).join(', ')}. Tente uma faixa mais aberta para comparar essas também.</div>`;
+  }
+  el.innerHTML=html;
+}
+
+function renderTabelaComparativo(todosGrupos){
+  const b=document.getElementById('body-comparativo');
+  const linhas=[];
+  todosGrupos.forEach(g=>{
+    const label=g.sozinha ? '— (sem grupo nesta faixa)' : `${fmtM(g.fatMin)} – ${fmtM(g.fatMax)}`;
+    g.filiais.forEach(f=>linhas.push({...f,_grupoLabel:label}));
   });
+  linhas.sort((a,b)=>b.FAT_REAL-a.FAT_REAL);
+  if(!linhas.length){ b.innerHTML='<tr><td colspan="6" class="empty">Sem dados</td></tr>'; return; }
+  b.innerHTML=linhas.map(f=>`<tr>
+    <td><span class="sigla">${f.SIGLA}</span></td>
+    <td>${f.LOJA||'—'}</td>
+    <td>${f.REGIONAL||'—'}</td>
+    <td class="num">${fmtM(f.FAT_REAL)}</td>
+    <td class="num ${pctClass(f.PERC_DESP)}">${fmtP(f.PERC_DESP)}</td>
+    <td style="font-size:11px">${f._grupoLabel}</td>
+  </tr>`).join('');
 }
 
 // =========================================================
