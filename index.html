@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel Orçamentário Agroquima 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{
+  --azul:#0D47A1;--azul-esc:#002B5B;--azul-cl:#64B5F6;
+  --cinza:#333;--cinza-cl:#E6E6E6;--branco:#fff;
+  --verde:#1B8A3C;--vermelho:#C62828;--amarelo:#F2A900;
+  --fundo:#F0F4FA;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:var(--fundo);color:var(--cinza)}
+
+/* HEADER */
+.header{background:var(--azul-esc);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header-logo{display:flex;align-items:center;gap:12px}
+.header-logo .logo-box{background:var(--branco);border-radius:6px;padding:4px 10px;font-weight:900;font-size:16px;color:var(--azul-esc);letter-spacing:1px}
+.header-logo .logo-box span{color:var(--azul-cl)}
+.header h1{color:var(--branco);font-size:18px;font-weight:600}
+.header-meta{color:var(--azul-cl);font-size:12px;text-align:right}
+.header-meta span{display:block}
+
+/* TABS */
+.tabs{background:var(--azul);display:flex;gap:2px;padding:0 24px}
+.tab{padding:11px 20px;color:rgba(255,255,255,.7);cursor:pointer;font-size:13px;font-weight:600;border-bottom:3px solid transparent;transition:.2s;white-space:nowrap}
+.tab:hover{color:#fff}
+.tab.active{color:#fff;border-bottom-color:var(--azul-cl)}
+
+/* CONTENT */
+.content{display:none;padding:20px 24px;max-width:1500px;margin:0 auto}
+.content.active{display:block}
+
+/* FILTROS */
+.filters{background:var(--branco);border-radius:8px;padding:14px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.f-group{display:flex;flex-direction:column;gap:4px}
+.f-group label{font-size:11px;font-weight:700;color:var(--azul);text-transform:uppercase}
+.f-group select,.f-group input{padding:7px 10px;border:1px solid #ccd;border-radius:5px;font-size:13px;min-width:160px}
+.f-group select:focus,.f-group input:focus{outline:none;border-color:var(--azul)}
+.btn{padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:13px;font-weight:700;transition:.2s}
+.btn-primary{background:var(--azul);color:#fff}.btn-primary:hover{background:var(--azul-esc)}
+.btn-ghost{background:#eef;color:var(--azul)}.btn-ghost:hover{background:#dde}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:18px}
+.kpi{background:var(--branco);border-radius:8px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.08);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--azul)}
+.kpi.verde::before{background:var(--verde)}
+.kpi.vermelho::before{background:var(--vermelho)}
+.kpi.amarelo::before{background:var(--amarelo)}
+.kpi-label{font-size:11px;color:#666;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.kpi-val{font-size:22px;font-weight:800;color:var(--azul-esc);line-height:1.1}
+.kpi-sub{font-size:11px;color:#888;margin-top:4px}
+.kpi-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-top:6px}
+.badge-ok{background:#E8F5E9;color:#2E7D32}.badge-bad{background:#FFEBEE;color:#C62828}.badge-warn{background:#FFF8E1;color:#F57F17}
+
+/* CHARTS GRID */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(480px,1fr));gap:16px;margin-bottom:18px}
+.chart-box{background:var(--branco);border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.chart-box h3{font-size:13px;font-weight:700;color:var(--azul-esc);margin-bottom:12px;border-bottom:2px solid var(--fundo);padding-bottom:8px}
+.chart-wrap{position:relative;height:280px}
+
+/* TABLE */
+.tbl-box{background:var(--branco);border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:18px;overflow-x:auto}
+.tbl-box h3{font-size:13px;font-weight:700;color:var(--azul-esc);margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:var(--azul-esc);color:#fff;position:sticky;top:0}
+th{padding:9px 10px;text-align:left;font-weight:700;font-size:11px;text-transform:uppercase}
+td{padding:8px 10px;border-bottom:1px solid #f0f0f0}
+tbody tr:hover{background:#F5F8FF}
+.num{text-align:right;font-family:monospace;font-size:11px}
+.tx-pos{color:var(--verde);font-weight:700}
+.tx-neg{color:var(--vermelho);font-weight:700}
+.tx-warn{color:#E65100;font-weight:700}
+.sigla{background:var(--azul-esc);color:#fff;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700}
+
+/* TOP3 */
+.top3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.top3-card{background:var(--branco);border-radius:8px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-top:4px solid var(--vermelho)}
+.top3-card h4{font-size:11px;color:#666;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.top3-card .desvio{font-size:24px;font-weight:800;color:var(--vermelho)}
+.top3-card .grupo-nome{font-size:13px;font-weight:600;color:var(--azul-esc);margin-bottom:4px}
+.top3-card .sub{font-size:11px;color:#888}
+
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--azul-cl);border-radius:8px;padding:40px;text-align:center;background:var(--branco);cursor:pointer;transition:.2s;margin-bottom:18px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--azul);background:#EEF4FF}
+.upload-zone p{color:var(--azul);font-weight:600;margin-bottom:8px}
+.upload-zone small{color:#888}
+.upload-log{background:var(--branco);border-radius:8px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.log-line{font-size:12px;padding:3px 0;border-bottom:1px solid #f0f0f0;font-family:monospace}
+.log-ok{color:var(--verde)}.log-err{color:var(--vermelho)}
+
+/* EXPORT */
+.export-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-bottom:18px}
+.export-card{background:var(--azul-esc);border-radius:10px;padding:20px;color:#fff;position:relative}
+.export-card .ec-label{font-size:11px;color:var(--azul-cl);text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.export-card .ec-val{font-size:28px;font-weight:800;color:#fff}
+.export-card .ec-sub{font-size:12px;color:var(--azul-cl);margin-top:4px}
+.export-card .ec-badge{position:absolute;top:16px;right:16px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.export-card-filial{background:var(--branco);border-radius:10px;border-left:5px solid var(--azul);padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.ec-filial-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ec-sigla{background:var(--azul-esc);color:#fff;border-radius:5px;padding:4px 10px;font-weight:800;font-size:14px}
+.ec-filial-nome{font-size:13px;font-weight:700;color:var(--azul-esc)}
+.ec-filial-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid #eee}
+.ec-filial-row span:last-child{font-weight:700}
+
+/* TOOLBAR ICONS */
+.icon-toolbar{display:flex;gap:8px;align-items:center}
+.ico-btn{background:none;border:1px solid rgba(255,255,255,.3);border-radius:5px;color:#fff;padding:6px 8px;cursor:pointer;font-size:14px;transition:.2s;position:relative}
+.ico-btn:hover{background:rgba(255,255,255,.15)}
+.ico-btn .tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#333;color:#fff;font-size:11px;padding:4px 8px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:.2s}
+.ico-btn:hover .tooltip{opacity:1}
+
+/* MISC */
+.section-title{font-size:15px;font-weight:700;color:var(--azul-esc);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:2px;background:var(--azul-cl);opacity:.3}
+.periodo-badge{background:var(--azul);color:#fff;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700}
+.empty{text-align:center;padding:40px;color:#aaa;font-size:14px}
+
+@media(max-width:768px){.charts-grid,.top3{grid-template-columns:1fr}.tabs{overflow-x:auto}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">
+    <div class="logo-box">A<span>G</span></div>
+    <div>
+      <div style="color:#fff;font-weight:800;font-size:16px;letter-spacing:1px">AGROQUIMA</div>
+      <div style="color:var(--azul-cl);font-size:11px">Painel Orçamentário</div>
+    </div>
+  </div>
+  <div style="color:#fff;font-size:14px;font-weight:600">📊 Análise Administrativa e Gerencial</div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="icon-toolbar">
+      <button class="ico-btn" onclick="exportAllCards()" title=""><span class="tooltip">Exportar Cards em PNG</span>📥</button>
+      <button class="ico-btn" onclick="switchTab('tab-upload')" title=""><span class="tooltip">Atualizar Base de Dados</span>🔄</button>
+      <button class="ico-btn" onclick="printPainel()" title=""><span class="tooltip">Imprimir Painel</span>🖨️</button>
+    </div>
+    <div class="header-meta">
+      <span id="hd-periodo">Carregando...</span>
+      <span id="hd-filiais" style="font-size:10px">— filiais</span>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('tab-overview')" id="tab-overview">📊 Visão Geral</div>
+  <div class="tab" onclick="switchTab('tab-filiais')" id="tab-filiais">🏢 Por Filial</div>
+  <div class="tab" onclick="switchTab('tab-regional')" id="tab-regional">🗺️ Regional / Auditor</div>
+  <div class="tab" onclick="switchTab('tab-grupos')" id="tab-grupos">📂 Grupos de Conta</div>
+  <div class="tab" onclick="switchTab('tab-export')" id="tab-export">📸 Exportar Imagens</div>
+  <div class="tab" onclick="switchTab('tab-upload')" id="tab-upload">🔄 Atualizar Base</div>
+</div>
+
+<!-- ======================== TAB: OVERVIEW ======================== -->
+<div class="content active" id="content-tab-overview">
+
+  <!-- FILTROS -->
+  <div class="filters">
+    <div class="f-group">
+      <label>Regional</label>
+      <select id="ov-regional" onchange="applyOvFilters()"><option value="">Todas</option></select>
+    </div>
+    <div class="f-group">
+      <label>Auditor</label>
+      <select id="ov-auditor" onchange="applyOvFilters()"><option value="">Todos</option></select>
+    </div>
+    <div class="f-group">
+      <label>Período</label>
+      <select id="ov-mes" onchange="applyOvFilters()">
+        <option value="">Jan – Mai 2026</option>
+        <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+        <option value="3">Março</option><option value="4">Abril</option>
+        <option value="5">Maio</option>
+      </select>
+    </div>
+    <button class="btn btn-ghost" onclick="clearOvFilters()">✕ Limpar</button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid" id="kpi-grid"></div>
+
+  <!-- TOP3 DESVIO -->
+  <div class="section-title">⚠️ TOP 3 Categorias com Maior Desvio</div>
+  <div class="top3" id="top3-desvio"></div>
+
+  <!-- CHARTS -->
+  <div class="charts-grid">
+    <div class="chart-box">
+      <h3>📅 Sazonalidade — Faturamento vs Despesas</h3>
+      <div class="chart-wrap"><canvas id="ch-sazon"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <h3>🥧 % Despesa / Faturamento por Regional</h3>
+      <div class="chart-wrap"><canvas id="ch-regional-perc"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <h3>📊 Top 10 Filiais — Faturamento Realizado</h3>
+      <div class="chart-wrap"><canvas id="ch-top-filiais"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <h3>🔍 Discrepância: % Desp/Fat por Filial</h3>
+      <div class="chart-wrap"><canvas id="ch-disc"></canvas></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ======================== TAB: FILIAIS ======================== -->
+<div class="content" id="content-tab-filiais">
+  <div class="filters">
+    <div class="f-group">
+      <label>Regional</label>
+      <select id="fil-regional" onchange="applyFilFilters()"><option value="">Todas</option></select>
+    </div>
+    <div class="f-group">
+      <label>Auditor</label>
+      <select id="fil-auditor" onchange="applyFilFilters()"><option value="">Todos</option></select>
+    </div>
+    <div class="f-group">
+      <label>Ordenar por</label>
+      <select id="fil-sort" onchange="applyFilFilters()">
+        <option value="FAT_REAL">Faturamento ↓</option>
+        <option value="DESP_REAL">Despesa ↓</option>
+        <option value="PERC_DESP">% Despesa ↓</option>
+        <option value="DESVIO_DESP">Desvio Desp ↓</option>
+      </select>
+    </div>
+    <button class="btn btn-ghost" onclick="clearFilFilters()">✕ Limpar</button>
+    <div style="margin-left:auto" class="icon-toolbar">
+      <button class="ico-btn" onclick="exportTable('tbl-filiais','filiais_2026')" title=""><span class="tooltip">Exportar tabela PNG</span>📥</button>
+      <button class="ico-btn" onclick="copyTableCSV('tbl-filiais')" title=""><span class="tooltip">Copiar CSV</span>📋</button>
+    </div>
+  </div>
+
+  <div class="tbl-box">
+    <h3>🏢 Desempenho por Filial — Jan-Mai 2026</h3>
+    <table id="tbl-filiais">
+      <thead>
+        <tr>
+          <th>Filial</th>
+          <th>Loja</th>
+          <th>Regional</th>
+          <th>Auditor</th>
+          <th class="num">Fat. Realizado</th>
+          <th class="num">Fat. Planejado</th>
+          <th class="num">Desv. Fat %</th>
+          <th class="num">Desp. Realizada</th>
+          <th class="num">Desp. Planejada</th>
+          <th class="num">Desv. Desp %</th>
+          <th class="num">% Desp/Fat</th>
+        </tr>
+      </thead>
+      <tbody id="body-filiais"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ======================== TAB: REGIONAL/AUDITOR ======================== -->
+<div class="content" id="content-tab-regional">
+  <div class="charts-grid" style="margin-bottom:18px">
+    <div class="chart-box">
+      <h3>🗺️ Faturamento por Regional</h3>
+      <div class="chart-wrap"><canvas id="ch-reg-fat"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <h3>👤 % Desp/Fat por Auditor</h3>
+      <div class="chart-wrap"><canvas id="ch-aud-perc"></canvas></div>
+    </div>
+  </div>
+  <div class="tbl-box">
+    <h3>🗺️ Consolidado por Regional</h3>
+    <table id="tbl-regional">
+      <thead>
+        <tr>
+          <th>Regional</th>
+          <th class="num">Fat. Realizado</th>
+          <th class="num">Fat. Planejado</th>
+          <th class="num">Desv. Fat %</th>
+          <th class="num">Desp. Realizada</th>
+          <th class="num">Desp. Planejada</th>
+          <th class="num">Desv. Desp %</th>
+          <th class="num">% Desp/Fat</th>
+        </tr>
+      </thead>
+      <tbody id="body-regional"></tbody>
+    </table>
+  </div>
+  <div class="tbl-box" style="margin-top:16px">
+    <h3>👤 Consolidado por Auditor</h3>
+    <table id="tbl-auditor">
+      <thead>
+        <tr>
+          <th>Auditor</th>
+          <th class="num">Fat. Realizado</th>
+          <th class="num">Fat. Planejado</th>
+          <th class="num">Desp. Realizada</th>
+          <th class="num">Desp. Planejada</th>
+          <th class="num">% Desp/Fat</th>
+        </tr>
+      </thead>
+      <tbody id="body-auditor"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ======================== TAB: GRUPOS ======================== -->
+<div class="content" id="content-tab-grupos">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
+    <div class="chart-box">
+      <h3>📂 Despesas por Grupo de Conta</h3>
+      <div class="chart-wrap"><canvas id="ch-grupos-bar"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <h3>📊 % de Desvio por Grupo</h3>
+      <div class="chart-wrap"><canvas id="ch-grupos-desv"></canvas></div>
+    </div>
+  </div>
+  <div class="tbl-box">
+    <h3>📋 Detalhamento por Grupo de Conta</h3>
+    <table id="tbl-grupos">
+      <thead>
+        <tr>
+          <th>Grupo de Conta</th>
+          <th class="num">Realizado</th>
+          <th class="num">Planejado</th>
+          <th class="num">Desvio R$</th>
+          <th class="num">Desvio %</th>
+          <th class="num">% Total Desp</th>
+        </tr>
+      </thead>
+      <tbody id="body-grupos"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ======================== TAB: EXPORT PNG ======================== -->
+<div class="content" id="content-tab-export">
+  <div class="filters" style="margin-bottom:16px">
+    <div class="f-group">
+      <label>Filial para Card</label>
+      <select id="exp-filial"><option value="">Selecione filial...</option></select>
+    </div>
+    <div class="f-group">
+      <label>Regional para Card</label>
+      <select id="exp-regional"><option value="">Selecione regional...</option></select>
+    </div>
+    <div class="icon-toolbar" style="align-self:flex-end">
+      <button class="ico-btn" style="background:var(--azul);border-color:var(--azul)" onclick="buildExportPreview()" title=""><span class="tooltip">Gerar Preview</span>🔍</button>
+      <button class="ico-btn" style="background:var(--verde);border-color:var(--verde)" onclick="exportAllCards()" title=""><span class="tooltip">Exportar TODOS os Cards PNG</span>📥</button>
+      <button class="ico-btn" style="background:#7B1FA2;border-color:#7B1FA2" onclick="exportSingleCard('card-geral')" title=""><span class="tooltip">Exportar Card Geral</span>🖼️</button>
+    </div>
+  </div>
+
+  <div class="section-title">📌 Card Geral — Exportável</div>
+  <div id="card-geral" style="max-width:820px;margin-bottom:20px">
+    <div style="background:var(--azul-esc);border-radius:12px;padding:24px;color:#fff">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <div>
+          <div style="font-size:11px;color:var(--azul-cl);text-transform:uppercase;font-weight:700">Agroquima — Planilha Orçamentária</div>
+          <div style="font-size:18px;font-weight:800" id="cg-periodo">Jan – Mai 2026</div>
+        </div>
+        <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:8px 14px;text-align:center">
+          <div style="font-size:10px;color:var(--azul-cl)">FILIAIS</div>
+          <div style="font-size:22px;font-weight:800" id="cg-count">27</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <div style="background:rgba(255,255,255,.08);border-radius:8px;padding:14px">
+          <div style="font-size:10px;color:var(--azul-cl);margin-bottom:4px">FATURAMENTO REALIZADO</div>
+          <div style="font-size:20px;font-weight:800" id="cg-fat">—</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Plano: <span id="cg-fat-prev">—</span></div>
+          <div style="font-size:11px;font-weight:700;margin-top:4px" id="cg-fat-desv">—</div>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border-radius:8px;padding:14px">
+          <div style="font-size:10px;color:var(--azul-cl);margin-bottom:4px">DESPESAS REALIZADAS</div>
+          <div style="font-size:20px;font-weight:800" id="cg-desp">—</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Plano: <span id="cg-desp-prev">—</span></div>
+          <div style="font-size:11px;font-weight:700;margin-top:4px" id="cg-desp-desv">—</div>
+        </div>
+        <div style="background:rgba(100,181,246,.2);border-radius:8px;padding:14px;border:1px solid rgba(100,181,246,.4)">
+          <div style="font-size:10px;color:var(--azul-cl);margin-bottom:4px">RESULTADO ORÇAMENTÁRIO</div>
+          <div style="font-size:20px;font-weight:800;color:#A5D6A7" id="cg-result">—</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">% Desp/Fat Plan: <span id="cg-perc-plan">—</span></div>
+          <div style="font-size:11px;font-weight:700;color:var(--azul-cl);margin-top:2px">% Desp/Fat Real: <span id="cg-perc-real">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">🏢 Cards por Filial — Exportáveis</div>
+  <div class="export-cards-grid" id="export-cards-filiais"></div>
+
+  <div class="section-title">🗺️ Cards por Regional — Exportáveis</div>
+  <div class="export-cards-grid" id="export-cards-regionais"></div>
+</div>
+
+<!-- ======================== TAB: UPLOAD ======================== -->
+<div class="content" id="content-tab-upload">
+  <div class="section-title">🔄 Atualizar Base de Dados</div>
+  <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+    ondragover="event.preventDefault();this.classList.add('drag')"
+    ondragleave="this.classList.remove('drag')"
+    ondrop="handleDrop(event)">
+    <div style="font-size:40px;margin-bottom:10px">📂</div>
+    <p>Clique ou arraste o arquivo JSON de dados aqui</p>
+    <small>Formato: aqm_data.json gerado pelo script Python<br>Suporta 2025, 2026 parcial ou completo</small>
+    <input type="file" id="file-input" accept=".json" style="display:none" onchange="handleFileUpload(event)">
+  </div>
+  <div class="upload-log" id="upload-log">
+    <div class="log-line" style="color:#888">Aguardando arquivo...</div>
+  </div>
+  <div style="margin-top:16px;background:var(--branco);border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+    <div class="section-title" style="font-size:13px">📌 Instruções</div>
+    <ol style="font-size:12px;line-height:1.8;padding-left:20px;color:#555">
+      <li>Abra o arquivo <code>Mapa_Despesa_2026.xlsx</code> atualizado</li>
+      <li>Execute o script Python <strong>gerar_json.py</strong> (receba ao lado)</li>
+      <li>Arraste o arquivo <code>aqm_data.json</code> gerado aqui</li>
+      <li>O painel atualiza automaticamente sem perder configurações</li>
+    </ol>
+    <div style="margin-top:12px">
+      <button class="btn btn-primary" onclick="downloadGenScript()">⬇️ Baixar gerar_json.py</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =========================================================
+// DADOS E ESTADO
+// =========================================================
+let DATA = null;
+let charts_reg = {};
+
+const fmt = v => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:0}).format(v);
+const fmtM = v => {
+  if(Math.abs(v)>=1e9) return 'R$ '+(v/1e9).toFixed(1)+' Bi';
+  if(Math.abs(v)>=1e6) return 'R$ '+(v/1e6).toFixed(1)+' Mi';
+  return fmt(v);
+};
+const fmtP = v => (v||0).toFixed(2)+'%';
+const clP = (v,inv=false) => {
+  if(inv) return v>0?'tx-neg':v<0?'tx-pos':'';
+  return v>0?'tx-pos':v<0?'tx-neg':'';
+};
+const badgeP = (v,inv=false) => {
+  const pos = inv ? v<0 : v>0;
+  const neg = inv ? v>0 : v<0;
+  if(neg) return `<span class="kpi-badge badge-bad">▼ ${fmtP(Math.abs(v))}</span>`;
+  if(pos) return `<span class="kpi-badge badge-ok">▲ ${fmtP(Math.abs(v))}</span>`;
+  return `<span class="kpi-badge">0%</span>`;
+};
+
+// =========================================================
+// TABS
+// =========================================================
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('content-'+id).classList.add('active');
+}
+
+// =========================================================
+// LOAD DATA
+// =========================================================
+async function loadData(src){
+  try{
+    const r = await fetch(src);
+    DATA = await r.json();
+    initAll();
+  }catch(e){
+    console.error(e);
+    document.body.innerHTML += '<p style="color:red;padding:20px">Erro ao carregar aqm_data.json</p>';
+  }
+}
+
+function initAll(){
+  const m = DATA.meta;
+  document.getElementById('hd-periodo').textContent = m.periodo || 'Jan-Mai 2026';
+  document.getElementById('hd-filiais').textContent = `${m.filiais_count} filiais ativas`;
+
+  populateSelects();
+  renderKPIs(m);
+  renderTop3();
+  renderCharts();
+  renderTabFiliais(DATA.filiais);
+  renderTabRegional();
+  renderTabGrupos();
+  renderExportCards();
+  updateCardGeral(m);
+}
+
+// =========================================================
+// SELECTS
+// =========================================================
+function populateSelects(){
+  const regionais = [...new Set(DATA.filiais.map(f=>f.REGIONAL).filter(Boolean))].sort();
+  const auditores = [...new Set(DATA.filiais.map(f=>f.AUDITOR).filter(Boolean))].sort();
+
+  ['ov-regional','fil-regional','exp-regional'].forEach(id=>{
+    const s=document.getElementById(id); if(!s)return;
+    s.innerHTML='<option value="">Todas</option>';
+    regionais.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;s.appendChild(o);});
+  });
+  ['ov-auditor','fil-auditor'].forEach(id=>{
+    const s=document.getElementById(id); if(!s)return;
+    s.innerHTML='<option value="">Todos</option>';
+    auditores.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;s.appendChild(o);});
+  });
+
+  const expFil=document.getElementById('exp-filial');
+  expFil.innerHTML='<option value="">Selecione...</option>';
+  DATA.filiais.forEach(f=>{const o=document.createElement('option');o.value=f.SIGLA;o.textContent=`${f.SIGLA} — ${f.LOJA}`;expFil.appendChild(o);});
+  const expReg=document.getElementById('exp-regional');
+  expReg.innerHTML='<option value="">Selecione...</option>';
+  regionais.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;expReg.appendChild(o);});
+}
+
+// =========================================================
+// KPIs
+// =========================================================
+function renderKPIs(m){
+  const g=document.getElementById('kpi-grid');
+  const devFat=m.dev_fat||0; const devDesp=m.dev_desp||0;
+  g.innerHTML=`
+    <div class="kpi">
+      <div class="kpi-label">💰 Faturamento Realizado</div>
+      <div class="kpi-val">${fmtM(m.tot_fat_real)}</div>
+      <div class="kpi-sub">Plano: ${fmtM(m.tot_fat_prev)}</div>
+      ${badgeP(devFat)}
+    </div>
+    <div class="kpi vermelho">
+      <div class="kpi-label">📤 Despesas Realizadas</div>
+      <div class="kpi-val">${fmtM(m.tot_desp_real)}</div>
+      <div class="kpi-sub">Plano: ${fmtM(m.tot_desp_prev)}</div>
+      ${badgeP(devDesp,true)}
+    </div>
+    <div class="kpi ${m.resultado>0?'verde':'vermelho'}">
+      <div class="kpi-label">⚖️ Resultado Orçamentário</div>
+      <div class="kpi-val">${fmtM(m.resultado)}</div>
+      <div class="kpi-sub">Fat − Desp realizados</div>
+    </div>
+    <div class="kpi amarelo">
+      <div class="kpi-label">📊 % Desp / Fat Realizado</div>
+      <div class="kpi-val">${fmtP(m.perc_desp_real)}</div>
+      <div class="kpi-sub">Planejado: ${fmtP(m.perc_desp_plan)}</div>
+      ${badgeP(m.perc_desp_real - m.perc_desp_plan, true)}
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">🏢 Filiais Ativas</div>
+      <div class="kpi-val">${m.filiais_count}</div>
+      <div class="kpi-sub">${m.periodo}</div>
+    </div>
+    <div class="kpi ${devFat<-5?'vermelho':devFat>5?'verde':'amarelo'}">
+      <div class="kpi-label">📉 Desvio Faturamento</div>
+      <div class="kpi-val">${fmtP(Math.abs(devFat))}</div>
+      <div class="kpi-sub">${devFat<0?'Abaixo do plano':'Acima do plano'}</div>
+      ${badgeP(devFat)}
+    </div>
+  `;
+}
+
+// =========================================================
+// TOP3
+// =========================================================
+function renderTop3(){
+  const grupos = DATA.grupos.filter(g=>g.DESVIO>0).sort((a,b)=>b.DESVIO-a.DESVIO).slice(0,3);
+  const c=document.getElementById('top3-desvio');
+  if(!grupos.length){c.innerHTML='<div class="empty">Sem desvios positivos</div>';return;}
+  c.innerHTML=grupos.map((g,i)=>`
+    <div class="top3-card">
+      <h4>🔴 ${i+1}º Maior Desvio</h4>
+      <div class="grupo-nome">${g.GRUPO_CONTA}</div>
+      <div class="desvio">+${fmtP(g.DESVIO)}</div>
+      <div class="sub">Real: ${fmtM(g.DESP_REAL)} | Plan: ${fmtM(g.DESP_PREV)}</div>
+    </div>
+  `).join('');
+}
+
+// =========================================================
+// CHARTS
+// =========================================================
+function destroyChart(id){if(charts_reg[id]){charts_reg[id].destroy();delete charts_reg[id];}}
+
+function renderCharts(){
+  renderSazon();
+  renderRegionalPerc();
+  renderTopFiliais();
+  renderDiscrepancia();
+  renderRegFat();
+  renderAudPerc();
+  renderGruposBar();
+  renderGruposDesv();
+}
+
+function renderSazon(){
+  destroyChart('ch-sazon');
+  const meses=DATA.meses;
+  const ctx=document.getElementById('ch-sazon').getContext('2d');
+  charts_reg['ch-sazon']=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:meses.map(m=>m.NOME),
+      datasets:[
+        {label:'Fat. Realizado',data:meses.map(m=>m.FAT_REAL),backgroundColor:'#0D47A1',borderRadius:4},
+        {label:'Fat. Planejado',data:meses.map(m=>m.FAT_PREV),backgroundColor:'rgba(13,71,161,.3)',borderRadius:4},
+        {label:'Desp. Realizada',data:meses.map(m=>m.DESP_REAL),type:'line',borderColor:'#C62828',backgroundColor:'rgba(198,40,40,.1)',borderWidth:2,fill:true,tension:.3}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+      scales:{y:{ticks:{callback:v=>fmtM(v),font:{size:10}}}}}
+  });
+}
+
+function renderRegionalPerc(){
+  destroyChart('ch-regional-perc');
+  const reg=DATA.regionais;
+  const ctx=document.getElementById('ch-regional-perc').getContext('2d');
+  charts_reg['ch-regional-perc']=new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:reg.map(r=>r.REGIONAL),
+      datasets:[{data:reg.map(r=>r.PERC_DESP),
+        backgroundColor:['#0D47A1','#1565C0','#1976D2','#1E88E5','#42A5F5','#64B5F6'],
+        borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11}}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toFixed(2)}% Desp/Fat`}}}}
+  });
+}
+
+function renderTopFiliais(){
+  destroyChart('ch-top-filiais');
+  const top=DATA.filiais.slice(0,10);
+  const ctx=document.getElementById('ch-top-filiais').getContext('2d');
+  charts_reg['ch-top-filiais']=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:top.map(f=>f.SIGLA||f.ID_FILIAL),
+      datasets:[
+        {label:'Realizado',data:top.map(f=>f.FAT_REAL),backgroundColor:'#002B5B',borderRadius:4},
+        {label:'Planejado',data:top.map(f=>f.FAT_PREV),backgroundColor:'rgba(0,43,91,.3)',borderRadius:4}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+      scales:{y:{ticks:{callback:v=>fmtM(v),font:{size:10}}}}}
+  });
+}
+
+function renderDiscrepancia(){
+  destroyChart('ch-disc');
+  const sorted=[...DATA.filiais].sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
+  const avg=DATA.meta.perc_desp_real;
+  const ctx=document.getElementById('ch-disc').getContext('2d');
+  charts_reg['ch-disc']=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:sorted.map(f=>f.SIGLA||f.ID_FILIAL),
+      datasets:[
+        {label:'% Desp/Fat',data:sorted.map(f=>f.PERC_DESP),
+          backgroundColor:sorted.map(f=>f.PERC_DESP>avg+3?'#C62828':f.PERC_DESP<avg-3?'#1B8A3C':'#0D47A1'),
+          borderRadius:3}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        annotation:{annotations:{avgLine:{type:'line',yMin:avg,yMax:avg,borderColor:'#F2A900',borderWidth:2}}}},
+      scales:{y:{ticks:{callback:v=>v+'%',font:{size:10}}}}}
+  });
+}
+
+function renderRegFat(){
+  destroyChart('ch-reg-fat');
+  const reg=DATA.regionais;
+  const ctx=document.getElementById('ch-reg-fat').getContext('2d');
+  charts_reg['ch-reg-fat']=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:reg.map(r=>r.REGIONAL),
+      datasets:[
+        {label:'Fat. Realizado',data:reg.map(r=>r.FAT_REAL),backgroundColor:'#0D47A1',borderRadius:4},
+        {label:'Desp. Realizada',data:reg.map(r=>r.DESP_REAL),backgroundColor:'#C62828',borderRadius:4}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom'}},
+      scales:{y:{ticks:{callback:v=>fmtM(v),font:{size:10}}}}}
+  });
+}
+
+function renderAudPerc(){
+  destroyChart('ch-aud-perc');
+  const aud=DATA.auditores;
+  const ctx=document.getElementById('ch-aud-perc').getContext('2d');
+  charts_reg['ch-aud-perc']=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:aud.map(a=>a.AUDITOR),
+      datasets:[
+        {label:'% Desp/Fat',data:aud.map(a=>a.PERC_DESP),backgroundColor:'#002B5B',borderRadius:4}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:v=>v+'%',font:{size:10}}}}}
+  });
+}
+
+function renderGruposBar(){
+  destroyChart('ch-grupos-bar');
+  const g=DATA.grupos;
+  const ctx=document.getElementById('ch-grupos-bar').getContext('2d');
+  charts_reg['ch-grupos-bar']=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:g.map(x=>x.GRUPO_CONTA.replace(/^\d+\-/,'')),
+      datasets:[
+        {label:'Realizado',data:g.map(x=>x.DESP_REAL),backgroundColor:'#0D47A1',borderRadius:3},
+        {label:'Planejado',data:g.map(x=>x.DESP_PREV),backgroundColor:'rgba(13,71,161,.3)',borderRadius:3}
+      ]
+    },
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom'}},
+      scales:{x:{ticks:{callback:v=>fmtM(v),font:{size:9}}}}}
+  });
+}
+
+function renderGruposDesv(){
+  destroyChart('ch-grupos-desv');
+  const g=[...DATA.grupos].sort((a,b)=>b.DESVIO-a.DESVIO);
+  const ctx=document.getElementById('ch-grupos-desv').getContext('2d');
+  charts_reg['ch-grupos-desv']=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:g.map(x=>x.GRUPO_CONTA.replace(/^\d+\-/,'')),
+      datasets:[{label:'Desvio %',data:g.map(x=>x.DESVIO),
+        backgroundColor:g.map(x=>x.DESVIO>0?'#C62828':'#1B8A3C'),borderRadius:3}]
+    },
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{callback:v=>v+'%',font:{size:9}}}}}
+  });
+}
+
+// =========================================================
+// TABELAS
+// =========================================================
+function renderTabFiliais(filiais){
+  const b=document.getElementById('body-filiais');
+  if(!filiais||!filiais.length){b.innerHTML='<tr><td colspan="11" class="empty">Sem dados</td></tr>';return;}
+  b.innerHTML=filiais.map(f=>{
+    const df=f.DESVIO_FAT||0; const dd=f.DESVIO_DESP||0;
+    return `<tr>
+      <td><span class="sigla">${f.SIGLA||f.ID_FILIAL}</span></td>
+      <td>${f.LOJA||'—'}</td>
+      <td>${f.REGIONAL||'—'}</td>
+      <td>${f.AUDITOR||'—'}</td>
+      <td class="num">${fmtM(f.FAT_REAL)}</td>
+      <td class="num">${fmtM(f.FAT_PREV)}</td>
+      <td class="num ${clP(df)}">${fmtP(df)}</td>
+      <td class="num">${fmtM(f.DESP_REAL)}</td>
+      <td class="num">${fmtM(f.DESP_PREV)}</td>
+      <td class="num ${clP(dd,true)}">${fmtP(dd)}</td>
+      <td class="num ${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTabRegional(){
+  const b=document.getElementById('body-regional');
+  b.innerHTML=DATA.regionais.map(r=>{
+    const df=((r.FAT_REAL-r.FAT_PREV)/r.FAT_PREV*100);
+    const dd=((r.DESP_REAL-r.DESP_PREV)/r.DESP_PREV*100);
+    return `<tr>
+      <td><strong>${r.REGIONAL}</strong></td>
+      <td class="num">${fmtM(r.FAT_REAL)}</td>
+      <td class="num">${fmtM(r.FAT_PREV)}</td>
+      <td class="num ${clP(df)}">${fmtP(df)}</td>
+      <td class="num">${fmtM(r.DESP_REAL)}</td>
+      <td class="num">${fmtM(r.DESP_PREV)}</td>
+      <td class="num ${clP(dd,true)}">${fmtP(dd)}</td>
+      <td class="num ${r.PERC_DESP>20?'tx-neg':r.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(r.PERC_DESP)}</td>
+    </tr>`;
+  }).join('');
+
+  const ba=document.getElementById('body-auditor');
+  ba.innerHTML=DATA.auditores.map(a=>{
+    return `<tr>
+      <td><strong>${a.AUDITOR}</strong></td>
+      <td class="num">${fmtM(a.FAT_REAL)}</td>
+      <td class="num">${fmtM(a.FAT_PREV)}</td>
+      <td class="num">${fmtM(a.DESP_REAL)}</td>
+      <td class="num">${fmtM(a.DESP_PREV)}</td>
+      <td class="num ${a.PERC_DESP>20?'tx-neg':a.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(a.PERC_DESP)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTabGrupos(){
+  const totalDesp=DATA.grupos.reduce((s,g)=>s+g.DESP_REAL,0);
+  const b=document.getElementById('body-grupos');
+  b.innerHTML=DATA.grupos.map(g=>{
+    const desvR=g.DESP_REAL-g.DESP_PREV;
+    return `<tr>
+      <td>${g.GRUPO_CONTA}</td>
+      <td class="num">${fmtM(g.DESP_REAL)}</td>
+      <td class="num">${fmtM(g.DESP_PREV)}</td>
+      <td class="num ${desvR>0?'tx-neg':'tx-pos'}">${fmtM(desvR)}</td>
+      <td class="num ${g.DESVIO>20?'tx-neg':g.DESVIO>0?'tx-warn':'tx-pos'}">${fmtP(g.DESVIO)}</td>
+      <td class="num">${((g.DESP_REAL/totalDesp)*100).toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+}
+
+// =========================================================
+// FILTROS OVERVIEW
+// =========================================================
+function applyOvFilters(){
+  const reg=document.getElementById('ov-regional').value;
+  const aud=document.getElementById('ov-auditor').value;
+  const mes=document.getElementById('ov-mes').value;
+  let filiais=DATA.filiais.filter(f=>(!reg||f.REGIONAL===reg)&&(!aud||f.AUDITOR===aud));
+  const m={
+    tot_fat_real:filiais.reduce((s,f)=>s+f.FAT_REAL,0),
+    tot_fat_prev:filiais.reduce((s,f)=>s+f.FAT_PREV,0),
+    tot_desp_real:filiais.reduce((s,f)=>s+f.DESP_REAL,0),
+    tot_desp_prev:filiais.reduce((s,f)=>s+f.DESP_PREV,0),
+    filiais_count:filiais.length,
+    periodo: DATA.meta.periodo
+  };
+  m.perc_desp_real=m.tot_fat_real>0?(m.tot_desp_real/m.tot_fat_real*100):0;
+  m.perc_desp_plan=m.tot_fat_prev>0?(m.tot_desp_prev/m.tot_fat_prev*100):0;
+  m.resultado=m.tot_fat_real-m.tot_desp_real;
+  m.dev_fat=m.tot_fat_prev>0?((m.tot_fat_real-m.tot_fat_prev)/m.tot_fat_prev*100):0;
+  m.dev_desp=m.tot_desp_prev>0?((m.tot_desp_real-m.tot_desp_prev)/m.tot_desp_prev*100):0;
+  renderKPIs(m);
+}
+
+function clearOvFilters(){
+  document.getElementById('ov-regional').value='';
+  document.getElementById('ov-auditor').value='';
+  document.getElementById('ov-mes').value='';
+  renderKPIs(DATA.meta);
+}
+
+// =========================================================
+// FILTROS FILIAIS
+// =========================================================
+function applyFilFilters(){
+  const reg=document.getElementById('fil-regional').value;
+  const aud=document.getElementById('fil-auditor').value;
+  const sort=document.getElementById('fil-sort').value;
+  let f=DATA.filiais.filter(x=>(!reg||x.REGIONAL===reg)&&(!aud||x.AUDITOR===aud));
+  f=[...f].sort((a,b)=>b[sort]-a[sort]);
+  renderTabFiliais(f);
+}
+
+function clearFilFilters(){
+  document.getElementById('fil-regional').value='';
+  document.getElementById('fil-auditor').value='';
+  document.getElementById('fil-sort').value='FAT_REAL';
+  renderTabFiliais(DATA.filiais);
+}
+
+// =========================================================
+// EXPORT CARDS
+// =========================================================
+function updateCardGeral(m){
+  document.getElementById('cg-fat').textContent=fmtM(m.tot_fat_real);
+  document.getElementById('cg-fat-prev').textContent=fmtM(m.tot_fat_prev);
+  document.getElementById('cg-fat-desv').textContent=(m.dev_fat<0?'▼ ':' ▲')+fmtP(Math.abs(m.dev_fat))+' vs plano';
+  document.getElementById('cg-fat-desv').style.color=m.dev_fat<0?'#EF9A9A':'#A5D6A7';
+  document.getElementById('cg-desp').textContent=fmtM(m.tot_desp_real);
+  document.getElementById('cg-desp-prev').textContent=fmtM(m.tot_desp_prev);
+  document.getElementById('cg-desp-desv').textContent=(m.dev_desp>0?'▲ ':' ▼')+fmtP(Math.abs(m.dev_desp))+' vs plano';
+  document.getElementById('cg-desp-desv').style.color=m.dev_desp>0?'#EF9A9A':'#A5D6A7';
+  document.getElementById('cg-result').textContent=fmtM(m.resultado);
+  document.getElementById('cg-perc-plan').textContent=fmtP(m.perc_desp_plan);
+  document.getElementById('cg-perc-real').textContent=fmtP(m.perc_desp_real);
+  document.getElementById('cg-count').textContent=m.filiais_count;
+}
+
+function renderExportCards(){
+  // Filiais cards
+  const cf=document.getElementById('export-cards-filiais');
+  cf.innerHTML=DATA.filiais.map(f=>`
+    <div class="export-card-filial" id="ecard-fil-${f.SIGLA}">
+      <div class="ec-filial-header">
+        <div>
+          <div class="ec-sigla">${f.SIGLA||f.ID_FILIAL}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="ec-filial-nome">${f.LOJA||'—'}</div>
+          <div style="font-size:11px;color:#888">${f.REGIONAL||''} · ${f.AUDITOR||''}</div>
+        </div>
+      </div>
+      <div class="ec-filial-row"><span>Faturamento</span><span style="color:var(--azul)">${fmtM(f.FAT_REAL)}</span></div>
+      <div class="ec-filial-row"><span>Plano Fat.</span><span>${fmtM(f.FAT_PREV)}</span></div>
+      <div class="ec-filial-row"><span>Desvio Fat.</span><span class="${clP(f.DESVIO_FAT)}">${fmtP(f.DESVIO_FAT)}</span></div>
+      <div class="ec-filial-row"><span>Despesas</span><span style="color:var(--vermelho)">${fmtM(f.DESP_REAL)}</span></div>
+      <div class="ec-filial-row"><span>% Desp/Fat</span><span class="${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</span></div>
+      <div style="margin-top:8px;display:flex;justify-content:flex-end">
+        <button class="ico-btn" style="background:var(--azul);border:none;border-radius:4px;font-size:11px;padding:4px 8px;cursor:pointer;color:#fff" onclick="exportSingleCard('ecard-fil-${f.SIGLA}')" title="Exportar PNG">📥</button>
+      </div>
+    </div>
+  `).join('');
+
+  // Regional cards
+  const cr=document.getElementById('export-cards-regionais');
+  cr.innerHTML=DATA.regionais.map(r=>`
+    <div style="background:var(--azul-esc);border-radius:10px;padding:18px;color:#fff" id="ecard-reg-${r.REGIONAL.replace(/\s/g,'_')}">
+      <div style="font-size:10px;color:var(--azul-cl);text-transform:uppercase;font-weight:700;margin-bottom:8px">Regional</div>
+      <div style="font-size:16px;font-weight:800;margin-bottom:12px">${r.REGIONAL}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="background:rgba(255,255,255,.08);border-radius:6px;padding:10px">
+          <div style="font-size:10px;color:var(--azul-cl)">Faturamento</div>
+          <div style="font-size:15px;font-weight:800">${fmtM(r.FAT_REAL)}</div>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border-radius:6px;padding:10px">
+          <div style="font-size:10px;color:var(--azul-cl)">Despesas</div>
+          <div style="font-size:15px;font-weight:800;color:#EF9A9A">${fmtM(r.DESP_REAL)}</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:12px;color:var(--azul-cl)">% Desp/Fat: <strong style="color:#fff">${fmtP(r.PERC_DESP)}</strong></div>
+        <button style="background:rgba(255,255,255,.15);border:none;border-radius:4px;color:#fff;padding:4px 8px;cursor:pointer;font-size:11px" onclick="exportSingleCard('ecard-reg-${r.REGIONAL.replace(/\s/g,'_')}')">📥</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// =========================================================
+// EXPORT PNG
+// =========================================================
+async function exportSingleCard(id){
+  const el=document.getElementById(id);
+  if(!el){alert('Elemento não encontrado: '+id);return;}
+  const canvas=await html2canvas(el,{scale:3,backgroundColor:'#fff',useCORS:true});
+  const link=document.createElement('a');
+  link.download=`agroquima_${id}_${Date.now()}.png`;
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+}
+
+async function exportAllCards(){
+  const cards=[
+    'card-geral',
+    ...DATA.filiais.map(f=>'ecard-fil-'+f.SIGLA),
+    ...DATA.regionais.map(r=>'ecard-reg-'+r.REGIONAL.replace(/\s/g,'_'))
+  ];
+  for(let id of cards){
+    const el=document.getElementById(id);
+    if(!el)continue;
+    await new Promise(res=>setTimeout(res,300));
+    const canvas=await html2canvas(el,{scale:3,backgroundColor:'#fff',useCORS:true});
+    const link=document.createElement('a');
+    link.download=`aqm_${id}.png`;
+    link.href=canvas.toDataURL('image/png');
+    link.click();
+    await new Promise(res=>setTimeout(res,400));
+  }
+}
+
+async function exportTable(tableId,fname){
+  const el=document.getElementById(tableId);
+  if(!el)return;
+  const canvas=await html2canvas(el,{scale:2,backgroundColor:'#fff'});
+  const link=document.createElement('a');
+  link.download=`${fname}_${Date.now()}.png`;
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+}
+
+function copyTableCSV(tableId){
+  const t=document.getElementById(tableId);
+  const rows=[...t.querySelectorAll('tr')];
+  const csv=rows.map(r=>[...r.querySelectorAll('th,td')].map(c=>c.innerText.trim()).join('\t')).join('\n');
+  navigator.clipboard.writeText(csv);
+  alert('Tabela copiada como CSV!');
+}
+
+function buildExportPreview(){
+  switchTab('tab-export');
+}
+
+function printPainel(){window.print();}
+
+// =========================================================
+// UPLOAD
+// =========================================================
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f)processUploadFile(f);
+}
+
+function handleFileUpload(e){
+  const f=e.target.files[0];
+  if(f)processUploadFile(f);
+}
+
+function processUploadFile(file){
+  const log=document.getElementById('upload-log');
+  log.innerHTML='';
+  addLog(`📂 Arquivo: ${file.name} (${(file.size/1024).toFixed(1)} KB)`, '');
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const newData=JSON.parse(ev.target.result);
+      if(!newData.meta||!newData.filiais){
+        addLog('❌ Formato inválido. Verifique o arquivo JSON.','log-err');return;
+      }
+      DATA=newData;
+      initAll();
+      addLog('✅ Dados carregados com sucesso!','log-ok');
+      addLog(`📊 ${newData.meta.filiais_count} filiais | ${newData.meta.periodo}`,'log-ok');
+      addLog(`💰 Fat. Real: ${fmtM(newData.meta.tot_fat_real)}`,'log-ok');
+      addLog(`📤 Desp. Real: ${fmtM(newData.meta.tot_desp_real)}`,'log-ok');
+      addLog(`⚖️ Resultado: ${fmtM(newData.meta.resultado)}`,'log-ok');
+    }catch(err){
+      addLog('❌ Erro ao processar JSON: '+err.message,'log-err');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function addLog(msg,cls){
+  const d=document.createElement('div');
+  d.className='log-line '+(cls||'');
+  d.textContent=msg;
+  document.getElementById('upload-log').appendChild(d);
+}
+
+// =========================================================
+// DOWNLOAD SCRIPT PYTHON
+// =========================================================
+function downloadGenScript(){
+  const script=`# gerar_json.py — Agroquima Painel Orçamentário
+# Execute: python gerar_json.py
+import pandas as pd, json, sys
+
+DESPESA_FILE = 'Mapa_Despesa_2026.xlsx'
+REGIONAIS_FILE = 'Base_regionais.xlsx'
+OUT = 'aqm_data.json'
+
+d = pd.read_excel(DESPESA_FILE)
+r = pd.read_excel(REGIONAIS_FILE)
+
+fl = dict(zip(r['FILIAL'], r['LOJA']))
+fr = dict(zip(r['FILIAL'], r['REGIONAL']))
+fa = dict(zip(r['FILIAL'], r['AUDITOR']))
+fs = dict(zip(r['FILIAL'], r['SIGLA']))
+fg = dict(zip(r['FILIAL'], r['GERENTE']))
+fsu = dict(zip(r['FILIAL'], r['SUPERVISOR']))
+fe = dict(zip(r['FILIAL'], r['ESTADO']))
+
+d['LOJA']=d['ID_FILIAL'].map(fl)
+d['REGIONAL']=d['ID_FILIAL'].map(fr)
+d['AUDITOR']=d['ID_FILIAL'].map(fa)
+d['SIGLA']=d['ID_FILIAL'].map(fs)
+d['GERENTE']=d['ID_FILIAL'].map(fg)
+d['SUPERVISOR']=d['ID_FILIAL'].map(fsu)
+d['ESTADO']=d['ID_FILIAL'].map(fe)
+
+fat = d[d['GRUPO_CONTA'] == '01-VENDAS DE MERCADORIAS'].copy()
+desp = d[d['GRUPO_CONTA'] != '01-VENDAS DE MERCADORIAS'].copy()
+
+anos = sorted(d['ANO'].unique())
+meses_disp = sorted(d['MES'].unique())
+periodo_str = f"Jan-Mai {max(anos)}" if len(anos)==1 else f"{min(anos)}-{max(anos)}"
+
+mes_nomes={1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'}
+
+fat_fil = fat.groupby(['ID_FILIAL','SIGLA','LOJA','REGIONAL','AUDITOR','GERENTE','SUPERVISOR','ESTADO']).agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+desp_fil = desp.groupby('ID_FILIAL').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+filiais = fat_fil.merge(desp_fil, on='ID_FILIAL', how='left').fillna(0)
+filiais['PERC_DESP']=(filiais['DESP_REAL']/filiais['FAT_REAL']*100).round(2)
+filiais['DESVIO_FAT']=((filiais['FAT_REAL']-filiais['FAT_PREV'])/filiais['FAT_PREV']*100).round(2)
+filiais['DESVIO_DESP']=((filiais['DESP_REAL']-filiais['DESP_PREV'])/filiais['DESP_PREV']*100).round(2)
+filiais=filiais.sort_values('FAT_REAL',ascending=False)
+
+fat_mes=fat.groupby('MES').agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+desp_mes=desp.groupby('MES').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+meses=fat_mes.merge(desp_mes,on='MES').fillna(0)
+meses['NOME']=meses['MES'].map(mes_nomes)
+meses['PERC_DESP']=(meses['DESP_REAL']/meses['FAT_REAL']*100).round(2)
+
+fat_reg=fat.groupby('REGIONAL').agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+desp_reg=desp.groupby('REGIONAL').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+regionais_out=fat_reg.merge(desp_reg,on='REGIONAL').fillna(0)
+regionais_out['PERC_DESP']=(regionais_out['DESP_REAL']/regionais_out['FAT_REAL']*100).round(2)
+
+fat_aud=fat.groupby('AUDITOR').agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+desp_aud=desp.groupby('AUDITOR').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+auditores=fat_aud.merge(desp_aud,on='AUDITOR').fillna(0)
+auditores['PERC_DESP']=(auditores['DESP_REAL']/auditores['FAT_REAL']*100).round(2)
+
+grupos=desp.groupby('GRUPO_CONTA').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index().sort_values('DESP_REAL',ascending=False)
+grupos['DESVIO']=((grupos['DESP_REAL']-grupos['DESP_PREV'])/grupos['DESP_PREV']*100).round(2)
+
+tot_fat_real=fat['VLR_REALIZADO'].sum()
+tot_fat_prev=fat['VLR_PREVISAO'].sum()
+tot_desp_real=desp['VLR_REALIZADO'].sum()
+tot_desp_prev=desp['VLR_PREVISAO'].sum()
+
+payload={
+    'meta':{
+        'periodo':periodo_str,'filiais_count':int(len(filiais)),
+        'tot_fat_real':round(tot_fat_real,2),'tot_fat_prev':round(tot_fat_prev,2),
+        'tot_desp_real':round(tot_desp_real,2),'tot_desp_prev':round(tot_desp_prev,2),
+        'perc_desp_real':round(tot_desp_real/tot_fat_real*100,2),
+        'perc_desp_plan':round(tot_desp_prev/tot_fat_prev*100,2),
+        'resultado':round(tot_fat_real-tot_desp_real,2),
+        'dev_fat':round((tot_fat_real-tot_fat_prev)/tot_fat_prev*100,2),
+        'dev_desp':round((tot_desp_real-tot_desp_prev)/tot_desp_prev*100,2)
+    },
+    'filiais':filiais.to_dict('records'),
+    'meses':meses.to_dict('records'),
+    'regionais':regionais_out.to_dict('records'),
+    'auditores':auditores.to_dict('records'),
+    'grupos':grupos.to_dict('records')
+}
+
+with open(OUT,'w',encoding='utf-8') as f:
+    json.dump(payload,f,ensure_ascii=False,default=str)
+print(f"✅ {OUT} gerado | Fat: R$ {tot_fat_real:,.0f} | Desp: R$ {tot_desp_real:,.0f}")
+`;
+  const blob=new Blob([script],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='gerar_json.py';
+  a.click();
+}
+
+// =========================================================
+// INIT
+// =========================================================
+window.addEventListener('DOMContentLoaded', ()=> loadData('aqm_data.json'));
+</script>
+</body>
+</html>
