@@ -43,6 +43,7 @@ html,body{background:var(--fundo);color:var(--cinza);max-width:100%;overflow-x:h
 .f-group select:focus,.f-group input:focus{outline:none;border-color:var(--azul)}
 .chk-label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cinza);cursor:pointer;padding:7px 0;white-space:nowrap}
 .chk-label input{width:16px;height:16px;cursor:pointer;flex-shrink:0}
+body.hide-auditor .col-auditor{display:none}
 .toolbar-end{margin-left:auto}
 .btn{padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:13px;font-weight:700;transition:.2s}
 .btn-primary{background:var(--azul);color:#fff}.btn-primary:hover{background:var(--azul-esc)}
@@ -105,12 +106,17 @@ tbody tr:hover{background:#F5F8FF}
 .export-card .ec-val{font-size:28px;font-weight:800;color:#fff}
 .export-card .ec-sub{font-size:12px;color:var(--azul-cl);margin-top:4px}
 .export-card .ec-badge{position:absolute;top:16px;right:16px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700}
-.export-card-filial{background:var(--branco);border-radius:10px;border-left:5px solid var(--azul);padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+/* Nota: a barra de destaque usa ::before + overflow:hidden (não border-left)
+   porque border-left combinado com border-radius renderiza um artefato
+   (triângulo escuro no canto) na captura html2canvas. */
+.export-card-filial{background:var(--branco);border-radius:10px;padding:16px 16px 16px 20px;box-shadow:0 2px 8px rgba(0,0,0,.1);position:relative;overflow:hidden}
+.export-card-filial::before{content:'';position:absolute;top:0;left:0;width:5px;height:100%;background:var(--azul)}
 .ec-filial-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .ec-sigla{background:var(--azul-esc);color:#fff;border-radius:5px;padding:4px 10px;font-weight:800;font-size:14px}
 .ec-filial-nome{font-size:13px;font-weight:700;color:var(--azul-esc)}
 .ec-filial-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid #eee}
 .ec-filial-row span:last-child{font-weight:700}
+.ec-actions{margin-top:8px;display:flex;justify-content:flex-end}
 
 /* TOOLBAR ICONS — ícone + legenda sempre visível (funciona em toque, sem depender de hover) */
 .icon-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -300,6 +306,10 @@ tbody tr:hover{background:#F5F8FF}
       </select>
     </div>
     <button class="btn btn-ghost" onclick="clearFilFilters()">✕ Limpar</button>
+    <div class="f-group">
+      <label>&nbsp;</label>
+      <label class="chk-label"><input type="checkbox" class="chk-hide-auditor" onchange="toggleHideAuditor(this.checked)"> Ocultar Auditor</label>
+    </div>
     <div class="toolbar-end icon-toolbar">
       <button class="ico-btn-light" onclick="exportTable('tbl-filiais','filiais_2026')"><span class="ico-ic">📥</span>Exportar PNG</button>
       <button class="ico-btn-light" onclick="copyTableCSV('tbl-filiais')"><span class="ico-ic">📋</span>Copiar CSV</button>
@@ -307,14 +317,14 @@ tbody tr:hover{background:#F5F8FF}
   </div>
 
   <div class="tbl-box">
-    <h3>🏢 Desempenho por Filial — Jan-Mai 2026</h3>
+    <h3 id="tbl-filiais-title">🏢 Desempenho por Filial</h3>
     <table id="tbl-filiais">
       <thead>
         <tr>
           <th>Filial</th>
           <th>Loja</th>
           <th>Regional</th>
-          <th>Auditor</th>
+          <th class="col-auditor">Auditor</th>
           <th class="num">Fat. Realizado</th>
           <th class="num">Fat. Planejado</th>
           <th class="num">Desv. Fat %</th>
@@ -342,7 +352,7 @@ tbody tr:hover{background:#F5F8FF}
     </div>
   </div>
   <div class="tbl-box">
-    <h3>🗺️ Consolidado por Regional</h3>
+    <h3 id="tbl-regional-title">🗺️ Consolidado por Regional</h3>
     <table id="tbl-regional">
       <thead>
         <tr>
@@ -360,7 +370,7 @@ tbody tr:hover{background:#F5F8FF}
     </table>
   </div>
   <div class="tbl-box" style="margin-top:16px">
-    <h3>👤 Consolidado por Auditor</h3>
+    <h3 id="tbl-auditor-title">👤 Consolidado por Auditor</h3>
     <table id="tbl-auditor">
       <thead>
         <tr>
@@ -390,7 +400,7 @@ tbody tr:hover{background:#F5F8FF}
     </div>
   </div>
   <div class="tbl-box">
-    <h3>📋 Detalhamento por Grupo de Conta</h3>
+    <h3 id="tbl-grupos-title">📋 Detalhamento por Grupo de Conta</h3>
     <table id="tbl-grupos">
       <thead>
         <tr>
@@ -485,6 +495,10 @@ tbody tr:hover{background:#F5F8FF}
       <label>Regional para Card</label>
       <select id="exp-regional"><option value="">Selecione regional...</option></select>
     </div>
+    <div class="f-group">
+      <label>&nbsp;</label>
+      <label class="chk-label"><input type="checkbox" class="chk-hide-auditor" onchange="toggleHideAuditor(this.checked)"> Ocultar Auditor nas exportações</label>
+    </div>
     <div class="icon-toolbar" style="align-self:flex-end">
       <button class="ico-btn" style="background:var(--azul);border-color:var(--azul)" onclick="buildExportPreview()"><span class="ico-ic">🔍</span>Gerar Preview</button>
       <button class="ico-btn" style="background:var(--verde);border-color:var(--verde)" onclick="exportAllCards()"><span class="ico-ic">📥</span>Exportar Todos</button>
@@ -570,6 +584,14 @@ tbody tr:hover{background:#F5F8FF}
 // =========================================================
 let DATA = null;
 let charts_reg = {};
+let HIDE_AUDITOR = false;
+
+function toggleHideAuditor(checked){
+  HIDE_AUDITOR = checked;
+  document.body.classList.toggle('hide-auditor', checked);
+  document.querySelectorAll('.chk-hide-auditor').forEach(el=>{ if(el.checked!==checked) el.checked=checked; });
+  if(DATA) renderExportCards();
+}
 
 const fmt = v => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:0}).format(v);
 const fmtM = v => {
@@ -632,6 +654,11 @@ function initAll(){
   document.getElementById('hd-periodo').textContent = m.periodo || 'Jan-Mai 2026';
   document.getElementById('hd-filiais').textContent = `${m.filiais_count} filiais ativas`;
 
+  // Planejado/Desvio em todas as tabelas comparam sempre o mesmo período do
+  // Realizado (ex.: Jan-Mai vs Jan-Mai) — nunca o orçamento do ano inteiro.
+  const tituloPeriodo = t=>{const el=document.getElementById(t);if(el)el.textContent=el.textContent.replace(/( — .+)?$/,` — ${m.periodo} · desvio vs. plano do mesmo período`);};
+  ['tbl-filiais-title','tbl-regional-title','tbl-auditor-title','tbl-grupos-title'].forEach(tituloPeriodo);
+
   populateSelects();
   renderKPIs(m);
   renderTop3();
@@ -676,17 +703,21 @@ function populateSelects(){
 function renderKPIs(m){
   const g=document.getElementById('kpi-grid');
   const devFat=m.dev_fat||0; const devDesp=m.dev_desp||0;
+  const fatAnoLine = m.tot_fat_prev_ano ? `<div class="kpi-sub" style="opacity:.65">Orçamento anual total: ${fmtM(m.tot_fat_prev_ano)}</div>` : '';
+  const despAnoLine = m.tot_desp_prev_ano ? `<div class="kpi-sub" style="opacity:.65">Orçamento anual total: ${fmtM(m.tot_desp_prev_ano)}</div>` : '';
   g.innerHTML=`
     <div class="kpi">
       <div class="kpi-label">💰 Faturamento Realizado</div>
       <div class="kpi-val">${fmtM(m.tot_fat_real)}</div>
-      <div class="kpi-sub">Plano: ${fmtM(m.tot_fat_prev)}</div>
+      <div class="kpi-sub">Plano (${m.periodo}): ${fmtM(m.tot_fat_prev)}</div>
+      ${fatAnoLine}
       ${badgeP(devFat)}
     </div>
     <div class="kpi vermelho">
       <div class="kpi-label">📤 Despesas Realizadas</div>
       <div class="kpi-val">${fmtM(m.tot_desp_real)}</div>
-      <div class="kpi-sub">Plano: ${fmtM(m.tot_desp_prev)}</div>
+      <div class="kpi-sub">Plano (${m.periodo}): ${fmtM(m.tot_desp_prev)}</div>
+      ${despAnoLine}
       ${badgeP(devDesp,true)}
     </div>
     <div class="kpi ${m.resultado>0?'verde':'vermelho'}">
@@ -911,7 +942,7 @@ function renderTabFiliais(filiais){
       <td><span class="sigla">${f.SIGLA||f.ID_FILIAL}</span></td>
       <td>${f.LOJA||'—'}</td>
       <td>${f.REGIONAL||'—'}</td>
-      <td>${f.AUDITOR||'—'}</td>
+      <td class="col-auditor">${f.AUDITOR||'—'}</td>
       <td class="num">${fmtM(f.FAT_REAL)}</td>
       <td class="num">${fmtM(f.FAT_PREV)}</td>
       <td class="num ${clP(df)}">${fmtP(df)}</td>
@@ -1163,24 +1194,28 @@ function updateCardGeral(m){
 
 function renderExportCards(){
   // Filiais cards
+  // Nota: o botão de exportar fica FORA da div com o id capturado pelo
+  // html2canvas — senão o próprio botão aparece dentro da imagem exportada.
   const cf=document.getElementById('export-cards-filiais');
   cf.innerHTML=DATA.filiais.map(f=>`
-    <div class="export-card-filial" id="ecard-fil-${f.SIGLA}">
-      <div class="ec-filial-header">
-        <div>
-          <div class="ec-sigla">${f.SIGLA||f.ID_FILIAL}</div>
+    <div>
+      <div class="export-card-filial" id="ecard-fil-${f.SIGLA}">
+        <div class="ec-filial-header">
+          <div>
+            <div class="ec-sigla">${f.SIGLA||f.ID_FILIAL}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="ec-filial-nome">${f.LOJA||'—'}</div>
+            <div style="font-size:11px;color:#888">${f.REGIONAL||''}${(!HIDE_AUDITOR && f.AUDITOR) ? ' · '+f.AUDITOR : ''}</div>
+          </div>
         </div>
-        <div style="text-align:right">
-          <div class="ec-filial-nome">${f.LOJA||'—'}</div>
-          <div style="font-size:11px;color:#888">${f.REGIONAL||''} · ${f.AUDITOR||''}</div>
-        </div>
+        <div class="ec-filial-row"><span>Faturamento</span><span style="color:var(--azul)">${fmtM(f.FAT_REAL)}</span></div>
+        <div class="ec-filial-row"><span>Plano Fat. (${DATA.meta.periodo})</span><span>${fmtM(f.FAT_PREV)}</span></div>
+        <div class="ec-filial-row"><span>Desvio Fat.</span><span class="${clP(f.DESVIO_FAT)}">${fmtP(f.DESVIO_FAT)}</span></div>
+        <div class="ec-filial-row"><span>Despesas</span><span style="color:var(--vermelho)">${fmtM(f.DESP_REAL)}</span></div>
+        <div class="ec-filial-row"><span>% Desp/Fat</span><span class="${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</span></div>
       </div>
-      <div class="ec-filial-row"><span>Faturamento</span><span style="color:var(--azul)">${fmtM(f.FAT_REAL)}</span></div>
-      <div class="ec-filial-row"><span>Plano Fat.</span><span>${fmtM(f.FAT_PREV)}</span></div>
-      <div class="ec-filial-row"><span>Desvio Fat.</span><span class="${clP(f.DESVIO_FAT)}">${fmtP(f.DESVIO_FAT)}</span></div>
-      <div class="ec-filial-row"><span>Despesas</span><span style="color:var(--vermelho)">${fmtM(f.DESP_REAL)}</span></div>
-      <div class="ec-filial-row"><span>% Desp/Fat</span><span class="${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</span></div>
-      <div style="margin-top:8px;display:flex;justify-content:flex-end">
+      <div class="ec-actions">
         <button class="ico-btn" style="background:var(--azul);border:none;padding:7px 12px" onclick="exportSingleCard('ecard-fil-${f.SIGLA}')"><span class="ico-ic">📥</span>PNG</button>
       </div>
     </div>
@@ -1189,22 +1224,24 @@ function renderExportCards(){
   // Regional cards
   const cr=document.getElementById('export-cards-regionais');
   cr.innerHTML=DATA.regionais.map(r=>`
-    <div style="background:var(--azul-esc);border-radius:10px;padding:18px;color:#fff" id="ecard-reg-${r.REGIONAL.replace(/\s/g,'_')}">
-      <div style="font-size:10px;color:var(--azul-cl);text-transform:uppercase;font-weight:700;margin-bottom:8px">Regional</div>
-      <div style="font-size:16px;font-weight:800;margin-bottom:12px">${r.REGIONAL}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div style="background:rgba(255,255,255,.08);border-radius:6px;padding:10px">
-          <div style="font-size:10px;color:var(--azul-cl)">Faturamento</div>
-          <div style="font-size:15px;font-weight:800">${fmtM(r.FAT_REAL)}</div>
+    <div>
+      <div style="background:var(--azul-esc);border-radius:10px;padding:18px;color:#fff" id="ecard-reg-${r.REGIONAL.replace(/\s/g,'_')}">
+        <div style="font-size:10px;color:var(--azul-cl);text-transform:uppercase;font-weight:700;margin-bottom:8px">Regional</div>
+        <div style="font-size:16px;font-weight:800;margin-bottom:12px">${r.REGIONAL}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div style="background:rgba(255,255,255,.08);border-radius:6px;padding:10px">
+            <div style="font-size:10px;color:var(--azul-cl)">Faturamento</div>
+            <div style="font-size:15px;font-weight:800">${fmtM(r.FAT_REAL)}</div>
+          </div>
+          <div style="background:rgba(255,255,255,.08);border-radius:6px;padding:10px">
+            <div style="font-size:10px;color:var(--azul-cl)">Despesas</div>
+            <div style="font-size:15px;font-weight:800;color:#EF9A9A">${fmtM(r.DESP_REAL)}</div>
+          </div>
         </div>
-        <div style="background:rgba(255,255,255,.08);border-radius:6px;padding:10px">
-          <div style="font-size:10px;color:var(--azul-cl)">Despesas</div>
-          <div style="font-size:15px;font-weight:800;color:#EF9A9A">${fmtM(r.DESP_REAL)}</div>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="font-size:12px;color:var(--azul-cl)">% Desp/Fat: <strong style="color:#fff">${fmtP(r.PERC_DESP)}</strong></div>
-        <button style="background:rgba(255,255,255,.15);border:none;border-radius:4px;color:#fff;padding:4px 8px;cursor:pointer;font-size:11px" onclick="exportSingleCard('ecard-reg-${r.REGIONAL.replace(/\s/g,'_')}')">📥</button>
+      </div>
+      <div class="ec-actions">
+        <button class="ico-btn" style="background:var(--azul);border:none;padding:7px 12px" onclick="exportSingleCard('ecard-reg-${r.REGIONAL.replace(/\s/g,'_')}')"><span class="ico-ic">📥</span>PNG</button>
       </div>
     </div>
   `).join('');
@@ -1410,43 +1447,62 @@ def pct(numer, denom):
 def pct_s(n, d):
     return round(n/d*100, 2) if d else 0.0
 
-fat_fil = fat.groupby(['ID_FILIAL','SIGLA','LOJA','REGIONAL','AUDITOR','GERENTE','SUPERVISOR','ESTADO']).agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
-desp_fil = desp.groupby('ID_FILIAL').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+# ==== JANELA DE COMPARAÇÃO (Realizado x Planejado) ====
+# A planilha traz o orçamento do ANO INTEIRO (Jan-Dez), mas o Realizado só
+# existe até o último mês já fechado (ex.: Jan-Mai). Comparar Realizado
+# desses 5 meses contra o Planejado de 12 meses gera desvios gigantes e
+# incorretos (sempre parece que ficou muito abaixo do plano). fat_comp/
+# desp_comp restringem os DOIS lados (Realizado e Planejado) aos mesmos
+# meses, para que Desvio % seja uma comparação válida. O gráfico de
+# sazonalidade (meses/meses_com_realizado) continua usando o ano inteiro,
+# pois ali a comparação é sempre mês-a-mês (não agregada).
+fat_comp = fat[fat['MES'].isin(meses_com_realizado)].copy()
+desp_comp = desp[desp['MES'].isin(meses_com_realizado)].copy()
+
+fat_fil = fat_comp.groupby(['ID_FILIAL','SIGLA','LOJA','REGIONAL','AUDITOR','GERENTE','SUPERVISOR','ESTADO']).agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+desp_fil = desp_comp.groupby('ID_FILIAL').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
 filiais = fat_fil.merge(desp_fil, on='ID_FILIAL', how='left').fillna(0)
 filiais['PERC_DESP']=pct(filiais['DESP_REAL'], filiais['FAT_REAL'])
 filiais['DESVIO_FAT']=pct(filiais['FAT_REAL']-filiais['FAT_PREV'], filiais['FAT_PREV'])
 filiais['DESVIO_DESP']=pct(filiais['DESP_REAL']-filiais['DESP_PREV'], filiais['DESP_PREV'])
 filiais=filiais.sort_values('FAT_REAL',ascending=False)
 
+# meses: usa o ano inteiro (fat/desp, não fat_comp/desp_comp) — aqui a
+# comparação já é mês-a-mês, então meses futuros (Realizado=0) são válidos.
 fat_mes=fat.groupby('MES').agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
 desp_mes=desp.groupby('MES').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
 meses=fat_mes.merge(desp_mes,on='MES').fillna(0)
 meses['NOME']=meses['MES'].map(mes_nomes)
 meses['PERC_DESP']=pct(meses['DESP_REAL'], meses['FAT_REAL'])
 
-fat_reg=fat.groupby('REGIONAL').agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
-desp_reg=desp.groupby('REGIONAL').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+fat_reg=fat_comp.groupby('REGIONAL').agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+desp_reg=desp_comp.groupby('REGIONAL').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
 regionais_out=fat_reg.merge(desp_reg,on='REGIONAL').fillna(0)
 regionais_out['PERC_DESP']=pct(regionais_out['DESP_REAL'], regionais_out['FAT_REAL'])
 
-fat_aud=fat.groupby('AUDITOR').agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
-desp_aud=desp.groupby('AUDITOR').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+fat_aud=fat_comp.groupby('AUDITOR').agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+desp_aud=desp_comp.groupby('AUDITOR').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
 auditores=fat_aud.merge(desp_aud,on='AUDITOR').fillna(0)
 auditores['PERC_DESP']=pct(auditores['DESP_REAL'], auditores['FAT_REAL'])
 
-grupos=desp.groupby('GRUPO_CONTA').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index().sort_values('DESP_REAL',ascending=False)
+grupos=desp_comp.groupby('GRUPO_CONTA').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index().sort_values('DESP_REAL',ascending=False)
 grupos['DESVIO']=pct(grupos['DESP_REAL']-grupos['DESP_PREV'], grupos['DESP_PREV'])
 
-tot_fat_real=fat['VLR_REALIZADO'].sum()
-tot_fat_prev=fat['VLR_PREVISAO'].sum()
-tot_desp_real=desp['VLR_REALIZADO'].sum()
-tot_desp_prev=desp['VLR_PREVISAO'].sum()
+tot_fat_real=fat_comp['VLR_REALIZADO'].sum()
+tot_fat_prev=fat_comp['VLR_PREVISAO'].sum()
+tot_desp_real=desp_comp['VLR_REALIZADO'].sum()
+tot_desp_prev=desp_comp['VLR_PREVISAO'].sum()
+# Orçamento do ano inteiro (Jan-Dez), só para referência/contexto — não
+# entra em nenhum cálculo de desvio.
+tot_fat_prev_ano=fat['VLR_PREVISAO'].sum()
+tot_desp_prev_ano=desp['VLR_PREVISAO'].sum()
 
 payload={
     'meta':{
         'periodo':periodo_str,'filiais_count':int(len(filiais)),
         'tot_fat_real':round(tot_fat_real,2),'tot_fat_prev':round(tot_fat_prev,2),
         'tot_desp_real':round(tot_desp_real,2),'tot_desp_prev':round(tot_desp_prev,2),
+        'tot_fat_prev_ano':round(tot_fat_prev_ano,2),'tot_desp_prev_ano':round(tot_desp_prev_ano,2),
         'perc_desp_real':pct_s(tot_desp_real,tot_fat_real),
         'perc_desp_plan':pct_s(tot_desp_prev,tot_fat_prev),
         'resultado':round(tot_fat_real-tot_desp_real,2),
