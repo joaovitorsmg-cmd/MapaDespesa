@@ -13,11 +13,11 @@
   --verde:#1B8A3C;--vermelho:#C62828;--amarelo:#F2A900;
   --fundo:#F0F4FA;
 }
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-body{background:var(--fundo);color:var(--cinza)}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--fundo);color:var(--cinza);max-width:100%;overflow-x:hidden}
 
 /* HEADER */
-.header{background:var(--azul-esc);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header{background:var(--azul-esc);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .header-logo{display:flex;align-items:center;gap:12px}
 .header-logo .logo-box{background:var(--branco);border-radius:6px;padding:4px 10px;font-weight:900;font-size:16px;color:var(--azul-esc);letter-spacing:1px}
 .header-logo .logo-box span{color:var(--azul-cl)}
@@ -26,8 +26,8 @@ body{background:var(--fundo);color:var(--cinza)}
 .header-meta span{display:block}
 
 /* TABS */
-.tabs{background:var(--azul);display:flex;gap:2px;padding:0 24px}
-.tab{padding:11px 20px;color:rgba(255,255,255,.7);cursor:pointer;font-size:13px;font-weight:600;border-bottom:3px solid transparent;transition:.2s;white-space:nowrap}
+.tabs{background:var(--azul);display:flex;gap:2px;padding:0 24px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.tab{padding:11px 20px;color:rgba(255,255,255,.7);cursor:pointer;font-size:13px;font-weight:600;border-bottom:3px solid transparent;transition:.2s;white-space:nowrap;flex-shrink:0}
 .tab:hover{color:#fff}
 .tab.active{color:#fff;border-bottom-color:var(--azul-cl)}
 
@@ -41,6 +41,9 @@ body{background:var(--fundo);color:var(--cinza)}
 .f-group label{font-size:11px;font-weight:700;color:var(--azul);text-transform:uppercase}
 .f-group select,.f-group input{padding:7px 10px;border:1px solid #ccd;border-radius:5px;font-size:13px;min-width:160px}
 .f-group select:focus,.f-group input:focus{outline:none;border-color:var(--azul)}
+.chk-label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cinza);cursor:pointer;padding:7px 0;white-space:nowrap}
+.chk-label input{width:16px;height:16px;cursor:pointer;flex-shrink:0}
+.toolbar-end{margin-left:auto}
 .btn{padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:13px;font-weight:700;transition:.2s}
 .btn-primary{background:var(--azul);color:#fff}.btn-primary:hover{background:var(--azul-esc)}
 .btn-ghost{background:#eef;color:var(--azul)}.btn-ghost:hover{background:#dde}
@@ -65,7 +68,7 @@ body{background:var(--fundo);color:var(--cinza)}
 .chart-wrap{position:relative;height:280px}
 
 /* TABLE */
-.tbl-box{background:var(--branco);border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:18px;overflow-x:auto}
+.tbl-box{background:var(--branco);border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:18px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tbl-box h3{font-size:13px;font-weight:700;color:var(--azul-esc);margin-bottom:12px}
 table{width:100%;border-collapse:collapse;font-size:12px}
 thead{background:var(--azul-esc);color:#fff;position:sticky;top:0}
@@ -109,12 +112,15 @@ tbody tr:hover{background:#F5F8FF}
 .ec-filial-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid #eee}
 .ec-filial-row span:last-child{font-weight:700}
 
-/* TOOLBAR ICONS */
-.icon-toolbar{display:flex;gap:8px;align-items:center}
-.ico-btn{background:none;border:1px solid rgba(255,255,255,.3);border-radius:5px;color:#fff;padding:6px 8px;cursor:pointer;font-size:14px;transition:.2s;position:relative}
+/* TOOLBAR ICONS — ícone + legenda sempre visível (funciona em toque, sem depender de hover) */
+.icon-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ico-btn,.ico-btn-light{display:inline-flex;align-items:center;gap:6px;border-radius:6px;padding:7px 12px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;transition:.2s;border:1px solid transparent}
+.ico-btn{background:none;border-color:rgba(255,255,255,.35);color:#fff}
 .ico-btn:hover{background:rgba(255,255,255,.15)}
-.ico-btn .tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#333;color:#fff;font-size:11px;padding:4px 8px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:.2s}
-.ico-btn:hover .tooltip{opacity:1}
+.ico-btn:active,.ico-btn-light:active{transform:scale(.96)}
+.ico-btn-light{background:#EEF3FF;border-color:#D3DEF5;color:var(--azul)}
+.ico-btn-light:hover{background:#DEE8FC}
+.ico-ic{font-size:14px;line-height:1}
 
 /* MISC */
 .section-title{font-size:15px;font-weight:700;color:var(--azul-esc);margin-bottom:12px;display:flex;align-items:center;gap:8px}
@@ -122,7 +128,65 @@ tbody tr:hover{background:#F5F8FF}
 .periodo-badge{background:var(--azul);color:#fff;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700}
 .empty{text-align:center;padding:40px;color:#aaa;font-size:14px}
 
-@media(max-width:768px){.charts-grid,.top3{grid-template-columns:1fr}.tabs{overflow-x:auto}}
+/* LEGENDA DE GRÁFICO */
+.chart-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:#666;margin-bottom:10px}
+.chart-legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.dot-azul{background:var(--azul)}.dot-vermelho{background:var(--vermelho)}
+
+/* CARDS MOBILE — Comparativo Filiais (substitui a tabela larga em telas pequenas) */
+.cmp-cards{display:none}
+.cmp-card{background:var(--branco);border-radius:8px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:10px;border-left:4px solid var(--azul)}
+.cmp-card.alert{border-left-color:var(--vermelho);background:#FFFAFA}
+.cmp-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px}
+.cmp-card-fil{font-size:14px;font-weight:800;color:var(--azul-esc)}
+.cmp-card-loja{font-size:11px;color:#888;margin-top:2px}
+.cmp-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.cmp-card-stat{background:var(--fundo);border-radius:6px;padding:8px 10px}
+.cmp-card-stat .lbl{font-size:9px;color:#888;text-transform:uppercase;font-weight:700}
+.cmp-card-stat .val{font-size:14px;font-weight:800;color:var(--azul-esc);margin-top:2px}
+.cmp-card-peers{font-size:11px;color:#666;border-top:1px solid #eee;padding-top:8px;margin-top:2px}
+
+/* =========================================================
+   MOBILE — fluido em telas pequenas
+   ========================================================= */
+@media(max-width:768px){
+  .charts-grid,.top3{grid-template-columns:1fr}
+  .export-cards-grid{grid-template-columns:1fr}
+  .cmp-desktop-only{display:none}
+  .cmp-cards{display:block}
+}
+
+@media(max-width:640px){
+  .header{padding:12px 16px}
+  .header>div:nth-child(2){display:none}
+  .header>div:last-child{width:100%;justify-content:space-between;flex-wrap:wrap;row-gap:8px}
+  .icon-toolbar{flex:1 1 auto}
+  .ico-btn{flex:1;justify-content:center;padding:8px 6px;font-size:11px}
+  .header-meta{width:100%;text-align:left}
+
+  .tabs{padding:0 10px}
+  .tab{padding:10px 14px;font-size:12px}
+
+  .content{padding:14px}
+
+  .filters{padding:12px;flex-direction:column;align-items:stretch}
+  .f-group{width:100%}
+  .f-group select,.f-group input{width:100%;min-width:0;font-size:16px;padding:9px 10px}
+  .filters .btn{width:100%}
+  .toolbar-end{margin-left:0;width:100%}
+  .icon-toolbar .ico-btn-light{flex:1;justify-content:center}
+
+  .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .kpi{padding:12px 14px}
+  .kpi-val{font-size:19px}
+
+  .chart-wrap{height:230px}
+  .chart-box{padding:12px}
+
+  .upload-zone{padding:24px 14px}
+
+  .cmp-card-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
@@ -139,9 +203,9 @@ tbody tr:hover{background:#F5F8FF}
   <div style="color:#fff;font-size:14px;font-weight:600">📊 Análise Administrativa e Gerencial</div>
   <div style="display:flex;align-items:center;gap:12px">
     <div class="icon-toolbar">
-      <button class="ico-btn" onclick="exportAllCards()" title=""><span class="tooltip">Exportar Cards em PNG</span>📥</button>
-      <button class="ico-btn" onclick="switchTab('tab-upload')" title=""><span class="tooltip">Atualizar Base de Dados</span>🔄</button>
-      <button class="ico-btn" onclick="printPainel()" title=""><span class="tooltip">Imprimir Painel</span>🖨️</button>
+      <button class="ico-btn" onclick="exportAllCards()"><span class="ico-ic">📥</span>Exportar</button>
+      <button class="ico-btn" onclick="switchTab('tab-upload')"><span class="ico-ic">🔄</span>Atualizar</button>
+      <button class="ico-btn" onclick="printPainel()"><span class="ico-ic">🖨️</span>Imprimir</button>
     </div>
     <div class="header-meta">
       <span id="hd-periodo">Carregando...</span>
@@ -236,9 +300,9 @@ tbody tr:hover{background:#F5F8FF}
       </select>
     </div>
     <button class="btn btn-ghost" onclick="clearFilFilters()">✕ Limpar</button>
-    <div style="margin-left:auto" class="icon-toolbar">
-      <button class="ico-btn" onclick="exportTable('tbl-filiais','filiais_2026')" title=""><span class="tooltip">Exportar tabela PNG</span>📥</button>
-      <button class="ico-btn" onclick="copyTableCSV('tbl-filiais')" title=""><span class="tooltip">Copiar CSV</span>📋</button>
+    <div class="toolbar-end icon-toolbar">
+      <button class="ico-btn-light" onclick="exportTable('tbl-filiais','filiais_2026')"><span class="ico-ic">📥</span>Exportar PNG</button>
+      <button class="ico-btn-light" onclick="copyTableCSV('tbl-filiais')"><span class="ico-ic">📋</span>Copiar CSV</button>
     </div>
   </div>
 
@@ -364,22 +428,31 @@ tbody tr:hover{background:#F5F8FF}
         <option value="15">15 p.p.</option>
       </select>
     </div>
-    <div style="margin-left:auto" class="icon-toolbar">
-      <button class="ico-btn" onclick="exportTable('tbl-comparativo','comparativo_filiais')" title=""><span class="tooltip">Exportar tabela PNG</span>📥</button>
-      <button class="ico-btn" onclick="copyTableCSV('tbl-comparativo')" title=""><span class="tooltip">Copiar CSV</span>📋</button>
+    <div class="f-group">
+      <label>&nbsp;</label>
+      <label class="chk-label"><input type="checkbox" id="cmp-only-alert" onchange="renderComparativo()"> Mostrar só alertas</label>
+    </div>
+    <div class="toolbar-end icon-toolbar">
+      <button class="ico-btn-light" onclick="exportTable('tbl-comparativo','comparativo_filiais')"><span class="ico-ic">📥</span>Exportar PNG</button>
+      <button class="ico-btn-light" onclick="copyTableCSV('tbl-comparativo')"><span class="ico-ic">📋</span>Copiar CSV</button>
     </div>
   </div>
 
-  <div class="section-title" id="cmp-summary">⚖️ Filiais com faturamento parecido, mas gasto discrepante</div>
+  <div class="section-title">⚖️ Filiais com faturamento parecido, mas gasto discrepante</div>
+  <div class="kpi-grid" id="cmp-stats" style="margin-bottom:18px"></div>
 
   <div class="charts-grid" style="grid-template-columns:1fr;margin-bottom:18px">
     <div class="chart-box">
-      <h3>🔎 Faturamento x % Desp/Fat — pontos em vermelho = discrepância acima do limite</h3>
+      <h3>🔎 Faturamento x % Desp/Fat</h3>
+      <div class="chart-legend">
+        <span><i class="dot dot-azul"></i>Dentro do esperado</span>
+        <span><i class="dot dot-vermelho"></i>Discrepância ≥ limite selecionado</span>
+      </div>
       <div class="chart-wrap" style="height:360px"><canvas id="ch-comparativo"></canvas></div>
     </div>
   </div>
 
-  <div class="tbl-box">
+  <div class="tbl-box cmp-desktop-only">
     <h3>📋 Filiais comparáveis (faturamento parecido) ordenadas pela maior diferença de % Desp/Fat</h3>
     <table id="tbl-comparativo">
       <thead>
@@ -397,6 +470,8 @@ tbody tr:hover{background:#F5F8FF}
       <tbody id="body-comparativo"></tbody>
     </table>
   </div>
+
+  <div class="cmp-cards" id="cmp-cards"></div>
 </div>
 
 <!-- ======================== TAB: EXPORT PNG ======================== -->
@@ -411,9 +486,9 @@ tbody tr:hover{background:#F5F8FF}
       <select id="exp-regional"><option value="">Selecione regional...</option></select>
     </div>
     <div class="icon-toolbar" style="align-self:flex-end">
-      <button class="ico-btn" style="background:var(--azul);border-color:var(--azul)" onclick="buildExportPreview()" title=""><span class="tooltip">Gerar Preview</span>🔍</button>
-      <button class="ico-btn" style="background:var(--verde);border-color:var(--verde)" onclick="exportAllCards()" title=""><span class="tooltip">Exportar TODOS os Cards PNG</span>📥</button>
-      <button class="ico-btn" style="background:#7B1FA2;border-color:#7B1FA2" onclick="exportSingleCard('card-geral')" title=""><span class="tooltip">Exportar Card Geral</span>🖼️</button>
+      <button class="ico-btn" style="background:var(--azul);border-color:var(--azul)" onclick="buildExportPreview()"><span class="ico-ic">🔍</span>Gerar Preview</button>
+      <button class="ico-btn" style="background:var(--verde);border-color:var(--verde)" onclick="exportAllCards()"><span class="ico-ic">📥</span>Exportar Todos</button>
+      <button class="ico-btn" style="background:#7B1FA2;border-color:#7B1FA2" onclick="exportSingleCard('card-geral')"><span class="ico-ic">🖼️</span>Card Geral</button>
     </div>
   </div>
 
@@ -899,17 +974,39 @@ function renderComparativo(){
   if(!DATA)return;
   const tol=parseInt(document.getElementById('cmp-tol').value||15,10);
   const minDiff=parseInt(document.getElementById('cmp-mindiff').value||8,10);
+  const onlyAlert=document.getElementById('cmp-only-alert').checked;
+  const universo=DATA.filiais.filter(f=>f.FAT_REAL>0).length;
   const comp=computeComparativo(tol).sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff));
   const alertas=comp.filter(f=>Math.abs(f.diff)>=minDiff);
+  const lista=onlyAlert?alertas:comp;
 
-  document.getElementById('cmp-summary').textContent =
-    `⚖️ ${alertas.length} filial(is) com % Desp/Fat divergindo ≥ ${minDiff} p.p. de filiais com faturamento parecido (±${tol}%)`;
+  document.getElementById('cmp-stats').innerHTML=`
+    <div class="kpi">
+      <div class="kpi-label">🏢 Filiais Avaliadas</div>
+      <div class="kpi-val">${universo}</div>
+      <div class="kpi-sub">com faturamento realizado > 0</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">🔗 Com Pares Comparáveis</div>
+      <div class="kpi-val">${comp.length}</div>
+      <div class="kpi-sub">faixa de faturamento parecido ±${tol}%</div>
+    </div>
+    <div class="kpi ${alertas.length>0?'vermelho':'verde'}">
+      <div class="kpi-label">⚠️ Alertas de Discrepância</div>
+      <div class="kpi-val">${alertas.length}</div>
+      <div class="kpi-sub">diferença de gasto ≥ ${minDiff} p.p. vs pares</div>
+    </div>
+  `;
+
+  const emptyMsg = onlyAlert
+    ? 'Nenhum alerta encontrado nesta faixa/limite — tente reduzir o limite de diferença'
+    : 'Nenhuma filial encontrou pares com faturamento parecido nesta faixa';
 
   const b=document.getElementById('body-comparativo');
-  if(!comp.length){
-    b.innerHTML='<tr><td colspan="8" class="empty">Nenhuma filial encontrou pares com faturamento parecido nesta faixa</td></tr>';
+  if(!lista.length){
+    b.innerHTML=`<tr><td colspan="8" class="empty">${emptyMsg}</td></tr>`;
   }else{
-    b.innerHTML=comp.map(f=>{
+    b.innerHTML=lista.map(f=>{
       const isAlert=Math.abs(f.diff)>=minDiff;
       const diffCls = isAlert ? (f.diff>0?'tx-neg':'tx-pos') : '';
       return `<tr${isAlert?' style="background:#FFF5F5"':''}>
@@ -925,7 +1022,35 @@ function renderComparativo(){
     }).join('');
   }
 
+  renderComparativoCards(lista, minDiff, emptyMsg);
   renderComparativoChart(comp, minDiff);
+}
+
+function renderComparativoCards(lista, minDiff, emptyMsg){
+  const c=document.getElementById('cmp-cards');
+  if(!lista.length){
+    c.innerHTML=`<div class="empty">${emptyMsg}</div>`;
+    return;
+  }
+  c.innerHTML=lista.map(f=>{
+    const isAlert=Math.abs(f.diff)>=minDiff;
+    const diffCls = isAlert ? (f.diff>0?'tx-neg':'tx-pos') : '';
+    return `<div class="cmp-card${isAlert?' alert':''}">
+      <div class="cmp-card-top">
+        <div>
+          <span class="sigla">${f.SIGLA||f.ID_FILIAL}</span>${isAlert?' ⚠️':''}
+          <div class="cmp-card-loja">${f.LOJA||'—'} · ${f.REGIONAL||'—'}</div>
+        </div>
+      </div>
+      <div class="cmp-card-grid">
+        <div class="cmp-card-stat"><div class="lbl">Fat. Realizado</div><div class="val">${fmtM(f.FAT_REAL)}</div></div>
+        <div class="cmp-card-stat"><div class="lbl">% Desp/Fat</div><div class="val ${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</div></div>
+        <div class="cmp-card-stat"><div class="lbl">Média dos Pares</div><div class="val">${fmtP(f.peerAvg)}</div></div>
+        <div class="cmp-card-stat"><div class="lbl">Diferença</div><div class="val ${diffCls}">${f.diff>0?'+':''}${fmtP(f.diff)}</div></div>
+      </div>
+      <div class="cmp-card-peers">${f.peerCount} filial(is) comparável(is): ${f.peerList.slice(0,6).join(', ')}${f.peerList.length>6?'…':''}</div>
+    </div>`;
+  }).join('');
 }
 
 function renderComparativoChart(comp, minDiff){
@@ -1043,7 +1168,7 @@ function renderExportCards(){
       <div class="ec-filial-row"><span>Despesas</span><span style="color:var(--vermelho)">${fmtM(f.DESP_REAL)}</span></div>
       <div class="ec-filial-row"><span>% Desp/Fat</span><span class="${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</span></div>
       <div style="margin-top:8px;display:flex;justify-content:flex-end">
-        <button class="ico-btn" style="background:var(--azul);border:none;border-radius:4px;font-size:11px;padding:4px 8px;cursor:pointer;color:#fff" onclick="exportSingleCard('ecard-fil-${f.SIGLA}')" title="Exportar PNG">📥</button>
+        <button class="ico-btn" style="background:var(--azul);border:none;padding:7px 12px" onclick="exportSingleCard('ecard-fil-${f.SIGLA}')"><span class="ico-ic">📥</span>PNG</button>
       </div>
     </div>
   `).join('');
