@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{
-  color-scheme: light;
+  color-scheme: light dark;
   --azul:#0D47A1;--azul-esc:#002B5B;--azul-cl:#64B5F6;
   --verde:#1B8A3C;--vermelho:#C62828;--amarelo:#F2A900;
   --fundo:#F0F4FA;
@@ -25,6 +25,46 @@
   --row-hover:#F5F8FF;
   --hover-tint:#EEF4FF;
   --shadow:rgba(0,0,0,.08);
+  --btn-light-bg:#EEF3FF;--btn-light-border:#D3DEF5;--btn-light-hover:#DEE8FC;
+  --destaque-bg:#FFF5F5;
+  --badge-ok-bg:#E8F5E9;--badge-ok-fg:#2E7D32;
+  --badge-bad-bg:#FFEBEE;--badge-bad-fg:#C62828;
+  --badge-warn-bg:#FFF8E1;--badge-warn-fg:#F57F17;
+}
+/* Tema escuro — segue o dispositivo ou seleção manual */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fundo:#0B1220;--branco:#141B2D;--cinza:#E2E8F0;--cinza-cl:#2A3550;
+    --heading:#E3ECFF;--accent-text:#7EB2FA;--azul-cl:#7EC1FA;
+    --text-muted:#94A3B8;--text-faint:#7C8AA5;--text-faint2:#5B6B87;
+    --border:#232D45;--border-strong:#33405E;--row-hover:#1B2540;
+    --hover-tint:rgba(100,181,246,.12);--shadow:rgba(0,0,0,.4);
+    --btn-light-bg:rgba(100,181,246,.14);--btn-light-border:rgba(100,181,246,.32);--btn-light-hover:rgba(100,181,246,.24);
+    --destaque-bg:rgba(198,40,40,.16);
+    --badge-ok-bg:rgba(76,175,80,.18);--badge-ok-fg:#81C784;
+    --badge-bad-bg:rgba(198,40,40,.2);--badge-bad-fg:#EF9A9A;
+    --badge-warn-bg:rgba(245,127,23,.2);--badge-warn-fg:#FFCC80;
+  }
+}
+/* Seleção manual de tema (substitui a preferência do SO) */
+:root[data-theme="dark"]{
+  --fundo:#0B1220;--branco:#141B2D;--cinza:#E2E8F0;--cinza-cl:#2A3550;
+  --heading:#E3ECFF;--accent-text:#7EB2FA;--azul-cl:#7EC1FA;
+  --text-muted:#94A3B8;--text-faint:#7C8AA5;--text-faint2:#5B6B87;
+  --border:#232D45;--border-strong:#33405E;--row-hover:#1B2540;
+  --hover-tint:rgba(100,181,246,.12);--shadow:rgba(0,0,0,.4);
+  --btn-light-bg:rgba(100,181,246,.14);--btn-light-border:rgba(100,181,246,.32);--btn-light-hover:rgba(100,181,246,.24);
+  --destaque-bg:rgba(198,40,40,.16);
+  --badge-ok-bg:rgba(76,175,80,.18);--badge-ok-fg:#81C784;
+  --badge-bad-bg:rgba(198,40,40,.2);--badge-bad-fg:#EF9A9A;
+  --badge-warn-bg:rgba(245,127,23,.2);--badge-warn-fg:#FFCC80;
+}
+:root[data-theme="light"]{
+  --fundo:#F0F4FA;--branco:#fff;--cinza:#333;--cinza-cl:#E6E6E6;
+  --heading:#002B5B;--accent-text:#0D47A1;--azul-cl:#64B5F6;
+  --text-muted:#666;--text-faint:#888;--text-faint2:#aaa;
+  --border:#eee;--border-strong:#ccd;--row-hover:#F5F8FF;
+  --hover-tint:#EEF4FF;--shadow:rgba(0,0,0,.08);
   --btn-light-bg:#EEF3FF;--btn-light-border:#D3DEF5;--btn-light-hover:#DEE8FC;
   --destaque-bg:#FFF5F5;
   --badge-ok-bg:#E8F5E9;--badge-ok-fg:#2E7D32;
@@ -229,6 +269,7 @@ tbody tr:hover{background:var(--row-hover)}
     <div class="icon-toolbar">
       <button class="ico-btn" onclick="exportAllCards()" title="Exportar esta aba em PNG"><span class="tooltip">Exportar esta aba em PNG</span>📥</button>
       <button class="ico-btn" id="btn-export-bg" onclick="toggleExportBg()" title="Fundo export: Fundo Branco" style="opacity:.65"><span class="tooltip">Fundo export: Fundo Branco</span>🪟</button>
+      <button class="ico-btn" id="btn-theme" onclick="toggleTheme()" title="Alternar tema"><span class="tooltip">Tema: Automático</span>☀️</button>
       <button class="ico-btn" onclick="switchTab('tab-upload')" title="Atualizar base de dados"><span class="tooltip">Atualizar base de dados</span>🔄</button>
       <button class="ico-btn" onclick="printPainel()" title="Imprimir painel"><span class="tooltip">Imprimir painel</span>🖨️</button>
     </div>
@@ -656,10 +697,54 @@ const badgeP = (v,inv=false) => {
 };
 
 // =========================================================
-// TEMA — sempre claro
+// TEMA — segue o dispositivo; botão no header alterna manualmente
 // =========================================================
-Chart.defaults.color = '#555';
-Chart.defaults.borderColor = '#e6e6e6';
+const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+let _manualTheme = null; // null = segue dispositivo, 'dark' ou 'light' = manual
+
+function isDark(){
+  if(_manualTheme) return _manualTheme === 'dark';
+  return darkModeQuery.matches;
+}
+
+function applyChartTheme(forceDark){
+  const dark = (forceDark !== undefined) ? forceDark : isDark();
+  Chart.defaults.color = dark ? '#B8C4DA' : '#555';
+  Chart.defaults.borderColor = dark ? '#28324A' : '#e6e6e6';
+}
+applyChartTheme();
+
+function toggleTheme(){
+  if(_manualTheme === null){
+    // Primeiro clique: fixa no oposto do tema atual do dispositivo
+    _manualTheme = isDark() ? 'light' : 'dark';
+  } else if(_manualTheme === 'dark'){
+    _manualTheme = 'light';
+  } else {
+    _manualTheme = null; // volta a seguir o dispositivo
+  }
+  const root = document.documentElement;
+  if(_manualTheme) root.setAttribute('data-theme', _manualTheme);
+  else root.removeAttribute('data-theme');
+  applyChartTheme();
+  if(DATA) renderCharts();
+  _updateThemeBtn();
+}
+
+function _updateThemeBtn(){
+  const btn = document.getElementById('btn-theme');
+  if(!btn) return;
+  const dark = isDark();
+  btn.querySelector('.tooltip').textContent = _manualTheme
+    ? `Tema: ${dark?'Escuro':'Claro'} (manual — clique para ${dark?'claro':'escuro'}/automático)`
+    : `Tema: Automático (${dark?'Escuro':'Claro'} agora) — clique para fixar`;
+  btn.textContent = '';
+  btn.insertAdjacentHTML('afterbegin',`<span class="tooltip">${btn.querySelector('.tooltip').textContent}</span>${dark?'🌙':'☀️'}`);
+}
+
+darkModeQuery.addEventListener('change', ()=>{
+  if(!_manualTheme){ applyChartTheme(); if(DATA) renderCharts(); _updateThemeBtn(); }
+});
 
 // =========================================================
 // EXPORTAÇÃO — controle de fundo (branco ou transparente)
@@ -731,6 +816,7 @@ function initAll(){
   renderTabGrupos();
   renderComparativo();
   updateCardGeral(m);
+  _updateThemeBtn();
 }
 
 // =========================================================
@@ -880,7 +966,7 @@ function renderRegionalPerc(){
       labels:reg.map(r=>r.REGIONAL),
       datasets:[{data:reg.map(r=>r.PERC_DESP),
         backgroundColor:['#0D47A1','#1565C0','#1976D2','#1E88E5','#42A5F5','#64B5F6'],
-        borderWidth:2,borderColor:darkModeQuery.matches?'#141B2D':'#fff'}]
+        borderWidth:2,borderColor:isDark()?'#141B2D':'#fff'}]
     },
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{position:'bottom',labels:{font:{size:11}}},
@@ -1313,7 +1399,7 @@ function slugify(s){
 }
 
 // Captura um elemento em PNG (escala 4×, alta resolução para apresentações).
-// Botões internos são ocultados durante a captura.
+// Exportações são SEMPRE em tema claro, independente do tema ativo no painel.
 // Se EXPORT_TRANSPARENT=true exporta sem fundo (PNG com canal alpha) —
 // ideal para sobrepor em slides ou imagens de apresentação.
 async function captureAndDownload(el, filename){
@@ -1322,12 +1408,15 @@ async function captureAndDownload(el, filename){
   const buttons=[...el.querySelectorAll('button')];
   const prevVis=buttons.map(b=>b.style.visibility);
   buttons.forEach(b=>b.style.visibility='hidden');
+
+  // Forçar tema claro nas exportações: sobrepõe atributo data-theme temporariamente
+  const root = document.documentElement;
+  const prevTheme = root.getAttribute('data-theme');
+  root.setAttribute('data-theme', 'light');
+  applyChartTheme(false); // falso = light
+
   try{
-    let bgColor = null;
-    if(!EXPORT_TRANSPARENT){
-      const bg=getComputedStyle(el).backgroundColor;
-      bgColor = (bg && bg!=='rgba(0, 0, 0, 0)') ? bg : '#ffffff';
-    }
+    let bgColor = EXPORT_TRANSPARENT ? null : '#ffffff';
     const canvas=await html2canvas(el,{
       scale:4,
       backgroundColor: bgColor,
@@ -1341,6 +1430,10 @@ async function captureAndDownload(el, filename){
     link.click();
   } finally {
     buttons.forEach((b,i)=>b.style.visibility=prevVis[i]);
+    // Restaurar tema original após captura
+    if(prevTheme) root.setAttribute('data-theme', prevTheme);
+    else root.removeAttribute('data-theme');
+    applyChartTheme(); // restaura cores dos gráficos conforme tema atual
   }
 }
 
@@ -1726,7 +1819,10 @@ if __name__ == '__main__':
 // =========================================================
 // INIT
 // =========================================================
-window.addEventListener('DOMContentLoaded', ()=> loadData('aqm_data.json'));
+window.addEventListener('DOMContentLoaded', ()=>{
+  _updateThemeBtn();
+  loadData('aqm_data.json');
+});
 </script>
 </body>
 </html>
