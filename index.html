@@ -735,11 +735,10 @@ function _updateThemeBtn(){
   const btn = document.getElementById('btn-theme');
   if(!btn) return;
   const dark = isDark();
-  btn.querySelector('.tooltip').textContent = _manualTheme
-    ? `Tema: ${dark?'Escuro':'Claro'} (manual — clique para ${dark?'claro':'escuro'}/automático)`
-    : `Tema: Automático (${dark?'Escuro':'Claro'} agora) — clique para fixar`;
-  btn.textContent = '';
-  btn.insertAdjacentHTML('afterbegin',`<span class="tooltip">${btn.querySelector('.tooltip').textContent}</span>${dark?'🌙':'☀️'}`);
+  const tip = _manualTheme
+    ? `Tema: ${dark?'Escuro':'Claro'} (manual — clique para alternar)`
+    : `Tema: Automático (${dark?'Escuro':'Claro'} agora)`;
+  btn.innerHTML = `<span class="tooltip">${tip}</span>${dark?'🌙':'☀️'}`;
 }
 
 darkModeQuery.addEventListener('change', ()=>{
