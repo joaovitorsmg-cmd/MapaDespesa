@@ -267,6 +267,17 @@ tbody tr:hover{background:var(--row-hover)}
 .btn-limpar:hover{background:var(--cinza-claro)}
 .analise-layout{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
 .analise-layout>.chart-box,.analise-layout>.tbl-box{min-width:280px}
+/* ---- Seletor de colunas ---- */
+.col-sel-popup{position:fixed;background:var(--branco);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.18);padding:10px 14px;min-width:190px;z-index:9999;font-size:12px;max-height:60vh;overflow-y:auto}
+.col-sel-title{font-weight:700;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--azul-escuro);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.col-sel-row{display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer;white-space:nowrap;color:var(--texto)}
+.col-sel-row:hover span{color:var(--azul-escuro)}
+.btn-xs{font-size:10px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;background:transparent;cursor:pointer;color:var(--cinza)}
+.btn-xs:hover{background:var(--cinza-claro)}
+/* ---- Comparativo multi-ano ---- */
+.cmp-yr-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;margin-right:4px}
+.badge-y1{background:rgba(30,136,229,.15);color:#1e88e5}
+.badge-y2{background:rgba(198,40,40,.12);color:#c62828}
 </style>
 </head>
 <body>
@@ -439,7 +450,10 @@ tbody tr:hover{background:var(--row-hover)}
   </div>
 
   <div class="tbl-box">
-    <h3 id="tbl-filiais-title">🏢 Desempenho por Filial</h3>
+    <div class="tbl-box-head">
+      <h3 id="tbl-filiais-title">🏢 Desempenho por Filial</h3>
+      <button class="ico-mini" onclick="showColSelector('tbl-filiais',this)" title="Selecionar colunas">⊞</button>
+    </div>
     <table id="tbl-filiais">
       <thead>
         <tr>
@@ -484,6 +498,7 @@ tbody tr:hover{background:var(--row-hover)}
     <div class="tbl-box-head">
       <h3 id="tbl-regional-title">🗺️ Consolidado por Regional</h3>
       <div class="icon-toolbar">
+        <button class="ico-mini" onclick="showColSelector('tbl-regional',this)" title="Selecionar colunas">⊞</button>
         <button class="ico-mini" onclick="exportBox(this)" title="Exportar tabela em PNG"><span class="tooltip">Exportar tabela em PNG</span>📥</button>
         <button class="ico-mini" onclick="copyTableCSV('tbl-regional')" title="Copiar tabela como CSV"><span class="tooltip">Copiar tabela como CSV</span>📋</button>
       </div>
@@ -509,6 +524,7 @@ tbody tr:hover{background:var(--row-hover)}
     <div class="tbl-box-head">
       <h3 id="tbl-auditor-title">👤 Consolidado por Auditor</h3>
       <div class="icon-toolbar">
+        <button class="ico-mini" onclick="showColSelector('tbl-auditor',this)" title="Selecionar colunas">⊞</button>
         <button class="ico-mini" onclick="exportBox(this)" title="Exportar tabela em PNG"><span class="tooltip">Exportar tabela em PNG</span>📥</button>
         <button class="ico-mini" onclick="copyTableCSV('tbl-auditor')" title="Copiar tabela como CSV"><span class="tooltip">Copiar tabela como CSV</span>📋</button>
       </div>
@@ -551,6 +567,7 @@ tbody tr:hover{background:var(--row-hover)}
     <div class="tbl-box-head">
       <h3 id="tbl-grupos-title">📋 Detalhamento por Grupo de Conta</h3>
       <div class="icon-toolbar">
+        <button class="ico-mini" onclick="showColSelector('tbl-grupos',this)" title="Selecionar colunas">⊞</button>
         <button class="ico-mini" onclick="exportBox(this)" title="Exportar tabela em PNG"><span class="tooltip">Exportar tabela em PNG</span>📥</button>
         <button class="ico-mini" onclick="copyTableCSV('tbl-grupos')" title="Copiar tabela como CSV"><span class="tooltip">Copiar tabela como CSV</span>📋</button>
       </div>
@@ -615,6 +632,7 @@ tbody tr:hover{background:var(--row-hover)}
     <div class="tbl-box-head">
       <h3>📋 Tabela detalhada — todas as filiais e seu grupo de faturamento parecido</h3>
       <div class="icon-toolbar">
+        <button class="ico-mini" onclick="showColSelector('tbl-comparativo',this)" title="Selecionar colunas">⊞</button>
         <button class="ico-mini" onclick="exportBox(this)" title="Exportar tabela em PNG"><span class="tooltip">Exportar tabela em PNG</span>📥</button>
         <button class="ico-mini" onclick="copyTableCSV('tbl-comparativo')" title="Copiar tabela como CSV"><span class="tooltip">Copiar tabela como CSV</span>📋</button>
       </div>
@@ -672,7 +690,10 @@ tbody tr:hover{background:var(--row-hover)}
     <div class="tbl-box" style="flex:1">
       <div class="tbl-box-head">
         <h3 id="analise-tbl-title">📋 Grupos de Conta — Detalhado</h3>
-        <button class="ico-mini" onclick="exportTableCSV('tbl-analise-grupos','grupos_detalhado.csv')" title="Exportar CSV">📄</button>
+        <div class="icon-toolbar">
+          <button class="ico-mini" onclick="showColSelector('tbl-analise-grupos',this)" title="Selecionar colunas">⊞</button>
+          <button class="ico-mini" onclick="exportTableCSV('tbl-analise-grupos','grupos_detalhado.csv')" title="Exportar CSV">📄</button>
+        </div>
       </div>
       <div style="overflow-x:auto">
         <table id="tbl-analise-grupos">
@@ -693,7 +714,10 @@ tbody tr:hover{background:var(--row-hover)}
   <div class="tbl-box" style="margin-top:16px" id="analise-filiais-box">
     <div class="tbl-box-head">
       <h3 id="analise-filiais-title">🏢 Filiais no Filtro</h3>
-      <button class="ico-mini" onclick="exportTableCSV('tbl-analise-filiais','filiais_detalhado.csv')" title="Exportar CSV">📄</button>
+      <div class="icon-toolbar">
+        <button class="ico-mini" onclick="showColSelector('tbl-analise-filiais',this)" title="Selecionar colunas">⊞</button>
+        <button class="ico-mini" onclick="exportTableCSV('tbl-analise-filiais','filiais_detalhado.csv')" title="Exportar CSV">📄</button>
+      </div>
     </div>
     <div style="overflow-x:auto">
       <table id="tbl-analise-filiais">
@@ -1858,31 +1882,6 @@ function addLog(msg,cls){
 }
 
 // =========================================================
-// MULTI-YEAR HELPERS
-// =========================================================
-function _extractYear(meta){
-  if(meta.ano) return +meta.ano;
-  const m=(meta.periodo||'').match(/(\d{4})/);
-  return m ? +m[1] : new Date().getFullYear();
-}
-
-function _setActiveYear(year){
-  if(!_dataByYear[year]) return;
-  _activeYear=year;
-  DATA=_dataByYear[year];
-  document.querySelectorAll('.year-pill').forEach(p=>p.classList.toggle('active',+p.dataset.year===year));
-  initAll();
-}
-
-function _updateYearSelector(){
-  const years=Object.keys(_dataByYear).map(Number).sort((a,b)=>b-a);
-  const sel=document.getElementById('year-selector');
-  if(!sel) return;
-  sel.style.display=years.length>1?'flex':'none';
-  sel.innerHTML=years.map(y=>`<button class="year-pill${y===_activeYear?' active':''}" data-year="${y}" onclick="_setActiveYear(${y})">${y}</button>`).join('');
-}
-
-// =========================================================
 // EXPORT TABLE CSV
 // =========================================================
 function exportTableCSV(tableId, filename){
@@ -1898,27 +1897,53 @@ function exportTableCSV(tableId, filename){
 }
 
 // =========================================================
-// ANÁLISE DETALHADA
+// SELETOR DE COLUNAS
 // =========================================================
-function _populateAnaliseSelects(){
-  const fil=DATA.filiais;
-  const regs=[...new Set(fil.map(f=>f.REGIONAL))].filter(Boolean).sort();
-  const auds=[...new Set(fil.map(f=>f.AUDITOR))].filter(Boolean).sort();
-  const fSel=document.getElementById('sel-an-filial');
-  const rSel=document.getElementById('sel-an-regional');
-  const aSel=document.getElementById('sel-an-auditor');
-  if(!rSel) return;
-  const cur={r:rSel.value,a:aSel.value,f:fSel.value};
-  rSel.innerHTML='<option value="">Todas</option>'+regs.map(r=>`<option${r===cur.r?' selected':''}>${r}</option>`).join('');
-  aSel.innerHTML='<option value="">Todos</option>'+auds.map(a=>`<option${a===cur.a?' selected':''}>${a}</option>`).join('');
-  fSel.innerHTML='<option value="">Todas</option>'+fil.slice().sort((a,b)=>a.LOJA.localeCompare(b.LOJA)).map(f=>`<option value="${f.ID_FILIAL}"${String(f.ID_FILIAL)===cur.f?' selected':''}>${f.SIGLA} — ${f.LOJA}</option>`).join('');
+const _colHidden={};
+
+function _applyColVis(tableId){
+  const hidden=_colHidden[tableId]||new Set();
+  let el=document.getElementById('_cv_'+tableId);
+  if(!el){el=document.createElement('style');el.id='_cv_'+tableId;document.head.appendChild(el);}
+  el.textContent=[...hidden].map(i=>`#${tableId} th:nth-child(${i}),#${tableId} td:nth-child(${i}){display:none!important}`).join('');
 }
 
-function limparFiltrosAnalise(){
-  ['sel-an-regional','sel-an-auditor','sel-an-filial'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.value='';
-  });
-  renderAnalise();
+function showColSelector(tableId,btn){
+  const existing=document.getElementById('_colSel');
+  if(existing){if(existing.dataset.table===tableId){existing.remove();return;}existing.remove();}
+  const table=document.getElementById(tableId);
+  if(!table) return;
+  const ths=[...table.querySelectorAll('thead th')];
+  const cols=ths.map((th,i)=>({idx:i+1,label:th.textContent.trim()})).filter(c=>c.label);
+  const hidden=_colHidden[tableId]||new Set();
+  const popup=document.createElement('div');
+  popup.id='_colSel';
+  popup.dataset.table=tableId;
+  popup.className='col-sel-popup';
+  popup.innerHTML=`<div class="col-sel-title">Colunas visíveis</div>`+
+    cols.map(c=>`<label class="col-sel-row"><input type="checkbox"${!hidden.has(c.idx)?' checked':''}
+      onchange="toggleCol('${tableId}',${c.idx},this.checked)"><span>${c.label}</span></label>`).join('')+
+    `<div style="margin-top:8px;border-top:1px solid var(--border);padding-top:6px;text-align:right">
+      <button onclick="resetColSel('${tableId}')" class="btn-xs">Redefinir</button></div>`;
+  const rect=btn.getBoundingClientRect();
+  Object.assign(popup.style,{top:(rect.bottom+4)+'px',right:(window.innerWidth-rect.right)+'px'});
+  document.body.appendChild(popup);
+  const _close=e=>{if(!popup.contains(e.target)&&e.target!==btn){popup.remove();document.removeEventListener('click',_close);}};
+  setTimeout(()=>document.addEventListener('click',_close),10);
+}
+
+function toggleCol(tableId,colIdx,visible){
+  if(!_colHidden[tableId])_colHidden[tableId]=new Set();
+  if(visible)_colHidden[tableId].delete(colIdx);
+  else _colHidden[tableId].add(colIdx);
+  _applyColVis(tableId);
+}
+
+function resetColSel(tableId){
+  _colHidden[tableId]=new Set();
+  _applyColVis(tableId);
+  const popup=document.getElementById('_colSel');
+  if(popup)popup.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=true);
 }
 
 // =========================================================
@@ -1976,6 +2001,18 @@ function renderAnalise(){
   const auditor=(document.getElementById('sel-an-auditor')||{}).value||'';
   const filialId=+((document.getElementById('sel-an-filial')||{}).value)||0;
 
+  const years=Object.keys(_dataByYear).map(Number).sort();
+  if(years.length>=2){
+    _renderAnaliseComparativo(years,regional,auditor,filialId);
+    return;
+  }
+
+  // --- modo ano único: restaura cabeçalhos originais ---
+  const tHG=document.querySelector('#tbl-analise-grupos thead tr');
+  if(tHG) tHG.innerHTML='<th>GRUPO DE CONTA</th><th class="num">REALIZADO</th><th class="num">PLANEJADO</th><th class="num">DESVIO R$</th><th class="num">DESVIO %</th><th class="num">% DO TOTAL</th>';
+  const tHF=document.querySelector('#tbl-analise-filiais thead tr');
+  if(tHF) tHF.innerHTML='<th>FILIAL</th><th>LOJA</th><th>REGIONAL</th><th>AUDITOR</th><th class="num">FAT REALIZADO</th><th class="num">FAT PLANEJADO</th><th class="num">DESVIO FAT%</th><th class="num">DESP REALIZADA</th><th class="num">DESP PLANEJADA</th><th class="num">DESVIO DESP%</th><th class="num">% DESP/FAT</th>';
+
   let filFiltradas=DATA.filiais;
   if(filialId) filFiltradas=filFiltradas.filter(f=>+f.ID_FILIAL===filialId);
   else{
@@ -2018,6 +2055,164 @@ function renderAnalise(){
   _renderAnaliseGruposTable(grupos,totDespReal,totFatReal,totFatPrev);
   _renderAnaliseChart(grupos);
   _renderAnaliseFiliais(filFiltradas);
+}
+
+// =========================================================
+// COMPARATIVO MULTI-ANO — Análise Detalhada
+// =========================================================
+function _getAnaliseDados(yearData,regional,auditor,filialId){
+  if(!yearData) return null;
+  let filFiltradas=yearData.filiais||[];
+  if(filialId) filFiltradas=filFiltradas.filter(f=>+f.ID_FILIAL===filialId);
+  else{
+    if(regional) filFiltradas=filFiltradas.filter(f=>f.REGIONAL===regional);
+    if(auditor)  filFiltradas=filFiltradas.filter(f=>f.AUDITOR===auditor);
+  }
+  const ids=new Set(filFiltradas.map(f=>+f.ID_FILIAL));
+  const totFatReal=filFiltradas.reduce((s,f)=>s+(f.FAT_REAL||0),0);
+  const totFatPrev=filFiltradas.reduce((s,f)=>s+(f.FAT_PREV||0),0);
+  const totDespReal=filFiltradas.reduce((s,f)=>s+(f.DESP_REAL||0),0);
+  const totDespPrev=filFiltradas.reduce((s,f)=>s+(f.DESP_PREV||0),0);
+  const gfRows=(yearData.grupos_filial||[]).filter(r=>ids.has(+r.ID_FILIAL));
+  const gMap={};
+  gfRows.forEach(r=>{const gc=r.GRUPO_CONTA;if(!gMap[gc])gMap[gc]={GRUPO_CONTA:gc,DESP_REAL:0,DESP_PREV:0};gMap[gc].DESP_REAL+=r.DESP_REAL;gMap[gc].DESP_PREV+=r.DESP_PREV;});
+  const grupos=Object.values(gMap).sort((a,b)=>b.DESP_REAL-a.DESP_REAL);
+  return{filFiltradas,ids,totFatReal,totFatPrev,totDespReal,totDespPrev,grupos};
+}
+
+function _renderAnaliseComparativo(years,regional,auditor,filialId){
+  const y1=years[0],y2=years[1];
+  const d1=_getAnaliseDados(_dataByYear[y1],regional,auditor,filialId);
+  const d2=_getAnaliseDados(_dataByYear[y2],regional,auditor,filialId);
+  if(!d1||!d2) return;
+
+  let label='Consolidado';
+  if(filialId){const f=(DATA.filiais||[]).find(x=>+x.ID_FILIAL===filialId);label=f?`${f.SIGLA} — ${f.LOJA}`:String(filialId);}
+  else if(regional) label=`Regional: ${regional}`;
+  else if(auditor)  label=`Auditor: ${auditor}`;
+
+  const badge=y=>`<span class="cmp-yr-badge ${y===y1?'badge-y1':'badge-y2'}">${y}</span>`;
+  const tChart=document.getElementById('analise-chart-title');
+  const tTbl=document.getElementById('analise-tbl-title');
+  const tFil=document.getElementById('analise-filiais-title');
+  if(tChart) tChart.textContent=`📊 Despesa por Grupo — ${label} · ${y1} vs ${y2}`;
+  if(tTbl)   tTbl.textContent=`📋 Grupos de Conta — ${label} · ${y1} vs ${y2}`;
+
+  // KPI cards
+  const varFat=d1.totFatReal>0?(d2.totFatReal-d1.totFatReal)/d1.totFatReal*100:0;
+  const varDesp=d1.totDespReal>0?(d2.totDespReal-d1.totDespReal)/d1.totDespReal*100:0;
+  const perc1=d1.totFatReal>0?d1.totDespReal/d1.totFatReal*100:0;
+  const perc2=d2.totFatReal>0?d2.totDespReal/d2.totFatReal*100:0;
+  const c=document.getElementById('analise-cards');
+  if(c) c.innerHTML=`
+    <div class="kpi"><div class="kpi-label">💰 Faturamento</div>
+      <div class="kpi-val">${fmtM(d2.totFatReal)}</div>
+      <div class="kpi-sub">${badge(y2)} vs ${badge(y1)} ${fmtM(d1.totFatReal)}</div></div>
+    <div class="kpi ${varFat>=0?'verde':'vermelho'}"><div class="kpi-label">📈 Var. Faturamento</div>
+      <div class="kpi-val">${varFat>=0?'+':''}${fmtP(varFat)}</div>
+      <div class="kpi-sub">${y1} → ${y2}</div></div>
+    <div class="kpi vermelho"><div class="kpi-label">📤 Despesa</div>
+      <div class="kpi-val">${fmtM(d2.totDespReal)}</div>
+      <div class="kpi-sub">${badge(y2)} vs ${badge(y1)} ${fmtM(d1.totDespReal)}</div></div>
+    <div class="kpi ${varDesp<=0?'verde':'vermelho'}"><div class="kpi-label">📉 Var. Despesa</div>
+      <div class="kpi-val">${varDesp>=0?'+':''}${fmtP(varDesp)}</div>
+      <div class="kpi-sub">${y1} → ${y2}</div></div>
+    <div class="kpi amarelo"><div class="kpi-label">📊 % Desp/Fat</div>
+      <div class="kpi-val">${fmtP(perc2)}</div>
+      <div class="kpi-sub">${badge(y2)} · ${badge(y1)} ${fmtP(perc1)}</div></div>`;
+
+  // Grupos table: update thead
+  const tHG=document.querySelector('#tbl-analise-grupos thead tr');
+  if(tHG) tHG.innerHTML=`<th>GRUPO DE CONTA</th>
+    <th class="num">${y1} Realiz.</th><th class="num">${y1} Plan.</th>
+    <th class="num">${y2} Realiz.</th><th class="num">${y2} Plan.</th>
+    <th class="num">Var. R$</th><th class="num">Var. %</th>`;
+
+  const g1Map=Object.fromEntries(d1.grupos.map(g=>[g.GRUPO_CONTA,g]));
+  const g2Map=Object.fromEntries(d2.grupos.map(g=>[g.GRUPO_CONTA,g]));
+  const allG=[...new Set([...d1.grupos.map(g=>g.GRUPO_CONTA),...d2.grupos.map(g=>g.GRUPO_CONTA)])]
+    .sort((a,b)=>Math.max((g2Map[b]||{DESP_REAL:0}).DESP_REAL,(g1Map[b]||{DESP_REAL:0}).DESP_REAL)-Math.max((g2Map[a]||{DESP_REAL:0}).DESP_REAL,(g1Map[a]||{DESP_REAL:0}).DESP_REAL));
+
+  const fatDesvR=d2.totFatReal-d1.totFatReal;
+  const fatDesvPct=d1.totFatReal>0?fatDesvR/d1.totFatReal*100:0;
+  let rows=`<tr style="background:rgba(27,94,32,.10);font-weight:600;border-bottom:2px solid rgba(27,94,32,.25)">
+    <td>01-VENDAS DE MERCADORIAS <span style="font-size:10px;font-weight:400;opacity:.65">(Faturamento)</span></td>
+    <td class="num tx-pos">${fmtM(d1.totFatReal)}</td><td class="num">${fmtM(d1.totFatPrev)}</td>
+    <td class="num tx-pos">${fmtM(d2.totFatReal)}</td><td class="num">${fmtM(d2.totFatPrev)}</td>
+    <td class="num ${fatDesvR>=0?'tx-pos':'tx-neg'}">${fmtM(fatDesvR)}</td>
+    <td class="num ${fatDesvPct>=0?'tx-pos':'tx-neg'}">${fatDesvPct>=0?'+':''}${fmtP(fatDesvPct)}</td></tr>`;
+  rows+=allG.map(gc=>{
+    const g1=g1Map[gc]||{DESP_REAL:0,DESP_PREV:0};
+    const g2=g2Map[gc]||{DESP_REAL:0,DESP_PREV:0};
+    const varR=g2.DESP_REAL-g1.DESP_REAL;
+    const varPct=g1.DESP_REAL>0?varR/g1.DESP_REAL*100:0;
+    return`<tr><td>${gc}</td>
+      <td class="num">${fmtM(g1.DESP_REAL)}</td><td class="num">${fmtM(g1.DESP_PREV)}</td>
+      <td class="num">${fmtM(g2.DESP_REAL)}</td><td class="num">${fmtM(g2.DESP_PREV)}</td>
+      <td class="num ${varR>0?'tx-neg':'tx-pos'}">${fmtM(varR)}</td>
+      <td class="num ${varPct>5?'tx-neg':varPct<-5?'tx-pos':'tx-warn'}">${varPct>=0?'+':''}${fmtP(varPct)}</td></tr>`;
+  }).join('');
+  document.getElementById('body-analise-grupos').innerHTML=rows;
+
+  // Filiais table: update thead
+  const tHF=document.querySelector('#tbl-analise-filiais thead tr');
+  if(tHF) tHF.innerHTML=`<th>FILIAL</th><th>LOJA</th><th>REGIONAL</th>
+    <th class="num">${y1} Fat</th><th class="num">${y2} Fat</th><th class="num">Var Fat%</th>
+    <th class="num">${y1} Desp</th><th class="num">${y2} Desp</th><th class="num">Var Desp%</th>
+    <th class="num">% Desp ${y2}</th>`;
+
+  const fil1Map=Object.fromEntries(d1.filFiltradas.map(f=>[+f.ID_FILIAL,f]));
+  const fil2Map=Object.fromEntries(d2.filFiltradas.map(f=>[+f.ID_FILIAL,f]));
+  const allIds=[...new Set([...d1.filFiltradas.map(f=>+f.ID_FILIAL),...d2.filFiltradas.map(f=>+f.ID_FILIAL)])]
+    .sort((a,b)=>((fil2Map[b]||{FAT_REAL:0}).FAT_REAL)-((fil2Map[a]||{FAT_REAL:0}).FAT_REAL));
+
+  document.getElementById('body-analise-filiais').innerHTML=allIds.map(id=>{
+    const f1=fil1Map[id]||{};
+    const f2=fil2Map[id]||f1;
+    const ref=f2.SIGLA?f2:f1;
+    const vf=f1.FAT_REAL>0?(((f2.FAT_REAL||0)-f1.FAT_REAL)/f1.FAT_REAL*100):0;
+    const vd=f1.DESP_REAL>0?(((f2.DESP_REAL||0)-f1.DESP_REAL)/f1.DESP_REAL*100):0;
+    const pd=f2.PERC_DESP||0;
+    return`<tr>
+      <td><span class="sigla">${ref.SIGLA||id}</span></td>
+      <td>${ref.LOJA||'—'}</td><td>${ref.REGIONAL||'—'}</td>
+      <td class="num">${fmtM(f1.FAT_REAL||0)}</td>
+      <td class="num">${fmtM(f2.FAT_REAL||0)}</td>
+      <td class="num ${vf>=0?'tx-pos':'tx-neg'}">${vf>=0?'+':''}${fmtP(vf)}</td>
+      <td class="num">${fmtM(f1.DESP_REAL||0)}</td>
+      <td class="num">${fmtM(f2.DESP_REAL||0)}</td>
+      <td class="num ${vd>0?'tx-neg':'tx-pos'}">${vd>=0?'+':''}${fmtP(vd)}</td>
+      <td class="num ${pd>20?'tx-neg':pd<13?'tx-pos':'tx-warn'}">${fmtP(pd)}</td></tr>`;
+  }).join('');
+
+  if(tFil) tFil.textContent=`🏢 Filiais — ${label} (${allIds.length})`;
+
+  // Gráfico comparativo: barras agrupadas por ano
+  destroyChart('ch-analise');
+  const ctx=document.getElementById('ch-analise');
+  if(ctx){
+    const isDark=document.documentElement.getAttribute('data-theme')==='dark'||(!document.documentElement.getAttribute('data-theme')&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+    const tc=isDark?'#ccc':'#333';
+    const top=allG.slice(0,10);
+    charts_reg['ch-analise']=new Chart(ctx.getContext('2d'),{
+      type:'bar',
+      data:{
+        labels:top.map(g=>g.replace(/^\d+\-/,'')),
+        datasets:[
+          {label:String(y1),data:top.map(g=>(g1Map[g]||{DESP_REAL:0}).DESP_REAL),backgroundColor:'rgba(30,136,229,.65)',borderRadius:3},
+          {label:String(y2),data:top.map(g=>(g2Map[g]||{DESP_REAL:0}).DESP_REAL),backgroundColor:'rgba(198,40,40,.65)',borderRadius:3}
+        ]
+      },
+      options:{
+        indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{color:tc,font:{size:11}}},tooltip:{callbacks:{label:c=>' '+fmtM(c.raw)}}},
+        scales:{
+          x:{ticks:{color:tc,callback:v=>fmtM(v)},grid:{color:isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)'}},
+          y:{ticks:{color:tc,font:{size:10}}}
+        }
+      }
+    });
+  }
 }
 
 function _renderAnaliseCards(fatR,fatP,despR,despP,count){
@@ -2111,18 +2306,6 @@ function _renderAnaliseFiliais(filiais){
       <td class="num ${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</td>
     </tr>`;
   }).join('');
-}
-
-function exportTableCSV(tableId,filename){
-  const t=document.getElementById(tableId);
-  if(!t) return;
-  const rows=[...t.querySelectorAll('tr')];
-  const csv=rows.map(r=>[...r.querySelectorAll('th,td')].map(c=>'"'+c.innerText.trim().replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=filename||'tabela.csv';
-  a.click();
 }
 
 // =========================================================
