@@ -158,6 +158,12 @@ def main():
     ).reset_index().sort_values('DESP_REAL', ascending=False)
     grupos['DESVIO'] = pct(grupos['DESP_REAL'] - grupos['DESP_PREV'], grupos['DESP_PREV'])
 
+    grupos_filial = desp_comp.groupby(['ID_FILIAL', 'GRUPO_CONTA']).agg(
+        DESP_REAL=('VLR_REALIZADO', 'sum'),
+        DESP_PREV=('VLR_PREVISAO', 'sum')
+    ).reset_index()
+    grupos_filial['ID_FILIAL'] = grupos_filial['ID_FILIAL'].astype(int)
+
     tot_fat_real  = fat_comp['VLR_REALIZADO'].sum()
     tot_fat_prev  = fat_comp['VLR_PREVISAO'].sum()
     tot_desp_real = desp_comp['VLR_REALIZADO'].sum()
@@ -168,6 +174,7 @@ def main():
     payload = {
         'meta': {
             'periodo':          periodo_str,
+            'ano':              int(ano_alvo),
             'filiais_count':    int(len(filiais)),
             'tot_fat_real':     round(tot_fat_real,  2),
             'tot_fat_prev':     round(tot_fat_prev,  2),
@@ -186,7 +193,8 @@ def main():
         'filiais_mes': filiais_mes.to_dict('records'),
         'regionais':   regionais_out.to_dict('records'),
         'auditores':   auditores.to_dict('records'),
-        'grupos':      grupos.to_dict('records'),
+        'grupos':        grupos.to_dict('records'),
+        'grupos_filial': grupos_filial.to_dict('records'),
     }
 
     with open(OUT, 'w', encoding='utf-8') as f:
