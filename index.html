@@ -1747,8 +1747,9 @@ function addLog(msg,cls){
 // DOWNLOAD SCRIPT PYTHON
 // =========================================================
 function downloadGenScript(){
-  const script=`# gerar_json.py — Agroquima Painel Orçamentário
-# Execute: python gerar_json.py  (ou dê 2 cliques neste arquivo)
+  const script=`# -*- coding: utf-8 -*-
+# gerar_json.py -- Agroquima Painel Orcamentario
+# Execute: python gerar_json.py  (ou de 2 cliques neste arquivo)
 import pandas as pd, json, os, glob
 
 DESPESA_FILE = 'Mapa_Despesa.xlsx'
