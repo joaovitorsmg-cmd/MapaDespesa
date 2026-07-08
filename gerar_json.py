@@ -1,5 +1,6 @@
-# gerar_json.py — Agroquima Painel Orçamentário
-# Execute: python gerar_json.py  (ou dê 2 cliques neste arquivo no Windows)
+# -*- coding: utf-8 -*-
+# gerar_json.py — Agroquima Painel Orcamentario
+# Execute: python gerar_json.py  (ou de 2 cliques neste arquivo no Windows)
 #
 # Coloque na mesma pasta:
 #   - Mapa_Despesa.xlsx   (exportado do sistema)
