@@ -253,6 +253,20 @@ tbody tr:hover{background:var(--row-hover)}
 
   .upload-zone{padding:24px 14px}
 }
+/* ===== MULTI-YEAR PILLS ===== */
+.year-pill{padding:2px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:11px;font-weight:600;cursor:pointer;transition:.2s}
+.year-pill.active{background:#fff;color:var(--azul-escuro)}
+.year-pill:hover:not(.active){background:rgba(255,255,255,.15)}
+
+/* ===== ANÁLISE DETALHADA ===== */
+.filtros-bar{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;background:var(--branco);border-radius:8px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:14px}
+.filtro-group{display:flex;flex-direction:column;gap:3px}
+.filtro-group label{font-size:10px;font-weight:700;color:var(--azul-escuro);letter-spacing:.5px}
+.filtro-group select{padding:5px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;background:var(--branco);color:var(--texto);min-width:150px}
+.btn-limpar{padding:5px 14px;border:1px solid var(--border);border-radius:5px;background:transparent;color:var(--cinza);font-size:12px;cursor:pointer;white-space:nowrap;margin-bottom:0;align-self:flex-end}
+.btn-limpar:hover{background:var(--cinza-claro)}
+.analise-layout{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.analise-layout>.chart-box,.analise-layout>.tbl-box{min-width:280px}
 </style>
 </head>
 <body>
@@ -275,6 +289,7 @@ tbody tr:hover{background:var(--row-hover)}
       <button class="ico-btn" onclick="printPainel()" title="Imprimir painel"><span class="tooltip">Imprimir painel</span>🖨️</button>
     </div>
     <div class="header-meta">
+      <div id="year-selector" style="display:none;gap:4px"></div>
       <span id="hd-periodo">Carregando...</span>
       <span id="hd-filiais" style="font-size:10px">— filiais</span>
     </div>
@@ -288,6 +303,7 @@ tbody tr:hover{background:var(--row-hover)}
   <div class="tab" onclick="switchTab('tab-regional')" id="tab-regional">🗺️ Regional / Auditor</div>
   <div class="tab" onclick="switchTab('tab-grupos')" id="tab-grupos">📂 Grupos de Conta</div>
   <div class="tab" onclick="switchTab('tab-comparativo')" id="tab-comparativo">⚖️ Comparativo Filiais</div>
+  <div class="tab" onclick="switchTab('tab-analise')" id="tab-analise">🔍 Análise Detalhada</div>
   <div class="tab" onclick="switchTab('tab-upload')" id="tab-upload">🔄 Atualizar Base</div>
 </div>
 
@@ -619,6 +635,80 @@ tbody tr:hover{background:var(--row-hover)}
   </div>
 </div>
 
+<!-- ======================== TAB: ANÁLISE DETALHADA ======================== -->
+<div class="content" id="content-tab-analise">
+  <div class="filtros-bar" id="analise-filtros">
+    <div class="filtro-group">
+      <label>REGIONAL</label>
+      <select id="sel-an-regional" onchange="renderAnalise()">
+        <option value="">Todas</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>AUDITOR</label>
+      <select id="sel-an-auditor" onchange="renderAnalise()">
+        <option value="">Todos</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>FILIAL</label>
+      <select id="sel-an-filial" onchange="renderAnalise()">
+        <option value="">Todas</option>
+      </select>
+    </div>
+    <button class="btn-limpar" onclick="limparFiltrosAnalise()">× Limpar</button>
+  </div>
+
+  <div id="analise-cards" class="kpi-grid" style="margin:12px 0"></div>
+
+  <div class="analise-layout">
+    <div class="chart-box" style="flex:1.2">
+      <div class="chart-box-head">
+        <h3 id="analise-chart-title">📊 Despesa por Grupo de Conta</h3>
+        <button class="ico-mini" onclick="exportBox(this)" title="Exportar">📥</button>
+      </div>
+      <div style="position:relative;height:380px"><canvas id="ch-analise"></canvas></div>
+    </div>
+    <div class="tbl-box" style="flex:1">
+      <div class="tbl-box-head">
+        <h3 id="analise-tbl-title">📋 Grupos de Conta — Detalhado</h3>
+        <button class="ico-mini" onclick="exportTableCSV('tbl-analise-grupos','grupos_detalhado.csv')" title="Exportar CSV">📄</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table id="tbl-analise-grupos">
+          <thead><tr>
+            <th>GRUPO DE CONTA</th>
+            <th class="num">REALIZADO</th>
+            <th class="num">PLANEJADO</th>
+            <th class="num">DESVIO R$</th>
+            <th class="num">DESVIO %</th>
+            <th class="num">% DO TOTAL</th>
+          </tr></thead>
+          <tbody id="body-analise-grupos"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tbl-box" style="margin-top:16px" id="analise-filiais-box">
+    <div class="tbl-box-head">
+      <h3 id="analise-filiais-title">🏢 Filiais no Filtro</h3>
+      <button class="ico-mini" onclick="exportTableCSV('tbl-analise-filiais','filiais_detalhado.csv')" title="Exportar CSV">📄</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table id="tbl-analise-filiais">
+        <thead><tr>
+          <th>FILIAL</th><th>LOJA</th><th>REGIONAL</th><th>AUDITOR</th>
+          <th class="num">FAT REALIZADO</th><th class="num">FAT PLANEJADO</th><th class="num">DESVIO FAT%</th>
+          <th class="num">DESP REALIZADA</th><th class="num">DESP PLANEJADA</th><th class="num">DESVIO DESP%</th>
+          <th class="num">% DESP/FAT</th>
+        </tr></thead>
+        <tbody id="body-analise-filiais"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- ======================== TAB: UPLOAD ======================== -->
 <div class="content" id="content-tab-upload">
   <div class="section-title">🔄 Atualizar Base de Dados</div>
@@ -674,6 +764,8 @@ let charts_reg = {};
 let HIDE_AUDITOR = false;
 let _regionaisMap = null; // Map<Number, {LOJA,REGIONAL,AUDITOR,SIGLA,GERENTE,SUPERVISOR,ESTADO}>
 let _lastDespRows = null; // rows brutas do último xlsx de despesa (para rebuild ao carregar regionais)
+let _dataByYear = {};   // {2026: {meta,filiais,...}, 2025: {...}}
+let _activeYear = null;
 
 // Filiais com estrutura especial: compartilham CNPJ com polo industrial/fábrica.
 // As despesas dessas filiais incluem custos industriais que não são comparáveis
@@ -787,6 +879,7 @@ function switchTab(id){
   document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.getElementById('content-'+id).classList.add('active');
+  if(id==='tab-analise'&&DATA) renderAnalise();
 }
 
 // =========================================================
@@ -832,6 +925,7 @@ function initAll(){
   renderCharts();
   renderTabFiliais(DATA.filiais);
   renderTabRegional();
+  renderAnalise();
   renderTabGrupos();
   renderComparativo();
   updateCardGeral(m);
@@ -1589,7 +1683,12 @@ async function _processJSONFile(file){
       try{
         const nd=JSON.parse(ev.target.result);
         if(!nd.meta||!nd.filiais){addLog('❌ Formato inválido. Verifique o arquivo JSON.','log-err');resolve();return;}
-        DATA=nd; initAll();
+        const year=_extractYear(nd.meta);
+        _dataByYear[year]=nd;
+        _activeYear=year;
+        DATA=nd;
+        _updateYearSelector();
+        initAll();
         addLog('✅ JSON carregado com sucesso!','log-ok');
         addLog(`📊 ${nd.meta.filiais_count} filiais | ${nd.meta.periodo}`,'log-ok');
         addLog(`💰 Fat. Real: ${fmtM(nd.meta.tot_fat_real)}`,'log-ok');
@@ -1622,7 +1721,7 @@ async function _processXLSXFile(file){
         _regionaisMap.set(id,{LOJA:r.LOJA||'N/D',REGIONAL:r.REGIONAL||'N/D',AUDITOR:r.AUDITOR||'N/D',SIGLA:r.SIGLA||`F${id}`,GERENTE:r.GERENTE||'N/D',SUPERVISOR:r.SUPERVISOR||'N/D',ESTADO:r.ESTADO||'N/D'});
       });
       addLog(`✅ Base regionais: ${_regionaisMap.size} filiais mapeadas`,'log-ok');
-      if(_lastDespRows){addLog('🔄 Reconstruindo painel com nomes regionais...','');DATA=_buildDataFromRows(_lastDespRows);initAll();_logXLSXSummary();}
+      if(_lastDespRows){addLog('🔄 Reconstruindo painel com nomes regionais...','');DATA=_buildDataFromRows(_lastDespRows);const _yr=DATA.meta.ano||_extractYear(DATA.meta);_dataByYear[_yr]=DATA;_activeYear=_yr;_updateYearSelector();initAll();_logXLSXSummary();}
       else addLog('ℹ️ Agora arraste o Mapa_Despesa.xlsx para carregar os dados financeiros.','');
       return;
     }
@@ -1630,6 +1729,10 @@ async function _processXLSXFile(file){
     addLog(`📋 ${rows.length.toLocaleString('pt-BR')} linhas — processando...`,'');
     _lastDespRows=rows;
     DATA=_buildDataFromRows(rows);
+    const year=DATA.meta.ano||_extractYear(DATA.meta);
+    _dataByYear[year]=DATA;
+    _activeYear=year;
+    _updateYearSelector();
     initAll();
     _logXLSXSummary();
   }catch(err){
@@ -1715,6 +1818,17 @@ function _buildDataFromRows(rows){
   const bgDr=gs(despC,gck,'VLR_REALIZADO');const bgDp=gs(despC,gck,'VLR_PREVISAO');
   const grupos=[...bgDr.keys()].map(gc=>{const dr=bgDr.get(gc)||0,dp=bgDp.get(gc)||0;return{GRUPO_CONTA:gc,DESP_REAL:dr,DESP_PREV:dp,DESVIO:dp>0?(dr-dp)/dp*100:0};}).sort((a,b)=>b.DESP_REAL-a.DESP_REAL);
 
+  // --- grupos_filial: despesa por filial × grupo_conta ---
+  const gfMap = new Map();
+  despC.forEach(r=>{
+    const key=`${+r.ID_FILIAL}|||${(r.GRUPO_CONTA||'').toString().trim()}`;
+    const v=gfMap.get(key)||{ID_FILIAL:+r.ID_FILIAL,GRUPO_CONTA:(r.GRUPO_CONTA||'').toString().trim(),DESP_REAL:0,DESP_PREV:0};
+    v.DESP_REAL+=(+r.VLR_REALIZADO||0);
+    v.DESP_PREV+=(+r.VLR_PREVISAO||0);
+    gfMap.set(key,v);
+  });
+  const grupos_filial=[...gfMap.values()];
+
   // --- Meta ---
   const tFr=fatC.reduce((s,r)=>s+(+r.VLR_REALIZADO||0),0);
   const tFp=fatC.reduce((s,r)=>s+(+r.VLR_PREVISAO||0),0);
@@ -1722,8 +1836,8 @@ function _buildDataFromRows(rows){
   const tDp=despC.reduce((s,r)=>s+(+r.VLR_PREVISAO||0),0);
   const tFpA=fat.reduce((s,r)=>s+(+r.VLR_PREVISAO||0),0);
   const tDpA=desp.reduce((s,r)=>s+(+r.VLR_PREVISAO||0),0);
-  const meta={periodo:periodoStr,filiais_count:filiais.length,tot_fat_real:tFr,tot_fat_prev:tFp,tot_desp_real:tDr,tot_desp_prev:tDp,tot_fat_prev_ano:tFpA,tot_desp_prev_ano:tDpA,perc_desp_real:tFr>0?tDr/tFr*100:0,perc_desp_plan:tFp>0?tDp/tFp*100:0,resultado:tFr-tDr,dev_fat:tFp>0?(tFr-tFp)/tFp*100:0,dev_desp:tDp>0?(tDr-tDp)/tDp*100:0};
-  return{meta,filiais,meses,filiais_mes,regionais,auditores,grupos};
+  const meta={periodo:periodoStr,ano:maxYear,filiais_count:filiais.length,tot_fat_real:tFr,tot_fat_prev:tFp,tot_desp_real:tDr,tot_desp_prev:tDp,tot_fat_prev_ano:tFpA,tot_desp_prev_ano:tDpA,perc_desp_real:tFr>0?tDr/tFr*100:0,perc_desp_plan:tFp>0?tDp/tFp*100:0,resultado:tFr-tDr,dev_fat:tFp>0?(tFr-tFp)/tFp*100:0,dev_desp:tDp>0?(tDr-tDp)/tDp*100:0};
+  return{meta,filiais,meses,filiais_mes,regionais,auditores,grupos,grupos_filial};
 }
 
 function _logXLSXSummary(){
@@ -1741,6 +1855,390 @@ function addLog(msg,cls){
   d.className='log-line '+(cls||'');
   d.textContent=msg;
   document.getElementById('upload-log').appendChild(d);
+}
+
+// =========================================================
+// MULTI-YEAR HELPERS
+// =========================================================
+function _extractYear(meta){
+  if(meta.ano) return +meta.ano;
+  const m=(meta.periodo||'').match(/(\d{4})/);
+  return m ? +m[1] : new Date().getFullYear();
+}
+
+function _setActiveYear(year){
+  if(!_dataByYear[year]) return;
+  _activeYear=year;
+  DATA=_dataByYear[year];
+  document.querySelectorAll('.year-pill').forEach(p=>p.classList.toggle('active',+p.dataset.year===year));
+  initAll();
+}
+
+function _updateYearSelector(){
+  const years=Object.keys(_dataByYear).map(Number).sort((a,b)=>b-a);
+  const sel=document.getElementById('year-selector');
+  if(!sel) return;
+  sel.style.display=years.length>1?'flex':'none';
+  sel.innerHTML=years.map(y=>`<button class="year-pill${y===_activeYear?' active':''}" data-year="${y}" onclick="_setActiveYear(${y})">${y}</button>`).join('');
+}
+
+// =========================================================
+// EXPORT TABLE CSV
+// =========================================================
+function exportTableCSV(tableId, filename){
+  const t=document.getElementById(tableId);
+  if(!t) return;
+  const rows=[...t.querySelectorAll('tr')];
+  const csv=rows.map(r=>[...r.querySelectorAll('th,td')].map(c=>'"'+c.innerText.trim().replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename||tableId+'.csv';
+  a.click();
+}
+
+// =========================================================
+// ANÁLISE DETALHADA
+// =========================================================
+function _populateAnaliseSelects(){
+  const fil=DATA.filiais;
+  const regs=[...new Set(fil.map(f=>f.REGIONAL))].filter(Boolean).sort();
+  const auds=[...new Set(fil.map(f=>f.AUDITOR))].filter(Boolean).sort();
+  const fSel=document.getElementById('sel-an-filial');
+  const rSel=document.getElementById('sel-an-regional');
+  const aSel=document.getElementById('sel-an-auditor');
+  if(!rSel) return;
+  const cur={r:rSel.value,a:aSel.value,f:fSel.value};
+  rSel.innerHTML='<option value="">Todas</option>'+regs.map(r=>`<option${r===cur.r?' selected':''}>${r}</option>`).join('');
+  aSel.innerHTML='<option value="">Todos</option>'+auds.map(a=>`<option${a===cur.a?' selected':''}>${a}</option>`).join('');
+  fSel.innerHTML='<option value="">Todas</option>'+fil.slice().sort((a,b)=>a.LOJA.localeCompare(b.LOJA)).map(f=>`<option value="${f.ID_FILIAL}"${String(f.ID_FILIAL)===cur.f?' selected':''}>${f.SIGLA} — ${f.LOJA}</option>`).join('');
+}
+
+function limparFiltrosAnalise(){
+  ['sel-an-regional','sel-an-auditor','sel-an-filial'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  renderAnalise();
+}
+
+function renderAnalise(){
+  if(!DATA) return;
+  _populateAnaliseSelects();
+  const regional=document.getElementById('sel-an-regional').value;
+  const auditor=document.getElementById('sel-an-auditor').value;
+  const filialId=+(document.getElementById('sel-an-filial').value)||0;
+
+  let filFiltradas=DATA.filiais;
+  if(filialId) filFiltradas=filFiltradas.filter(f=>+f.ID_FILIAL===filialId);
+  else{
+    if(regional) filFiltradas=filFiltradas.filter(f=>f.REGIONAL===regional);
+    if(auditor)  filFiltradas=filFiltradas.filter(f=>f.AUDITOR===auditor);
+  }
+
+  const ids=new Set(filFiltradas.map(f=>+f.ID_FILIAL));
+  const totFatReal=filFiltradas.reduce((s,f)=>s+f.FAT_REAL,0);
+  const totFatPrev=filFiltradas.reduce((s,f)=>s+f.FAT_PREV,0);
+  const totDespReal=filFiltradas.reduce((s,f)=>s+f.DESP_REAL,0);
+  const totDespPrev=filFiltradas.reduce((s,f)=>s+f.DESP_PREV,0);
+
+  // Compute grupos from grupos_filial filtered by selected filiais
+  const gfRows=(DATA.grupos_filial||[]).filter(r=>ids.has(+r.ID_FILIAL));
+  const gMap={};
+  gfRows.forEach(r=>{
+    const gc=r.GRUPO_CONTA;
+    if(!gMap[gc]) gMap[gc]={GRUPO_CONTA:gc,DESP_REAL:0,DESP_PREV:0};
+    gMap[gc].DESP_REAL+=r.DESP_REAL;
+    gMap[gc].DESP_PREV+=r.DESP_PREV;
+  });
+  // Fallback: if no grupos_filial, use DATA.grupos
+  const grupos=Object.keys(gMap).length>0
+    ? Object.values(gMap).map(g=>({...g,DESVIO:g.DESP_PREV>0?(g.DESP_REAL-g.DESP_PREV)/g.DESP_PREV*100:0})).sort((a,b)=>b.DESP_REAL-a.DESP_REAL)
+    : (DATA.grupos||[]);
+
+  // Title
+  let label='Consolidado';
+  if(filialId){const f=DATA.filiais.find(x=>+x.ID_FILIAL===filialId);label=f?`${f.SIGLA} — ${f.LOJA}`:String(filialId);}
+  else if(regional) label=`Regional: ${regional}`;
+  else if(auditor)  label=`Auditor: ${auditor}`;
+  document.getElementById('analise-chart-title').textContent=`📊 Despesa por Grupo — ${label}`;
+  document.getElementById('analise-tbl-title').textContent=`📋 Grupos de Conta — ${label}`;
+  document.getElementById('analise-filiais-title').textContent=`🏢 Filiais — ${label} (${filFiltradas.length})`;
+
+  _renderAnaliseCards(totFatReal,totFatPrev,totDespReal,totDespPrev,filFiltradas.length);
+  _renderAnaliseGruposTable(grupos,totDespReal);
+  _renderAnaliseChart(grupos);
+  _renderAnaliseFiliais(filFiltradas);
+}
+
+function _renderAnaliseCards(fatR,fatP,despR,despP,count){
+  const devFat=fatP>0?(fatR-fatP)/fatP*100:0;
+  const devDesp=despP>0?(despR-despP)/despP*100:0;
+  const perc=fatR>0?despR/fatR*100:0;
+  document.getElementById('analise-cards').innerHTML=`
+    <div class="kpi"><div class="kpi-label">💰 Fat. Realizado</div><div class="kpi-val">${fmtM(fatR)}</div><div class="kpi-sub">Planejado: ${fmtM(fatP)}</div></div>
+    <div class="kpi ${devFat>=0?'verde':'vermelho'}"><div class="kpi-label">📈 Desvio Faturamento</div><div class="kpi-val">${devFat>=0?'+':''}${fmtP(devFat)}</div><div class="kpi-sub">${devFat>=0?'Acima':'Abaixo'} do plano</div></div>
+    <div class="kpi vermelho"><div class="kpi-label">📤 Desp. Realizada</div><div class="kpi-val">${fmtM(despR)}</div><div class="kpi-sub">Planejado: ${fmtM(despP)}</div></div>
+    <div class="kpi ${devDesp<=0?'verde':'vermelho'}"><div class="kpi-label">📉 Desvio Despesa</div><div class="kpi-val">${devDesp>=0?'+':''}${fmtP(devDesp)}</div><div class="kpi-sub">${devDesp>0?'Acima':'Dentro'} do plano</div></div>
+    <div class="kpi amarelo"><div class="kpi-label">📊 % Desp/Fat</div><div class="kpi-val">${fmtP(perc)}</div><div class="kpi-sub">${count} filiai${count!==1?'s':''} no filtro</div></div>
+  `;
+}
+
+function _renderAnaliseGruposTable(grupos,totalDesp){
+  const b=document.getElementById('body-analise-grupos');
+  if(!grupos.length){b.innerHTML='<tr><td colspan="6" class="empty">Sem dados</td></tr>';return;}
+  b.innerHTML=grupos.map(g=>{
+    const desvR=g.DESP_REAL-g.DESP_PREV;
+    const pct=totalDesp>0?g.DESP_REAL/totalDesp*100:0;
+    return `<tr>
+      <td>${g.GRUPO_CONTA}</td>
+      <td class="num">${fmtM(g.DESP_REAL)}</td>
+      <td class="num">${fmtM(g.DESP_PREV)}</td>
+      <td class="num ${desvR>0?'tx-neg':'tx-pos'}">${fmtM(desvR)}</td>
+      <td class="num ${g.DESVIO>10?'tx-neg':g.DESVIO>0?'tx-warn':'tx-pos'}">${g.DESVIO>=0?'+':''}${fmtP(g.DESVIO)}</td>
+      <td class="num">${pct.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+}
+
+function _renderAnaliseChart(grupos){
+  destroyChart('ch-analise');
+  if(!grupos.length) return;
+  const top=grupos.slice(0,12);
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark'||(!document.documentElement.getAttribute('data-theme')&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+  const textColor=isDark?'#ccc':'#333';
+  const ctx=document.getElementById('ch-analise').getContext('2d');
+  charts_reg['ch-analise']=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:top.map(g=>g.GRUPO_CONTA.replace(/^\d+\-/,'')),
+      datasets:[
+        {label:'Realizado',data:top.map(g=>g.DESP_REAL),backgroundColor:'#C62828',borderRadius:3},
+        {label:'Planejado',data:top.map(g=>g.DESP_PREV),backgroundColor:'rgba(198,40,40,.25)',borderRadius:3,borderColor:'#C62828',borderWidth:1}
+      ]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:textColor,font:{size:11}}},tooltip:{callbacks:{label:c=>' '+fmtM(c.raw)}}},
+      scales:{
+        x:{ticks:{color:textColor,callback:v=>fmtM(v)},grid:{color:isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)'}},
+        y:{ticks:{color:textColor,font:{size:10}}}
+      }
+    }
+  });
+}
+
+function _renderAnaliseFiliais(filiais){
+  const b=document.getElementById('body-analise-filiais');
+  b.innerHTML=filiais.map(f=>{
+    const df=f.DESVIO_FAT||0;const dd=f.DESVIO_DESP||0;
+    return `<tr>
+      <td><span class="sigla">${f.SIGLA||f.ID_FILIAL}</span></td>
+      <td>${f.LOJA||'—'}</td>
+      <td>${f.REGIONAL||'—'}</td>
+      <td>${f.AUDITOR||'—'}</td>
+      <td class="num">${fmtM(f.FAT_REAL)}</td>
+      <td class="num">${fmtM(f.FAT_PREV)}</td>
+      <td class="num ${clP(df)}">${df>=0?'+':''}${fmtP(df)}</td>
+      <td class="num">${fmtM(f.DESP_REAL)}</td>
+      <td class="num">${fmtM(f.DESP_PREV)}</td>
+      <td class="num ${clP(dd,true)}">${dd>=0?'+':''}${fmtP(dd)}</td>
+      <td class="num ${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// =========================================================
+// MULTI-ANO
+// =========================================================
+function _extractYear(meta){
+  if(meta.ano) return +meta.ano;
+  const m=(meta.periodo||'').match(/(\d{4})/);
+  return m?+m[1]:new Date().getFullYear();
+}
+
+function _setActiveYear(year){
+  if(!_dataByYear[year]) return;
+  _activeYear=year;
+  DATA=_dataByYear[year];
+  document.querySelectorAll('.year-pill').forEach(p=>p.classList.toggle('active',+p.dataset.year===year));
+  initAll();
+}
+
+function _updateYearSelector(){
+  const years=Object.keys(_dataByYear).map(Number).sort((a,b)=>b-a);
+  const sel=document.getElementById('year-selector');
+  if(!sel) return;
+  sel.style.display=years.length>1?'flex':'none';
+  sel.innerHTML=years.map(y=>`<button class="year-pill${y===_activeYear?' active':''}" data-year="${y}" onclick="_setActiveYear(${y})">${y}</button>`).join('');
+}
+
+// =========================================================
+// ANÁLISE DETALHADA
+// =========================================================
+function _populateAnaliseSelects(){
+  if(!DATA) return;
+  const fil=DATA.filiais;
+  const regs=[...new Set(fil.map(f=>f.REGIONAL))].filter(Boolean).sort();
+  const auds=[...new Set(fil.map(f=>f.AUDITOR))].filter(Boolean).sort();
+  const rSel=document.getElementById('sel-an-regional');
+  const aSel=document.getElementById('sel-an-auditor');
+  const fSel=document.getElementById('sel-an-filial');
+  if(!rSel) return;
+  const curR=rSel.value,curA=aSel.value,curF=fSel.value;
+  rSel.innerHTML='<option value="">Todas</option>'+regs.map(r=>`<option${r===curR?' selected':''}>${r}</option>`).join('');
+  aSel.innerHTML='<option value="">Todos</option>'+auds.map(a=>`<option${a===curA?' selected':''}>${a}</option>`).join('');
+  fSel.innerHTML='<option value="">Todas</option>'+fil.slice().sort((a,b)=>(a.LOJA||'').localeCompare(b.LOJA||'')).map(f=>`<option value="${f.ID_FILIAL}"${String(f.ID_FILIAL)===curF?' selected':''}>${f.SIGLA} — ${f.LOJA}</option>`).join('');
+}
+
+function limparFiltrosAnalise(){
+  ['sel-an-regional','sel-an-auditor','sel-an-filial'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderAnalise();
+}
+
+function renderAnalise(){
+  if(!DATA) return;
+  _populateAnaliseSelects();
+  const regional=(document.getElementById('sel-an-regional')||{}).value||'';
+  const auditor=(document.getElementById('sel-an-auditor')||{}).value||'';
+  const filialId=+((document.getElementById('sel-an-filial')||{}).value)||0;
+
+  let filFiltradas=DATA.filiais;
+  if(filialId) filFiltradas=filFiltradas.filter(f=>+f.ID_FILIAL===filialId);
+  else{
+    if(regional) filFiltradas=filFiltradas.filter(f=>f.REGIONAL===regional);
+    if(auditor)  filFiltradas=filFiltradas.filter(f=>f.AUDITOR===auditor);
+  }
+
+  const ids=new Set(filFiltradas.map(f=>+f.ID_FILIAL));
+  const totFatReal=filFiltradas.reduce((s,f)=>s+f.FAT_REAL,0);
+  const totFatPrev=filFiltradas.reduce((s,f)=>s+f.FAT_PREV,0);
+  const totDespReal=filFiltradas.reduce((s,f)=>s+f.DESP_REAL,0);
+  const totDespPrev=filFiltradas.reduce((s,f)=>s+f.DESP_PREV,0);
+
+  const gfRows=(DATA.grupos_filial||[]).filter(r=>ids.has(+r.ID_FILIAL));
+  const gMap={};
+  gfRows.forEach(r=>{
+    const gc=r.GRUPO_CONTA;
+    if(!gMap[gc]) gMap[gc]={GRUPO_CONTA:gc,DESP_REAL:0,DESP_PREV:0};
+    gMap[gc].DESP_REAL+=r.DESP_REAL;
+    gMap[gc].DESP_PREV+=r.DESP_PREV;
+  });
+  const grupos=Object.keys(gMap).length>0
+    ?Object.values(gMap).map(g=>({...g,DESVIO:g.DESP_PREV>0?(g.DESP_REAL-g.DESP_PREV)/g.DESP_PREV*100:0})).sort((a,b)=>b.DESP_REAL-a.DESP_REAL)
+    :(DATA.grupos||[]);
+
+  let label='Consolidado — Todas as Filiais';
+  if(filialId){const f=DATA.filiais.find(x=>+x.ID_FILIAL===filialId);label=f?`${f.SIGLA} — ${f.LOJA}`:String(filialId);}
+  else if(regional) label=`Regional: ${regional}`;
+  else if(auditor)  label=`Auditor: ${auditor}`;
+
+  const per=DATA.meta.periodo||'';
+  const tChart=document.getElementById('analise-chart-title');
+  const tTbl=document.getElementById('analise-tbl-title');
+  const tFil=document.getElementById('analise-filiais-title');
+  if(tChart) tChart.textContent=`📊 Despesa por Grupo — ${label} · ${per}`;
+  if(tTbl)   tTbl.textContent=`📋 Grupos de Conta — ${label}`;
+  if(tFil)   tFil.textContent=`🏢 Filiais — ${label} (${filFiltradas.length})`;
+
+  _renderAnaliseCards(totFatReal,totFatPrev,totDespReal,totDespPrev,filFiltradas.length);
+  _renderAnaliseGruposTable(grupos,totDespReal);
+  _renderAnaliseChart(grupos);
+  _renderAnaliseFiliais(filFiltradas);
+}
+
+function _renderAnaliseCards(fatR,fatP,despR,despP,count){
+  const devFat=fatP>0?(fatR-fatP)/fatP*100:0;
+  const devDesp=despP>0?(despR-despP)/despP*100:0;
+  const perc=fatR>0?despR/fatR*100:0;
+  const c=document.getElementById('analise-cards');
+  if(!c) return;
+  c.innerHTML=`
+    <div class="kpi"><div class="kpi-label">💰 Fat. Realizado</div><div class="kpi-val">${fmtM(fatR)}</div><div class="kpi-sub">Planejado: ${fmtM(fatP)}</div></div>
+    <div class="kpi ${devFat>=0?'verde':'vermelho'}"><div class="kpi-label">📈 Desvio Faturamento</div><div class="kpi-val">${devFat>=0?'+':''}${fmtP(devFat)}</div><div class="kpi-sub">${devFat>=0?'Acima':'Abaixo'} do plano</div></div>
+    <div class="kpi vermelho"><div class="kpi-label">📤 Desp. Realizada</div><div class="kpi-val">${fmtM(despR)}</div><div class="kpi-sub">Planejado: ${fmtM(despP)}</div></div>
+    <div class="kpi ${devDesp<=0?'verde':'vermelho'}"><div class="kpi-label">📉 Desvio Despesa</div><div class="kpi-val">${devDesp>=0?'+':''}${fmtP(devDesp)}</div><div class="kpi-sub">${devDesp>0?'Acima':'Dentro'} do plano</div></div>
+    <div class="kpi amarelo"><div class="kpi-label">📊 % Desp/Fat</div><div class="kpi-val">${fmtP(perc)}</div><div class="kpi-sub">${count} filiai${count!==1?'s':''} no filtro</div></div>
+  `;
+}
+
+function _renderAnaliseGruposTable(grupos,totalDesp){
+  const b=document.getElementById('body-analise-grupos');
+  if(!b) return;
+  if(!grupos.length){b.innerHTML='<tr><td colspan="6" class="empty">Sem dados — carregue um arquivo com grupos_filial</td></tr>';return;}
+  b.innerHTML=grupos.map(g=>{
+    const desvR=g.DESP_REAL-g.DESP_PREV;
+    const pct=totalDesp>0?g.DESP_REAL/totalDesp*100:0;
+    return `<tr>
+      <td>${g.GRUPO_CONTA}</td>
+      <td class="num">${fmtM(g.DESP_REAL)}</td>
+      <td class="num">${fmtM(g.DESP_PREV)}</td>
+      <td class="num ${desvR>0?'tx-neg':'tx-pos'}">${fmtM(desvR)}</td>
+      <td class="num ${g.DESVIO>10?'tx-neg':g.DESVIO>0?'tx-warn':'tx-pos'}">${g.DESVIO>=0?'+':''}${fmtP(g.DESVIO)}</td>
+      <td class="num">${pct.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+}
+
+function _renderAnaliseChart(grupos){
+  destroyChart('ch-analise');
+  const ctx=document.getElementById('ch-analise');
+  if(!ctx||!grupos.length) return;
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark'||(!document.documentElement.getAttribute('data-theme')&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+  const textColor=isDark?'#ccc':'#333';
+  const top=grupos.slice(0,12);
+  charts_reg['ch-analise']=new Chart(ctx.getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:top.map(g=>g.GRUPO_CONTA.replace(/^\d+\-/,'')),
+      datasets:[
+        {label:'Realizado',data:top.map(g=>g.DESP_REAL),backgroundColor:'#C62828',borderRadius:3},
+        {label:'Planejado',data:top.map(g=>g.DESP_PREV),backgroundColor:'rgba(198,40,40,.22)',borderRadius:3,borderColor:'#C62828',borderWidth:1}
+      ]
+    },
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:textColor,font:{size:11}}},tooltip:{callbacks:{label:c=>' '+fmtM(c.raw)}}},
+      scales:{
+        x:{ticks:{color:textColor,callback:v=>fmtM(v)},grid:{color:isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)'}},
+        y:{ticks:{color:textColor,font:{size:10}}}
+      }
+    }
+  });
+}
+
+function _renderAnaliseFiliais(filiais){
+  const b=document.getElementById('body-analise-filiais');
+  if(!b) return;
+  if(!filiais.length){b.innerHTML='<tr><td colspan="11" class="empty">Sem filiais no filtro</td></tr>';return;}
+  b.innerHTML=filiais.map(f=>{
+    const df=f.DESVIO_FAT||0,dd=f.DESVIO_DESP||0;
+    return `<tr>
+      <td><span class="sigla">${f.SIGLA||f.ID_FILIAL}</span></td>
+      <td>${f.LOJA||'—'}</td>
+      <td>${f.REGIONAL||'—'}</td>
+      <td>${f.AUDITOR||'—'}</td>
+      <td class="num">${fmtM(f.FAT_REAL)}</td>
+      <td class="num">${fmtM(f.FAT_PREV)}</td>
+      <td class="num ${clP(df)}">${df>=0?'+':''}${fmtP(df)}</td>
+      <td class="num">${fmtM(f.DESP_REAL)}</td>
+      <td class="num">${fmtM(f.DESP_PREV)}</td>
+      <td class="num ${clP(dd,true)}">${dd>=0?'+':''}${fmtP(dd)}</td>
+      <td class="num ${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportTableCSV(tableId,filename){
+  const t=document.getElementById(tableId);
+  if(!t) return;
+  const rows=[...t.querySelectorAll('tr')];
+  const csv=rows.map(r=>[...r.querySelectorAll('th,td')].map(c=>'"'+c.innerText.trim().replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename||'tabela.csv';
+  a.click();
 }
 
 // =========================================================
@@ -1921,6 +2419,9 @@ def main():
     grupos=desp_comp.groupby('GRUPO_CONTA').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index().sort_values('DESP_REAL',ascending=False)
     grupos['DESVIO']=pct(grupos['DESP_REAL']-grupos['DESP_PREV'], grupos['DESP_PREV'])
 
+    grupos_filial=desp_comp.groupby(['ID_FILIAL','GRUPO_CONTA']).agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+    grupos_filial['ID_FILIAL']=grupos_filial['ID_FILIAL'].astype(int)
+
     tot_fat_real=fat_comp['VLR_REALIZADO'].sum()
     tot_fat_prev=fat_comp['VLR_PREVISAO'].sum()
     tot_desp_real=desp_comp['VLR_REALIZADO'].sum()
@@ -1932,7 +2433,7 @@ def main():
 
     payload={
         'meta':{
-            'periodo':periodo_str,'filiais_count':int(len(filiais)),
+            'periodo':periodo_str,'ano':int(ano_alvo),'filiais_count':int(len(filiais)),
             'tot_fat_real':round(tot_fat_real,2),'tot_fat_prev':round(tot_fat_prev,2),
             'tot_desp_real':round(tot_desp_real,2),'tot_desp_prev':round(tot_desp_prev,2),
             'tot_fat_prev_ano':round(tot_fat_prev_ano,2),'tot_desp_prev_ano':round(tot_desp_prev_ano,2),
@@ -1947,7 +2448,8 @@ def main():
         'filiais_mes':filiais_mes.to_dict('records'),
         'regionais':regionais_out.to_dict('records'),
         'auditores':auditores.to_dict('records'),
-        'grupos':grupos.to_dict('records')
+        'grupos':grupos.to_dict('records'),
+        'grupos_filial':grupos_filial.to_dict('records')
     }
 
     with open(OUT,'w',encoding='utf-8') as f:
