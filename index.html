@@ -637,24 +637,30 @@ tbody tr:hover{background:var(--row-hover)}
   <div style="margin-top:16px;background:var(--branco);border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
     <div class="section-title" style="font-size:13px">📌 Como atualizar</div>
     <div style="font-size:12px;line-height:1.8;color:var(--cinza)">
-      <div style="margin-bottom:12px">
-        <strong style="color:var(--accent-text)">✨ Direto pelo Excel (sem Python):</strong>
+      <div style="margin-bottom:14px">
+        <strong style="color:var(--accent-text)">🐍 Via script Python (recomendado — inclui nomes de filial/regional/auditor):</strong>
+        <div style="margin:6px 0 4px;padding:8px 12px;background:var(--cinza-claro);border-radius:6px;font-size:11px;color:var(--text-muted)">
+          Coloque na mesma pasta os 3 arquivos:<br>
+          &nbsp;&nbsp;📄 <code>Mapa_Despesa.xlsx</code> &nbsp;+&nbsp; 📄 <code>Base_regionais.xlsx</code> &nbsp;+&nbsp; 🐍 <code>gerar_json.py</code>
+        </div>
         <ol style="padding-left:20px;margin:4px 0;color:var(--text-muted)">
-          <li>Arraste o <code>Mapa_Despesa.xlsx</code> atualizado na área acima</li>
-          <li>Opcionalmente também o <code>Base_regionais.xlsx</code> para nomes de filial/regional/auditor</li>
-          <li>O painel atualiza automaticamente</li>
+          <li>Baixe o <strong>gerar_json.py</strong> e o <strong>gerar_json.bat</strong> abaixo</li>
+          <li>Coloque os 3 arquivos na mesma pasta que os Excel</li>
+          <li>No Windows: dê 2 cliques em <code>gerar_json.bat</code> — aguarde o script finalizar</li>
+          <li>Arraste o <code>aqm_data.json</code> gerado na área acima</li>
         </ol>
       </div>
       <div>
-        <strong style="color:var(--text-muted)">🐍 Alternativa — script Python:</strong>
+        <strong style="color:var(--text-muted)">✨ Alternativa — direto pelo Excel (sem Python):</strong>
         <ol style="padding-left:20px;margin:4px 0;color:var(--text-muted)">
-          <li>Execute o <strong>gerar_json.py</strong> na sua planilha</li>
-          <li>Arraste o <code>aqm_data.json</code> gerado aqui</li>
+          <li>Arraste o <code>Mapa_Despesa.xlsx</code> <strong>e</strong> o <code>Base_regionais.xlsx</code> juntos na área acima</li>
+          <li>O painel atualiza automaticamente com os nomes completos</li>
         </ol>
       </div>
     </div>
-    <div style="margin-top:12px">
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="downloadGenScript()">⬇️ Baixar gerar_json.py</button>
+      <button class="btn btn-primary" onclick="downloadBatScript()">⬇️ Baixar gerar_json.bat</button>
     </div>
   </div>
 </div>
@@ -1745,7 +1751,7 @@ function downloadGenScript(){
 # Execute: python gerar_json.py  (ou dê 2 cliques neste arquivo)
 import pandas as pd, json, os, glob
 
-DESPESA_FILE = 'Mapa_Despesa_2026.xlsx'
+DESPESA_FILE = 'Mapa_Despesa.xlsx'
 REGIONAIS_FILE = 'Base_regionais.xlsx'
 OUT = 'aqm_data.json'
 
@@ -1967,6 +1973,15 @@ if __name__ == '__main__':
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download='gerar_json.py';
+  a.click();
+}
+
+function downloadBatScript(){
+  const bat=`@echo off\r\nchcp 65001 > nul\r\necho.\r\necho  =============================================\r\necho   Agroquima -- Gerador de Painel Orcamentario\r\necho  =============================================\r\necho.\r\necho  Arquivos necessarios nesta pasta:\r\necho    - Mapa_Despesa.xlsx\r\necho    - Base_regionais.xlsx\r\necho    - gerar_json.py\r\necho.\r\necho  Gerando aqm_data.json...\r\necho.\r\n\r\npython gerar_json.py\r\n\r\necho.\r\nif %ERRORLEVEL% NEQ 0 (\r\n    echo  ERRO: verifique se o Python esta instalado.\r\n    echo  Baixe em: https://www.python.org/downloads/\r\n    echo  Marque a opcao "Add Python to PATH" durante a instalacao.\r\n    echo.\r\n    echo  Tambem e necessario instalar as dependencias:\r\n    echo    pip install pandas openpyxl\r\n)\r\npause\r\n`;
+  const blob=new Blob([bat],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='gerar_json.bat';
   a.click();
 }
 
