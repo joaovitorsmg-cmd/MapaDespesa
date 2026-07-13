@@ -12,6 +12,11 @@ OUT            = 'aqm_data.json'
 #   2026  -> exporta SOMENTE o ano informado
 ANO_REFERENCIA = None
 
+# Filiais e regionais excluídas de TODOS os cálculos (filiais sem operação,
+# sem mapeamento ou pertencentes a estruturas não comparáveis).
+SIGLAS_EXCLUIR   = {'F2', 'FAP', 'F18', 'F33', 'GRA'}
+REGIONAIS_EXCLUIR = {'ANNAPAULLA GARCIA', 'EVANDRO MACEDO', 'HENISLEY SABINO', 'N/D'}
+
 
 def encontrar_arquivo(nome_esperado, pistas):
     if os.path.exists(nome_esperado):
@@ -47,7 +52,16 @@ def processar_ano(d_ano, r, ano_alvo):
         return str(s).strip().upper()
 
     grupos_receita_norm = {_norm(g) for g in GRUPOS_RECEITA}
+
+    # Exclui filiais sem operação/mapeamento antes de qualquer cálculo
+    sig_excl = {s.upper() for s in SIGLAS_EXCLUIR}
+    reg_excl = {x.upper() for x in REGIONAIS_EXCLUIR}
     d_ano = d_ano.copy()
+    d_ano = d_ano[
+        ~(d_ano['SIGLA'].apply(lambda x: str(x).strip().upper()).isin(sig_excl) |
+          d_ano['REGIONAL'].apply(lambda x: str(x).strip().upper()).isin(reg_excl))
+    ]
+
     d_ano['_GC_NORM'] = d_ano['GRUPO_CONTA'].apply(_norm)
 
     fat  = d_ano[ d_ano['_GC_NORM'].isin(grupos_receita_norm)].copy()

@@ -349,11 +349,29 @@ body.presentation-mode .content{padding-top:16px}
   <div class="filters">
     <div class="f-group">
       <label>Regional</label>
-      <select id="ov-regional" onchange="applyOvFilters()"><option value="">Todas</option></select>
+      <div class="chk-dropdown" id="dd-ov-reg">
+        <button class="chk-dd-trigger" onclick="toggleChkDropdown('dd-ov-reg')" type="button">
+          <span id="dd-ov-reg-label">Todas</span><span class="dd-arrow">▾</span>
+        </button>
+        <div class="chk-dd-panel" id="dd-ov-reg-panel">
+          <label class="chk-dd-item item-all">
+            <input type="checkbox" id="chk-ov-reg-all" checked onchange="onChkOvRegAll(this)"> Todas
+          </label>
+        </div>
+      </div>
     </div>
     <div class="f-group">
       <label>Auditor</label>
-      <select id="ov-auditor" onchange="applyOvFilters()"><option value="">Todos</option></select>
+      <div class="chk-dropdown" id="dd-ov-aud">
+        <button class="chk-dd-trigger" onclick="toggleChkDropdown('dd-ov-aud')" type="button">
+          <span id="dd-ov-aud-label">Todos</span><span class="dd-arrow">▾</span>
+        </button>
+        <div class="chk-dd-panel" id="dd-ov-aud-panel">
+          <label class="chk-dd-item item-all">
+            <input type="checkbox" id="chk-ov-aud-all" checked onchange="onChkOvAudAll(this)"> Todos
+          </label>
+        </div>
+      </div>
     </div>
     <div class="f-group" id="fg-year" style="display:none">
       <label>Ano</label>
@@ -448,12 +466,15 @@ body.presentation-mode .content{padding-top:16px}
       </div>
       <div class="chart-wrap"><canvas id="ch-top-filiais"></canvas></div>
     </div>
-    <div class="chart-box">
+    <div class="chart-box" style="grid-column:1/-1">
       <div class="chart-box-head">
-        <h3>🔍 Discrepância: % Desp/Fat por Filial</h3>
-        <button class="ico-mini" onclick="exportBox(this)" title="Exportar como imagem"><span class="tooltip">Exportar como imagem</span>📥</button>
+        <h3>% Despesa / Faturamento por Filial</h3>
+        <div style="display:flex;gap:6px">
+          <button class="ico-mini" onclick="exportBox(this.closest('.chart-box'))" title="Exportar tela atual"><span class="tooltip">Exportar tela atual</span>📥</button>
+          <button class="ico-mini" onclick="exportDiscrepanciaHD()" title="Exportar HD — nome completo + %"><span class="tooltip">Exportar HD</span>🖨️</button>
+        </div>
       </div>
-      <div class="chart-wrap"><canvas id="ch-disc"></canvas></div>
+      <div class="chart-wrap" style="height:320px"><canvas id="ch-disc"></canvas></div>
     </div>
   </div>
 
@@ -464,11 +485,29 @@ body.presentation-mode .content{padding-top:16px}
   <div class="filters">
     <div class="f-group">
       <label>Regional</label>
-      <select id="fil-regional" onchange="applyFilFilters()"><option value="">Todas</option></select>
+      <div class="chk-dropdown" id="dd-fil-reg">
+        <button class="chk-dd-trigger" onclick="toggleChkDropdown('dd-fil-reg')" type="button">
+          <span id="dd-fil-reg-label">Todas</span><span class="dd-arrow">▾</span>
+        </button>
+        <div class="chk-dd-panel" id="dd-fil-reg-panel">
+          <label class="chk-dd-item item-all">
+            <input type="checkbox" id="chk-fil-reg-all" checked onchange="onChkFilRegAll(this)"> Todas
+          </label>
+        </div>
+      </div>
     </div>
     <div class="f-group">
       <label>Auditor</label>
-      <select id="fil-auditor" onchange="applyFilFilters()"><option value="">Todos</option></select>
+      <div class="chk-dropdown" id="dd-fil-aud">
+        <button class="chk-dd-trigger" onclick="toggleChkDropdown('dd-fil-aud')" type="button">
+          <span id="dd-fil-aud-label">Todos</span><span class="dd-arrow">▾</span>
+        </button>
+        <div class="chk-dd-panel" id="dd-fil-aud-panel">
+          <label class="chk-dd-item item-all">
+            <input type="checkbox" id="chk-fil-aud-all" checked onchange="onChkFilAudAll(this)"> Todos
+          </label>
+        </div>
+      </div>
     </div>
     <div class="f-group">
       <label>Ordenar por</label>
@@ -520,6 +559,35 @@ body.presentation-mode .content{padding-top:16px}
 
 <!-- ======================== TAB: REGIONAL/AUDITOR ======================== -->
 <div class="content" id="content-tab-regional">
+  <div class="filters">
+    <div class="f-group">
+      <label>Regional</label>
+      <div class="chk-dropdown" id="dd-reg-reg">
+        <button class="chk-dd-trigger" onclick="toggleChkDropdown('dd-reg-reg')" type="button">
+          <span id="dd-reg-reg-label">Todas</span><span class="dd-arrow">▾</span>
+        </button>
+        <div class="chk-dd-panel" id="dd-reg-reg-panel">
+          <label class="chk-dd-item item-all">
+            <input type="checkbox" id="chk-reg-reg-all" checked onchange="onChkRegRegAll(this)"> Todas
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="f-group">
+      <label>Auditor</label>
+      <div class="chk-dropdown" id="dd-reg-aud">
+        <button class="chk-dd-trigger" onclick="toggleChkDropdown('dd-reg-aud')" type="button">
+          <span id="dd-reg-aud-label">Todos</span><span class="dd-arrow">▾</span>
+        </button>
+        <div class="chk-dd-panel" id="dd-reg-aud-panel">
+          <label class="chk-dd-item item-all">
+            <input type="checkbox" id="chk-reg-aud-all" checked onchange="onChkRegAudAll(this)"> Todos
+          </label>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-ghost" onclick="clearRegFilters()">✕ Limpar</button>
+  </div>
   <div class="charts-grid" style="margin-bottom:18px">
     <div class="chart-box">
       <div class="chart-box-head">
@@ -589,6 +657,22 @@ body.presentation-mode .content{padding-top:16px}
 
 <!-- ======================== TAB: GRUPOS ======================== -->
 <div class="content" id="content-tab-grupos">
+  <div class="filters">
+    <div class="f-group">
+      <label>Regional</label>
+      <div class="chk-dropdown" id="dd-gru-reg">
+        <button class="chk-dd-trigger" onclick="toggleChkDropdown('dd-gru-reg')" type="button">
+          <span id="dd-gru-reg-label">Todas</span><span class="dd-arrow">▾</span>
+        </button>
+        <div class="chk-dd-panel" id="dd-gru-reg-panel">
+          <label class="chk-dd-item item-all">
+            <input type="checkbox" id="chk-gru-reg-all" checked onchange="onChkGruRegAll(this)"> Todas
+          </label>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-ghost" onclick="clearGruFilters()">✕ Limpar</button>
+  </div>
   <div class="charts-grid">
     <div class="chart-box">
       <div class="chart-box-head">
@@ -731,15 +815,29 @@ body.presentation-mode .content{padding-top:16px}
   <div class="filtros-bar" id="analise-filtros">
     <div class="filtro-group">
       <label>REGIONAL</label>
-      <select id="sel-an-regional" onchange="renderAnalise()">
-        <option value="">Todas</option>
-      </select>
+      <div class="chk-dropdown" id="dd-an-reg">
+        <button class="chk-dd-trigger" onclick="toggleChkDropdown('dd-an-reg')" type="button">
+          <span id="dd-an-reg-label">Todas</span><span class="dd-arrow">▾</span>
+        </button>
+        <div class="chk-dd-panel" id="dd-an-reg-panel">
+          <label class="chk-dd-item item-all">
+            <input type="checkbox" id="chk-an-reg-all" checked onchange="onChkAnRegAll(this)"> Todas
+          </label>
+        </div>
+      </div>
     </div>
     <div class="filtro-group">
       <label>AUDITOR</label>
-      <select id="sel-an-auditor" onchange="renderAnalise()">
-        <option value="">Todos</option>
-      </select>
+      <div class="chk-dropdown" id="dd-an-aud">
+        <button class="chk-dd-trigger" onclick="toggleChkDropdown('dd-an-aud')" type="button">
+          <span id="dd-an-aud-label">Todos</span><span class="dd-arrow">▾</span>
+        </button>
+        <div class="chk-dd-panel" id="dd-an-aud-panel">
+          <label class="chk-dd-item item-all">
+            <input type="checkbox" id="chk-an-aud-all" checked onchange="onChkAnAudAll(this)"> Todos
+          </label>
+        </div>
+      </div>
     </div>
     <div class="filtro-group">
       <label>FILIAL</label>
@@ -870,14 +968,27 @@ let _activeYear = null;
 // gráficos de discrepância e comparativo entre filiais, mas mantidas nos totais
 // consolidados de faturamento e resultado.
 const _FIL_ESPECIAIS = [25]; // FCB Cuiabá (polo industrial + filial no mesmo CNPJ)
+const _SIGLAS_EXCLUIR   = new Set(['F2','FAP','F18','F33','GRA']);
+const _REGIONAIS_EXCLUIR = new Set(['ANNAPAULLA GARCIA','EVANDRO MACEDO','HENISLEY SABINO','N/D']);
 
-function _isFilialEspecial(f){
-  return _FIL_ESPECIAIS.includes(Number(f.ID_FILIAL));
+function _isFilialExcluida(f){
+  if(_FIL_ESPECIAIS.includes(Number(f.ID_FILIAL))) return true;
+  if(_SIGLAS_EXCLUIR.has(String(f.SIGLA||'').trim().toUpperCase())) return true;
+  if(_REGIONAIS_EXCLUIR.has(String(f.REGIONAL||'').trim().toUpperCase())) return true;
+  return false;
 }
 
-// Filiais normais: usadas em comparativos e rankings de despesa/receita
+function _isFilialEspecial(f){ return _isFilialExcluida(f); }
+
 function _filiaisComparaveis(){
-  return (DATA && DATA.filiais) ? DATA.filiais.filter(f=>!_isFilialEspecial(f)) : [];
+  return (DATA && DATA.filiais) ? DATA.filiais.filter(f=>!_isFilialExcluida(f)) : [];
+}
+
+function _applyGlobalExclusions(){
+  if(!DATA) return;
+  DATA.filiais   = (DATA.filiais||[]).filter(f=>!_isFilialExcluida(f));
+  DATA.regionais = (DATA.regionais||[]).filter(r=>!_REGIONAIS_EXCLUIR.has(String(r.REGIONAL||'').trim().toUpperCase()));
+  DATA.auditores = (DATA.auditores||[]).filter(a=>!_REGIONAIS_EXCLUIR.has(String(a.AUDITOR||'').trim().toUpperCase()));
 }
 
 function toggleHideAuditor(checked){
@@ -1019,6 +1130,7 @@ function showNoDataState(){
 }
 
 function initAll(){
+  _applyGlobalExclusions();
   const m = DATA.meta;
   document.getElementById('hd-periodo').textContent = m.periodo || 'Jan-Mai 2026';
   document.getElementById('hd-filiais').textContent = `${m.filiais_count} filiais ativas`;
@@ -1049,16 +1161,33 @@ function populateSelects(){
   const regionais = [...new Set(DATA.filiais.map(f=>f.REGIONAL).filter(Boolean))].sort();
   const auditores = [...new Set(DATA.filiais.map(f=>f.AUDITOR).filter(Boolean))].sort();
 
-  ['ov-regional','fil-regional'].forEach(id=>{
-    const s=document.getElementById(id); if(!s)return;
-    s.innerHTML='<option value="">Todas</option>';
-    regionais.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;s.appendChild(o);});
-  });
-  ['ov-auditor','fil-auditor'].forEach(id=>{
-    const s=document.getElementById(id); if(!s)return;
-    s.innerHTML='<option value="">Todos</option>';
-    auditores.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;s.appendChild(o);});
-  });
+  // Checkbox dropdowns — Visão Geral
+  _fillChkPanel('dd-ov-reg-panel', regionais, 'chk-ov-reg', 'onChkOvReg');
+  _fillChkPanel('dd-ov-aud-panel', auditores, 'chk-ov-aud', 'onChkOvAud');
+  _updateChkLabel('dd-ov-reg-label','chk-ov-reg','Todas');
+  _updateChkLabel('dd-ov-aud-label','chk-ov-aud','Todos');
+
+  // Checkbox dropdowns — Filiais
+  _fillChkPanel('dd-fil-reg-panel', regionais, 'chk-fil-reg', 'onChkFilReg');
+  _fillChkPanel('dd-fil-aud-panel', auditores, 'chk-fil-aud', 'onChkFilAud');
+  _updateChkLabel('dd-fil-reg-label','chk-fil-reg','Todas');
+  _updateChkLabel('dd-fil-aud-label','chk-fil-aud','Todos');
+
+  // Checkbox dropdowns — Regional/Auditor tab
+  _fillChkPanel('dd-reg-reg-panel', regionais, 'chk-reg-reg', 'onChkRegReg');
+  _fillChkPanel('dd-reg-aud-panel', auditores, 'chk-reg-aud', 'onChkRegAud');
+  _updateChkLabel('dd-reg-reg-label','chk-reg-reg','Todas');
+  _updateChkLabel('dd-reg-aud-label','chk-reg-aud','Todos');
+
+  // Checkbox dropdowns — Grupos tab
+  _fillChkPanel('dd-gru-reg-panel', regionais, 'chk-gru-reg', 'onChkGruReg');
+  _updateChkLabel('dd-gru-reg-label','chk-gru-reg','Todas');
+
+  // Checkbox dropdowns — Análise tab
+  _fillChkPanel('dd-an-reg-panel', regionais, 'chk-an-reg', 'onChkAnReg');
+  _fillChkPanel('dd-an-aud-panel', auditores, 'chk-an-aud', 'onChkAnAud');
+  _updateChkLabel('dd-an-reg-label','chk-an-reg','Todas');
+  _updateChkLabel('dd-an-aud-label','chk-an-aud','Todos');
 
   populateCmpFilters();
 
@@ -1224,6 +1353,15 @@ function renderTopFiliais(){
   });
 }
 
+function _discColor(perc, avg){
+  const delta=perc-avg;
+  if(delta<=-6) return '#1B8A3C';
+  if(delta<-2){ const t=(delta+6)/4; return `rgb(${Math.round(27+t*(13-27))},${Math.round(138+t*(71-138))},${Math.round(60+t*(161-60))})` }
+  if(delta<=2)  return '#0D47A1';
+  if(delta<6){  const t=(delta-2)/4; return `rgb(${Math.round(13+t*(198-13))},${Math.round(71+t*(40-71))},${Math.round(161+t*(40-161))})` }
+  return '#C62828';
+}
+
 function renderDiscrepancia(){
   destroyChart('ch-disc');
   const sorted=[..._filiaisComparaveis()].sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
@@ -1233,17 +1371,59 @@ function renderDiscrepancia(){
     type:'bar',
     data:{
       labels:sorted.map(f=>f.SIGLA||f.ID_FILIAL),
-      datasets:[
-        {label:'% Desp/Fat',data:sorted.map(f=>f.PERC_DESP),
-          backgroundColor:sorted.map(f=>f.PERC_DESP>avg+3?'#C62828':f.PERC_DESP<avg-3?'#1B8A3C':'#0D47A1'),
-          borderRadius:3}
-      ]
+      datasets:[{label:'% Desp/Fat',data:sorted.map(f=>f.PERC_DESP),
+        backgroundColor:sorted.map(f=>_discColor(f.PERC_DESP,avg)),borderRadius:4}]
     },
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},
-        annotation:{annotations:{avgLine:{type:'line',yMin:avg,yMax:avg,borderColor:'#F2A900',borderWidth:2}}}},
-      scales:{y:{ticks:{callback:v=>v+'%',font:{size:10}}}}}
+        tooltip:{callbacks:{
+          title:cs=>{ const f=sorted[cs[0].dataIndex]; return (f.LOJA?`${f.SIGLA} — ${f.LOJA}`:f.SIGLA)||f.ID_FILIAL; },
+          label:c=>`% Desp/Fat: ${c.raw.toFixed(2)}%`,
+          afterLabel:c=>{ const f=sorted[c.dataIndex]; return `Regional: ${f.REGIONAL||'—'}`; }
+        }},
+        annotation:{annotations:{avgLine:{type:'line',yMin:avg,yMax:avg,borderColor:'#F2A900',borderWidth:2,
+          label:{display:true,content:`Média ${avg.toFixed(1)}%`,position:'end',
+            backgroundColor:'rgba(242,169,0,.15)',color:'#F2A900',font:{size:10,weight:'bold'},padding:4}}}}},
+      scales:{y:{ticks:{callback:v=>v+'%',font:{size:10}},
+                 grid:{color:isDark()?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)'}},
+              x:{ticks:{font:{size:9}}}}}
   });
+}
+
+async function exportDiscrepanciaHD(){
+  const sorted=[..._filiaisComparaveis()].sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
+  const avg=DATA.meta.perc_desp_real;
+  const W=3200,H=1400;
+  const tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H;
+  document.body.appendChild(tmp);
+  const labelPlugin={id:'barLabels',afterDatasetsDraw(chart){
+    const c=chart.ctx,ds=chart.data.datasets[0];
+    c.save(); c.font='bold 24px Arial'; c.textAlign='center'; c.textBaseline='bottom'; c.fillStyle='#111';
+    chart.getDatasetMeta(0).data.forEach((bar,i)=>{ c.fillText(ds.data[i].toFixed(1)+'%',bar.x,bar.y-4); });
+    c.restore();
+  }};
+  const bgPlugin={id:'bgwhite',beforeDraw(chart){
+    const c=chart.ctx; c.save(); c.fillStyle='#ffffff'; c.fillRect(0,0,W,H); c.restore();
+  }};
+  const ch=new Chart(tmp.getContext('2d'),{
+    type:'bar',
+    data:{labels:sorted.map(f=>`${f.SIGLA}${f.LOJA?' – '+f.LOJA:''}`),
+          datasets:[{label:'% Desp/Fat',data:sorted.map(f=>f.PERC_DESP),
+            backgroundColor:sorted.map(f=>_discColor(f.PERC_DESP,avg)),borderRadius:6}]},
+    options:{animation:false,responsive:false,
+      plugins:{legend:{display:false},tooltip:{enabled:false},
+        annotation:{annotations:{avgLine:{type:'line',yMin:avg,yMax:avg,borderColor:'#F2A900',borderWidth:3}}}},
+      scales:{
+        y:{ticks:{callback:v=>v+'%',font:{size:20}},
+           title:{display:true,text:'% Despesa / Faturamento',font:{size:22,weight:'bold'}}},
+        x:{ticks:{font:{size:15,weight:'bold'},maxRotation:40,minRotation:30}}}},
+    plugins:[labelPlugin,bgPlugin]
+  });
+  await new Promise(r=>setTimeout(r,250));
+  const a=document.createElement('a');
+  a.download=`agroquima_despesa_por_filial_${Date.now()}.png`;
+  a.href=tmp.toDataURL('image/png'); a.click();
+  ch.destroy(); document.body.removeChild(tmp);
 }
 
 function renderRegFat(){
@@ -1283,9 +1463,10 @@ function renderAudPerc(){
   });
 }
 
-function renderGruposBar(){
+function renderGruposBar(){ renderGruposBarData(DATA.grupos); }
+function renderGruposBarData(g){
   destroyChart('ch-grupos-bar');
-  const g=DATA.grupos;
+  g=g||DATA.grupos;
   const ctx=document.getElementById('ch-grupos-bar').getContext('2d');
   charts_reg['ch-grupos-bar']=new Chart(ctx,{
     type:'bar',
@@ -1302,9 +1483,10 @@ function renderGruposBar(){
   });
 }
 
-function renderGruposDesv(){
+function renderGruposDesv(){ renderGruposDesvData(DATA.grupos); }
+function renderGruposDesvData(g){
   destroyChart('ch-grupos-desv');
-  const g=[...DATA.grupos].sort((a,b)=>b.DESVIO-a.DESVIO);
+  g=[...(g||DATA.grupos)].sort((a,b)=>b.DESVIO-a.DESVIO);
   const ctx=document.getElementById('ch-grupos-desv').getContext('2d');
   charts_reg['ch-grupos-desv']=new Chart(ctx,{
     type:'bar',
@@ -1346,11 +1528,14 @@ function renderTabFiliais(filiais){
   _drawFilialSparklines();
 }
 
-function renderTabRegional(){
+function renderTabRegional(){ renderTabRegionalFiltered(DATA.regionais, DATA.auditores); }
+
+function renderTabRegionalFiltered(regData, audData){
   const b=document.getElementById('body-regional');
-  b.innerHTML=DATA.regionais.map(r=>{
-    const df=((r.FAT_REAL-r.FAT_PREV)/r.FAT_PREV*100);
-    const dd=((r.DESP_REAL-r.DESP_PREV)/r.DESP_PREV*100);
+  if(!regData||!regData.length){b.innerHTML='<tr><td colspan="9" class="empty">Sem dados</td></tr>';}
+  else b.innerHTML=regData.map(r=>{
+    const df=r.FAT_PREV?((r.FAT_REAL-r.FAT_PREV)/r.FAT_PREV*100):0;
+    const dd=r.DESP_PREV?((r.DESP_REAL-r.DESP_PREV)/r.DESP_PREV*100):0;
     return `<tr>
       <td><strong>${r.REGIONAL}</strong></td>
       <td class="num">${fmtM(r.FAT_REAL)}</td>
@@ -1365,7 +1550,10 @@ function renderTabRegional(){
   }).join('');
 
   const ba=document.getElementById('body-auditor');
-  ba.innerHTML=DATA.auditores.map(a=>{
+  if(!ba) return;
+  const adList=audData||DATA.auditores;
+  if(!adList||!adList.length){ba.innerHTML='<tr><td colspan="6" class="empty">Sem dados</td></tr>';return;}
+  ba.innerHTML=adList.map(a=>{
     return `<tr>
       <td><strong>${a.AUDITOR}</strong></td>
       <td class="num">${fmtM(a.FAT_REAL)}</td>
@@ -1377,10 +1565,13 @@ function renderTabRegional(){
   }).join('');
 }
 
-function renderTabGrupos(){
-  const totalDesp=DATA.grupos.reduce((s,g)=>s+g.DESP_REAL,0);
+function renderTabGrupos(){ renderTabGruposData(DATA.grupos); }
+function renderTabGruposData(grupos){
+  grupos=grupos||DATA.grupos;
+  const totalDesp=grupos.reduce((s,g)=>s+g.DESP_REAL,0);
   const b=document.getElementById('body-grupos');
-  b.innerHTML=DATA.grupos.map(g=>{
+  if(!b) return;
+  b.innerHTML=grupos.map(g=>{
     const desvR=g.DESP_REAL-g.DESP_PREV;
     return `<tr>
       <td>${g.GRUPO_CONTA}</td>
@@ -1388,7 +1579,7 @@ function renderTabGrupos(){
       <td class="num">${fmtM(g.DESP_PREV)}</td>
       <td class="num ${desvR>0?'tx-neg':'tx-pos'}">${fmtM(desvR)}</td>
       <td class="num ${g.DESVIO>20?'tx-neg':g.DESVIO>0?'tx-warn':'tx-pos'}">${fmtP(g.DESVIO)}</td>
-      <td class="num">${((g.DESP_REAL/totalDesp)*100).toFixed(1)}%</td>
+      <td class="num">${totalDesp>0?((g.DESP_REAL/totalDesp)*100).toFixed(1)+'%':'—'}</td>
     </tr>`;
   }).join('');
 }
@@ -1673,10 +1864,12 @@ function renderTabelaComparativo(todosGrupos){
 // FILTROS OVERVIEW
 // =========================================================
 function applyOvFilters(){
-  const reg=document.getElementById('ov-regional').value;
-  const aud=document.getElementById('ov-auditor').value;
+  const _ovRegs=new Set([...document.querySelectorAll('.chk-ov-reg:checked')].map(c=>c.value));
+  const _ovAuds=new Set([...document.querySelectorAll('.chk-ov-aud:checked')].map(c=>c.value));
+  const _allOvR=_ovRegs.size===document.querySelectorAll('.chk-ov-reg').length||!_ovRegs.size;
+  const _allOvA=_ovAuds.size===document.querySelectorAll('.chk-ov-aud').length||!_ovAuds.size;
   const meses=_getCheckedMeses(); // array de números, ou [] = todos
-  const filiais=DATA.filiais.filter(f=>(!reg||f.REGIONAL===reg)&&(!aud||f.AUDITOR===aud));
+  const filiais=DATA.filiais.filter(f=>(_allOvR||_ovRegs.has(f.REGIONAL))&&(_allOvA||_ovAuds.has(f.AUDITOR)));
 
   let linhas, periodo;
   const todosOsMeses=meses.length===0||(DATA.meses||[]).filter(mm=>mm.FAT_REAL>0).length===meses.length;
@@ -1721,8 +1914,10 @@ function applyOvFilters(){
 }
 
 function clearOvFilters(){
-  document.getElementById('ov-regional').value='';
-  document.getElementById('ov-auditor').value='';
+  document.querySelectorAll('.chk-ov-reg,.chk-ov-aud').forEach(c=>c.checked=true);
+  ['chk-ov-reg-all','chk-ov-aud-all'].forEach(id=>{const e=document.getElementById(id);if(e)e.checked=true;});
+  _updateChkLabel('dd-ov-reg-label','chk-ov-reg','Todas');
+  _updateChkLabel('dd-ov-aud-label','chk-ov-aud','Todos');
   // Restaura todos os meses como selecionados
   document.querySelectorAll('.chk-mes').forEach(c=>c.checked=true);
   const allChk=document.getElementById('chk-mes-all');
@@ -1737,17 +1932,21 @@ function clearOvFilters(){
 // FILTROS FILIAIS
 // =========================================================
 function applyFilFilters(){
-  const reg=document.getElementById('fil-regional').value;
-  const aud=document.getElementById('fil-auditor').value;
+  const _fRegs=new Set([...document.querySelectorAll('.chk-fil-reg:checked')].map(c=>c.value));
+  const _fAuds=new Set([...document.querySelectorAll('.chk-fil-aud:checked')].map(c=>c.value));
+  const _allFR=_fRegs.size===document.querySelectorAll('.chk-fil-reg').length||!_fRegs.size;
+  const _allFA=_fAuds.size===document.querySelectorAll('.chk-fil-aud').length||!_fAuds.size;
   const sort=document.getElementById('fil-sort').value;
-  let f=DATA.filiais.filter(x=>(!reg||x.REGIONAL===reg)&&(!aud||x.AUDITOR===aud));
+  let f=DATA.filiais.filter(x=>(_allFR||_fRegs.has(x.REGIONAL))&&(_allFA||_fAuds.has(x.AUDITOR)));
   f=[...f].sort((a,b)=>b[sort]-a[sort]);
   renderTabFiliais(f);
 }
 
 function clearFilFilters(){
-  document.getElementById('fil-regional').value='';
-  document.getElementById('fil-auditor').value='';
+  document.querySelectorAll('.chk-fil-reg,.chk-fil-aud').forEach(c=>c.checked=true);
+  ['chk-fil-reg-all','chk-fil-aud-all'].forEach(id=>{const e=document.getElementById(id);if(e)e.checked=true;});
+  _updateChkLabel('dd-fil-reg-label','chk-fil-reg','Todas');
+  _updateChkLabel('dd-fil-aud-label','chk-fil-aud','Todos');
   document.getElementById('fil-sort').value='FAT_REAL';
   renderTabFiliais(DATA.filiais);
 }
@@ -2275,33 +2474,33 @@ function _updateYearSelector(){
 function _populateAnaliseSelects(){
   if(!DATA) return;
   const fil=DATA.filiais;
-  const regs=[...new Set(fil.map(f=>f.REGIONAL))].filter(Boolean).sort();
-  const auds=[...new Set(fil.map(f=>f.AUDITOR))].filter(Boolean).sort();
-  const rSel=document.getElementById('sel-an-regional');
-  const aSel=document.getElementById('sel-an-auditor');
   const fSel=document.getElementById('sel-an-filial');
-  if(!rSel) return;
-  const curR=rSel.value,curA=aSel.value,curF=fSel.value;
-  rSel.innerHTML='<option value="">Todas</option>'+regs.map(r=>`<option${r===curR?' selected':''}>${r}</option>`).join('');
-  aSel.innerHTML='<option value="">Todos</option>'+auds.map(a=>`<option${a===curA?' selected':''}>${a}</option>`).join('');
-  fSel.innerHTML='<option value="">Todas</option>'+fil.slice().sort((a,b)=>(a.LOJA||'').localeCompare(b.LOJA||'')).map(f=>`<option value="${f.ID_FILIAL}"${String(f.ID_FILIAL)===curF?' selected':''}>${f.SIGLA} — ${f.LOJA}</option>`).join('');
+  const curF=fSel?fSel.value:'';
+  if(fSel) fSel.innerHTML='<option value="">Todas</option>'+fil.slice().sort((a,b)=>(a.LOJA||'').localeCompare(b.LOJA||'')).map(f=>`<option value="${f.ID_FILIAL}"${String(f.ID_FILIAL)===curF?' selected':''}>${f.SIGLA} — ${f.LOJA}</option>`).join('');
+  // Checkbox dropdowns are populated once via populateSelects() and don't need repopulation
 }
 
 function limparFiltrosAnalise(){
-  ['sel-an-regional','sel-an-auditor','sel-an-filial'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.querySelectorAll('.chk-an-reg,.chk-an-aud').forEach(c=>c.checked=true);
+  ['chk-an-reg-all','chk-an-aud-all'].forEach(id=>{const e=document.getElementById(id);if(e)e.checked=true;});
+  _updateChkLabel('dd-an-reg-label','chk-an-reg','Todas');
+  _updateChkLabel('dd-an-aud-label','chk-an-aud','Todos');
+  const fs=document.getElementById('sel-an-filial');if(fs)fs.value='';
   renderAnalise();
 }
 
 function renderAnalise(){
   if(!DATA) return;
   _populateAnaliseSelects();
-  const regional=(document.getElementById('sel-an-regional')||{}).value||'';
-  const auditor=(document.getElementById('sel-an-auditor')||{}).value||'';
+  const _anRegs=new Set([...document.querySelectorAll('.chk-an-reg:checked')].map(c=>c.value));
+  const _anAuds=new Set([...document.querySelectorAll('.chk-an-aud:checked')].map(c=>c.value));
+  const _anAllR=_anRegs.size===document.querySelectorAll('.chk-an-reg').length||!_anRegs.size;
+  const _anAllA=_anAuds.size===document.querySelectorAll('.chk-an-aud').length||!_anAuds.size;
   const filialId=+((document.getElementById('sel-an-filial')||{}).value)||0;
 
   const years=Object.keys(_dataByYear).map(Number).sort();
   if(years.length>=2){
-    _renderAnaliseComparativo(years,regional,auditor,filialId);
+    _renderAnaliseComparativo(years,_anRegs,_anAuds,_anAllR,_anAllA,filialId);
     return;
   }
 
@@ -2314,8 +2513,8 @@ function renderAnalise(){
   let filFiltradas=DATA.filiais;
   if(filialId) filFiltradas=filFiltradas.filter(f=>+f.ID_FILIAL===filialId);
   else{
-    if(regional) filFiltradas=filFiltradas.filter(f=>f.REGIONAL===regional);
-    if(auditor)  filFiltradas=filFiltradas.filter(f=>f.AUDITOR===auditor);
+    if(!_anAllR) filFiltradas=filFiltradas.filter(f=>_anRegs.has(f.REGIONAL));
+    if(!_anAllA) filFiltradas=filFiltradas.filter(f=>_anAuds.has(f.AUDITOR));
   }
 
   const ids=new Set(filFiltradas.map(f=>+f.ID_FILIAL));
@@ -2338,8 +2537,8 @@ function renderAnalise(){
 
   let label='Consolidado — Todas as Filiais';
   if(filialId){const f=DATA.filiais.find(x=>+x.ID_FILIAL===filialId);label=f?`${f.SIGLA} — ${f.LOJA}`:String(filialId);}
-  else if(regional) label=`Regional: ${regional}`;
-  else if(auditor)  label=`Auditor: ${auditor}`;
+  else if(!_anAllR) label=`Regional: ${[..._anRegs].join(', ')}`;
+  else if(!_anAllA) label=`Auditor: ${[..._anAuds].join(', ')}`;
 
   const per=DATA.meta.periodo||'';
   const tChart=document.getElementById('analise-chart-title');
@@ -2358,13 +2557,13 @@ function renderAnalise(){
 // =========================================================
 // COMPARATIVO MULTI-ANO — Análise Detalhada
 // =========================================================
-function _getAnaliseDados(yearData,regional,auditor,filialId){
+function _getAnaliseDados(yearData,anRegs,anAuds,allR,allA,filialId){
   if(!yearData) return null;
   let filFiltradas=yearData.filiais||[];
   if(filialId) filFiltradas=filFiltradas.filter(f=>+f.ID_FILIAL===filialId);
   else{
-    if(regional) filFiltradas=filFiltradas.filter(f=>f.REGIONAL===regional);
-    if(auditor)  filFiltradas=filFiltradas.filter(f=>f.AUDITOR===auditor);
+    if(!allR) filFiltradas=filFiltradas.filter(f=>anRegs.has(f.REGIONAL));
+    if(!allA) filFiltradas=filFiltradas.filter(f=>anAuds.has(f.AUDITOR));
   }
   const ids=new Set(filFiltradas.map(f=>+f.ID_FILIAL));
   const totFatReal=filFiltradas.reduce((s,f)=>s+(f.FAT_REAL||0),0);
@@ -2378,16 +2577,16 @@ function _getAnaliseDados(yearData,regional,auditor,filialId){
   return{filFiltradas,ids,totFatReal,totFatPrev,totDespReal,totDespPrev,grupos};
 }
 
-function _renderAnaliseComparativo(years,regional,auditor,filialId){
+function _renderAnaliseComparativo(years,anRegs,anAuds,allR,allA,filialId){
   const y1=years[0],y2=years[1];
-  const d1=_getAnaliseDados(_dataByYear[y1],regional,auditor,filialId);
-  const d2=_getAnaliseDados(_dataByYear[y2],regional,auditor,filialId);
+  const d1=_getAnaliseDados(_dataByYear[y1],anRegs,anAuds,allR,allA,filialId);
+  const d2=_getAnaliseDados(_dataByYear[y2],anRegs,anAuds,allR,allA,filialId);
   if(!d1||!d2) return;
 
   let label='Consolidado';
   if(filialId){const f=(DATA.filiais||[]).find(x=>+x.ID_FILIAL===filialId);label=f?`${f.SIGLA} — ${f.LOJA}`:String(filialId);}
-  else if(regional) label=`Regional: ${regional}`;
-  else if(auditor)  label=`Auditor: ${auditor}`;
+  else if(!allR) label=`Regional: ${[...anRegs].join(', ')}`;
+  else if(!allA) label=`Auditor: ${[...anAuds].join(', ')}`;
 
   const badge=y=>`<span class="cmp-yr-badge ${y===y1?'badge-y1':'badge-y2'}">${y}</span>`;
   const tChart=document.getElementById('analise-chart-title');
@@ -3017,17 +3216,236 @@ function _updateMesLabel(){
   lbl.textContent=`${checked.length} meses`;
 }
 
+// =========================================================
+// CHECKBOX DROPDOWN — genérico
+// =========================================================
+function _fillChkPanel(panelId, values, cssClass, onChangeFn){
+  const panel=document.getElementById(panelId);
+  if(!panel) return;
+  const allItem=panel.querySelector('.item-all');
+  panel.innerHTML='';
+  if(allItem) panel.appendChild(allItem);
+  values.forEach(v=>{
+    const lbl=document.createElement('label');
+    lbl.className='chk-dd-item';
+    lbl.innerHTML=`<input type="checkbox" class="${cssClass}" value="${v.replace(/"/g,'&quot;')}" checked onchange="${onChangeFn}(this)"> ${v}`;
+    panel.appendChild(lbl);
+  });
+}
+
+function _updateChkLabel(labelId, cssClass, allText){
+  const all=document.querySelectorAll('.'+cssClass);
+  const checked=[...document.querySelectorAll('.'+cssClass+':checked')];
+  const lbl=document.getElementById(labelId);
+  if(!lbl) return;
+  if(!all.length||checked.length===all.length){lbl.textContent=allText;return;}
+  if(checked.length===0){lbl.textContent='Nenhum';return;}
+  if(checked.length===1){lbl.textContent=checked[0].value;return;}
+  lbl.textContent=`${checked.length} selecionadas`;
+}
+
+// Visão Geral — Regional
+function onChkOvRegAll(el){
+  document.querySelectorAll('.chk-ov-reg').forEach(c=>c.checked=el.checked);
+  _updateChkLabel('dd-ov-reg-label','chk-ov-reg','Todas');
+  applyOvFilters();
+}
+function onChkOvReg(el){
+  const all=document.querySelectorAll('.chk-ov-reg');
+  const chk=[...all].filter(c=>c.checked);
+  const allEl=document.getElementById('chk-ov-reg-all');
+  if(allEl) allEl.checked=chk.length===all.length;
+  _updateChkLabel('dd-ov-reg-label','chk-ov-reg','Todas');
+  applyOvFilters();
+}
+// Visão Geral — Auditor
+function onChkOvAudAll(el){
+  document.querySelectorAll('.chk-ov-aud').forEach(c=>c.checked=el.checked);
+  _updateChkLabel('dd-ov-aud-label','chk-ov-aud','Todos');
+  applyOvFilters();
+}
+function onChkOvAud(el){
+  const all=document.querySelectorAll('.chk-ov-aud');
+  const chk=[...all].filter(c=>c.checked);
+  const allEl=document.getElementById('chk-ov-aud-all');
+  if(allEl) allEl.checked=chk.length===all.length;
+  _updateChkLabel('dd-ov-aud-label','chk-ov-aud','Todos');
+  applyOvFilters();
+}
+
+// Filiais — Regional
+function onChkFilRegAll(el){
+  document.querySelectorAll('.chk-fil-reg').forEach(c=>c.checked=el.checked);
+  _updateChkLabel('dd-fil-reg-label','chk-fil-reg','Todas');
+  applyFilFilters();
+}
+function onChkFilReg(el){
+  const all=document.querySelectorAll('.chk-fil-reg');
+  const chk=[...all].filter(c=>c.checked);
+  const allEl=document.getElementById('chk-fil-reg-all');
+  if(allEl) allEl.checked=chk.length===all.length;
+  _updateChkLabel('dd-fil-reg-label','chk-fil-reg','Todas');
+  applyFilFilters();
+}
+// Filiais — Auditor
+function onChkFilAudAll(el){
+  document.querySelectorAll('.chk-fil-aud').forEach(c=>c.checked=el.checked);
+  _updateChkLabel('dd-fil-aud-label','chk-fil-aud','Todos');
+  applyFilFilters();
+}
+function onChkFilAud(el){
+  const all=document.querySelectorAll('.chk-fil-aud');
+  const chk=[...all].filter(c=>c.checked);
+  const allEl=document.getElementById('chk-fil-aud-all');
+  if(allEl) allEl.checked=chk.length===all.length;
+  _updateChkLabel('dd-fil-aud-label','chk-fil-aud','Todos');
+  applyFilFilters();
+}
+
+// Regional — Regional
+function onChkRegRegAll(el){
+  document.querySelectorAll('.chk-reg-reg').forEach(c=>c.checked=el.checked);
+  _updateChkLabel('dd-reg-reg-label','chk-reg-reg','Todas');
+  applyRegFilters();
+}
+function onChkRegReg(el){
+  const all=document.querySelectorAll('.chk-reg-reg');
+  const chk=[...all].filter(c=>c.checked);
+  const allEl=document.getElementById('chk-reg-reg-all');
+  if(allEl) allEl.checked=chk.length===all.length;
+  _updateChkLabel('dd-reg-reg-label','chk-reg-reg','Todas');
+  applyRegFilters();
+}
+// Regional — Auditor
+function onChkRegAudAll(el){
+  document.querySelectorAll('.chk-reg-aud').forEach(c=>c.checked=el.checked);
+  _updateChkLabel('dd-reg-aud-label','chk-reg-aud','Todos');
+  applyRegFilters();
+}
+function onChkRegAud(el){
+  const all=document.querySelectorAll('.chk-reg-aud');
+  const chk=[...all].filter(c=>c.checked);
+  const allEl=document.getElementById('chk-reg-aud-all');
+  if(allEl) allEl.checked=chk.length===all.length;
+  _updateChkLabel('dd-reg-aud-label','chk-reg-aud','Todos');
+  applyRegFilters();
+}
+
+// Grupos — Regional
+function onChkGruRegAll(el){
+  document.querySelectorAll('.chk-gru-reg').forEach(c=>c.checked=el.checked);
+  _updateChkLabel('dd-gru-reg-label','chk-gru-reg','Todas');
+  applyGruFilters();
+}
+function onChkGruReg(el){
+  const all=document.querySelectorAll('.chk-gru-reg');
+  const chk=[...all].filter(c=>c.checked);
+  const allEl=document.getElementById('chk-gru-reg-all');
+  if(allEl) allEl.checked=chk.length===all.length;
+  _updateChkLabel('dd-gru-reg-label','chk-gru-reg','Todas');
+  applyGruFilters();
+}
+
+// Análise — Regional
+function onChkAnRegAll(el){
+  document.querySelectorAll('.chk-an-reg').forEach(c=>c.checked=el.checked);
+  _updateChkLabel('dd-an-reg-label','chk-an-reg','Todas');
+  renderAnalise();
+}
+function onChkAnReg(el){
+  const all=document.querySelectorAll('.chk-an-reg');
+  const chk=[...all].filter(c=>c.checked);
+  const allEl=document.getElementById('chk-an-reg-all');
+  if(allEl) allEl.checked=chk.length===all.length;
+  _updateChkLabel('dd-an-reg-label','chk-an-reg','Todas');
+  renderAnalise();
+}
+// Análise — Auditor
+function onChkAnAudAll(el){
+  document.querySelectorAll('.chk-an-aud').forEach(c=>c.checked=el.checked);
+  _updateChkLabel('dd-an-aud-label','chk-an-aud','Todos');
+  renderAnalise();
+}
+function onChkAnAud(el){
+  const all=document.querySelectorAll('.chk-an-aud');
+  const chk=[...all].filter(c=>c.checked);
+  const allEl=document.getElementById('chk-an-aud-all');
+  if(allEl) allEl.checked=chk.length===all.length;
+  _updateChkLabel('dd-an-aud-label','chk-an-aud','Todos');
+  renderAnalise();
+}
+
+// =========================================================
+// FILTROS REGIONAL/AUDITOR
+// =========================================================
+function applyRegFilters(){
+  if(!DATA) return;
+  const regs=new Set([...document.querySelectorAll('.chk-reg-reg:checked')].map(c=>c.value));
+  const auds=new Set([...document.querySelectorAll('.chk-reg-aud:checked')].map(c=>c.value));
+  const allR=!regs.size;
+  const allA=!auds.size;
+  const regData=allR?DATA.regionais:DATA.regionais.filter(r=>regs.has(r.REGIONAL));
+  const audData=allA?DATA.auditores:DATA.auditores.filter(a=>auds.has(a.AUDITOR));
+  renderTabRegionalFiltered(regData, audData);
+}
+
+function clearRegFilters(){
+  document.querySelectorAll('.chk-reg-reg,.chk-reg-aud').forEach(c=>c.checked=true);
+  ['chk-reg-reg-all','chk-reg-aud-all'].forEach(id=>{const e=document.getElementById(id);if(e)e.checked=true;});
+  _updateChkLabel('dd-reg-reg-label','chk-reg-reg','Todas');
+  _updateChkLabel('dd-reg-aud-label','chk-reg-aud','Todos');
+  renderTabRegional();
+}
+
+// =========================================================
+// FILTROS GRUPOS
+// =========================================================
+function applyGruFilters(){
+  if(!DATA) return;
+  const regs=new Set([...document.querySelectorAll('.chk-gru-reg:checked')].map(c=>c.value));
+  const allR=!regs.size;
+  let grupos;
+  if(allR){
+    grupos=DATA.grupos;
+  } else {
+    const ids=new Set(DATA.filiais.filter(f=>regs.has(f.REGIONAL)).map(f=>+f.ID_FILIAL));
+    const gfRows=(DATA.grupos_filial||[]).filter(r=>ids.has(+r.ID_FILIAL));
+    const gMap={};
+    gfRows.forEach(r=>{
+      const gc=r.GRUPO_CONTA;
+      if(!gMap[gc]) gMap[gc]={GRUPO_CONTA:gc,DESP_REAL:0,DESP_PREV:0};
+      gMap[gc].DESP_REAL+=r.DESP_REAL;
+      gMap[gc].DESP_PREV+=r.DESP_PREV;
+    });
+    grupos=Object.values(gMap).map(g=>({...g,DESVIO:g.DESP_PREV>0?(g.DESP_REAL-g.DESP_PREV)/g.DESP_PREV*100:0})).sort((a,b)=>b.DESP_REAL-a.DESP_REAL);
+  }
+  renderTabGruposData(grupos);
+  renderGruposBarData(grupos);
+  renderGruposDesvData(grupos);
+}
+
+function clearGruFilters(){
+  document.querySelectorAll('.chk-gru-reg').forEach(c=>c.checked=true);
+  const e=document.getElementById('chk-gru-reg-all');if(e)e.checked=true;
+  _updateChkLabel('dd-gru-reg-label','chk-gru-reg','Todas');
+  renderTabGrupos();
+  renderGruposBar();
+  renderGruposDesv();
+}
+
 // URL HASH — persistência de filtros da Visão Geral
 // =========================================================
 let _firstLoad=true;
 
 function _syncUrlHash(){
-  const reg=document.getElementById('ov-regional').value;
-  const aud=document.getElementById('ov-auditor').value;
+  const regs=[...document.querySelectorAll('.chk-ov-reg:checked')].map(c=>c.value);
+  const allRegs=regs.length===document.querySelectorAll('.chk-ov-reg').length;
+  const auds=[...document.querySelectorAll('.chk-ov-aud:checked')].map(c=>c.value);
+  const allAuds=auds.length===document.querySelectorAll('.chk-ov-aud').length;
   const meses=_getCheckedMeses();
   const p=new URLSearchParams();
-  if(reg)p.set('regional',reg);
-  if(aud)p.set('auditor',aud);
+  if(!allRegs&&regs.length) p.set('regional',regs.join(','));
+  if(!allAuds&&auds.length) p.set('auditor',auds.join(','));
   if(meses.length) p.set('mes',meses.join(','));
   const s=p.toString();
   history.replaceState(null,'',location.pathname+location.search+(s?'#'+s:''));
@@ -3037,12 +3455,24 @@ function _applyUrlFilters(){
   const hash=(window.location.hash||'').slice(1);
   if(!hash)return;
   const p=new URLSearchParams(hash);
-  const reg=p.get('regional')||'';
-  const aud=p.get('auditor')||'';
+  const regStr=p.get('regional')||'';
+  const audStr=p.get('auditor')||'';
   const mesStr=p.get('mes')||'';
-  if(!reg&&!aud&&!mesStr)return;
-  const sel=(id,val)=>{const el=document.getElementById(id);if(el)[...el.options].forEach(o=>o.selected=o.value===val);};
-  sel('ov-regional',reg);sel('ov-auditor',aud);
+  if(!regStr&&!audStr&&!mesStr)return;
+  if(regStr){
+    const rSet=new Set(regStr.split(','));
+    document.querySelectorAll('.chk-ov-reg').forEach(c=>c.checked=rSet.has(c.value));
+    const allEl=document.getElementById('chk-ov-reg-all');
+    if(allEl) allEl.checked=rSet.size===document.querySelectorAll('.chk-ov-reg').length;
+    _updateChkLabel('dd-ov-reg-label','chk-ov-reg','Todas');
+  }
+  if(audStr){
+    const aSet=new Set(audStr.split(','));
+    document.querySelectorAll('.chk-ov-aud').forEach(c=>c.checked=aSet.has(c.value));
+    const allEl=document.getElementById('chk-ov-aud-all');
+    if(allEl) allEl.checked=aSet.size===document.querySelectorAll('.chk-ov-aud').length;
+    _updateChkLabel('dd-ov-aud-label','chk-ov-aud','Todos');
+  }
   if(mesStr){
     const mSet=new Set(mesStr.split(',').map(Number));
     document.querySelectorAll('.chk-mes').forEach(c=>c.checked=mSet.has(+c.value));
