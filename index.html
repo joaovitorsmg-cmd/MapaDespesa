@@ -986,7 +986,19 @@ async function loadData(src){
   try{
     const r = await fetch(src);
     if(!r.ok) throw new Error('HTTP '+r.status);
-    DATA = await r.json();
+    const nd = await r.json();
+    if(nd._multi_ano && nd.anos){
+      _dataByYear={};
+      Object.entries(nd.anos).forEach(([yr,data])=>{ _dataByYear[+yr]=data; });
+      const anos=Object.keys(_dataByYear).map(Number);
+      _activeYear=nd.ano_ativo||Math.max(...anos);
+      DATA=_dataByYear[_activeYear];
+      _updateYearSelector();
+    } else {
+      DATA=nd;
+      const year=_extractYear(nd.meta||{});
+      if(year){ _dataByYear[year]=nd; _activeYear=year; _updateYearSelector(); }
+    }
     initAll();
   }catch(e){
     console.error(e);
@@ -1945,18 +1957,38 @@ async function _processJSONFile(file){
     reader.onload=ev=>{
       try{
         const nd=JSON.parse(ev.target.result);
-        if(!nd.meta||!nd.filiais){addLog('❌ Formato inválido. Verifique o arquivo JSON.','log-err');resolve();return;}
-        const year=_extractYear(nd.meta);
-        _dataByYear[year]=nd;
-        _activeYear=year;
-        DATA=nd;
-        _updateYearSelector();
-        initAll();
-        addLog('✅ JSON carregado com sucesso!','log-ok');
-        addLog(`📊 ${nd.meta.filiais_count} filiais | ${nd.meta.periodo}`,'log-ok');
-        addLog(`💰 Fat. Real: ${fmtM(nd.meta.tot_fat_real)}`,'log-ok');
-        addLog(`📤 Desp. Real: ${fmtM(nd.meta.tot_desp_real)}`,'log-ok');
-        addLog(`⚖️ Resultado: ${fmtM(nd.meta.resultado)}`,'log-ok');
+        if(nd._multi_ano && nd.anos){
+          // Formato multi-ano gerado pelo gerar_json.py novo
+          _dataByYear={};
+          Object.entries(nd.anos).forEach(([yr,data])=>{ _dataByYear[+yr]=data; });
+          const anos=Object.keys(_dataByYear).map(Number).sort((a,b)=>a-b);
+          if(!anos.length){addLog('❌ JSON multi-ano sem dados nos anos.','log-err');resolve();return;}
+          _activeYear=nd.ano_ativo||Math.max(...anos);
+          DATA=_dataByYear[_activeYear];
+          _updateYearSelector();
+          initAll();
+          addLog('✅ JSON multi-ano carregado com sucesso!','log-ok');
+          if(anos.length>1) addLog(`📅 Anos disponíveis: ${anos.join(', ')} — use o filtro de ano para alternar.`,'log-ok');
+          const m=DATA.meta;
+          addLog(`📊 ${m.filiais_count} filiais | ${m.periodo}`,'log-ok');
+          addLog(`💰 Fat. Real: ${fmtM(m.tot_fat_real)}`,'log-ok');
+          addLog(`📤 Desp. Real: ${fmtM(m.tot_desp_real)}`,'log-ok');
+          addLog(`⚖️ Resultado: ${fmtM(m.resultado)}`,'log-ok');
+        } else {
+          // Formato legado — ano único
+          if(!nd.meta||!nd.filiais){addLog('❌ Formato inválido. Verifique o arquivo JSON.','log-err');resolve();return;}
+          const year=_extractYear(nd.meta);
+          _dataByYear[year]=nd;
+          _activeYear=year;
+          DATA=nd;
+          _updateYearSelector();
+          initAll();
+          addLog('✅ JSON carregado com sucesso!','log-ok');
+          addLog(`📊 ${nd.meta.filiais_count} filiais | ${nd.meta.periodo}`,'log-ok');
+          addLog(`💰 Fat. Real: ${fmtM(nd.meta.tot_fat_real)}`,'log-ok');
+          addLog(`📤 Desp. Real: ${fmtM(nd.meta.tot_desp_real)}`,'log-ok');
+          addLog(`⚖️ Resultado: ${fmtM(nd.meta.resultado)}`,'log-ok');
+        }
       }catch(err){addLog('❌ Erro ao processar JSON: '+err.message,'log-err');}
       resolve();
     };
@@ -2583,16 +2615,17 @@ function downloadGenScript(){
 # Execute: python gerar_json.py  (ou de 2 cliques neste arquivo)
 import pandas as pd, json, os, glob
 
-DESPESA_FILE = 'Mapa_Despesa.xlsx'
+DESPESA_FILE   = 'Mapa_Despesa.xlsx'
 REGIONAIS_FILE = 'Base_regionais.xlsx'
-OUT = 'aqm_data.json'
+OUT            = 'aqm_data.json'
+
+# ANO_REFERENCIA:
+#   None  -> exporta TODOS os anos encontrados na planilha (ex.: 2025 e 2026)
+#   2026  -> exporta SOMENTE o ano informado
+ANO_REFERENCIA = None
 
 
 def encontrar_arquivo(nome_esperado, pistas):
-    # Usa o nome exato se existir nesta pasta; senão procura qualquer .xlsx
-    # cujo nome contenha as palavras-chave (evita falhar só porque o arquivo
-    # foi salvo com outro nome, ex.: "Mapa Despesa.xlsx" em vez de
-    # "Mapa_Despesa_2026.xlsx").
     if os.path.exists(nome_esperado):
         return nome_esperado
     candidatos = [f for f in glob.glob('*.xlsx') if not os.path.basename(f).startswith('~$')]
@@ -2601,7 +2634,9 @@ def encontrar_arquivo(nome_esperado, pistas):
         if all(p in chave for p in pistas):
             print(f"ℹ️  '{nome_esperado}' não encontrado — usando '{f}' no lugar (nome parecido).")
             return f
-    print(f"\n❌ Não encontrei nenhum arquivo parecido com '{nome_esperado}' nesta pasta.")
+
+    print(f"""
+❌ Não encontrei nenhum arquivo parecido com '{nome_esperado}' nesta pasta.""")
     if candidatos:
         print("   Arquivos .xlsx encontrados aqui:")
         for f in candidatos:
@@ -2612,198 +2647,217 @@ def encontrar_arquivo(nome_esperado, pistas):
     raise FileNotFoundError(nome_esperado)
 
 
-def main():
-    despesa_path = encontrar_arquivo(DESPESA_FILE, ['despesa'])
-    regionais_path = encontrar_arquivo(REGIONAIS_FILE, ['regio'])
+def processar_ano(d_ano, r, ano_alvo):
+    """Recebe as linhas já filtradas para 'ano_alvo' e retorna o payload desse ano."""
 
-    d = pd.read_excel(despesa_path)
-    r = pd.read_excel(regionais_path)
+    mes_nomes = {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',
+                 7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'}
 
-    # ==== PERÍODO: usar SEMPRE ANO/MES/DIA (colunas I/J/K), NUNCA DATA_LANCAMENTO ====
-    # DATA_LANCAMENTO/DATA_APROVACAO são apenas a data em que a contabilidade
-    # fechou/aprovou o lote no sistema — não representam a competência do
-    # lançamento. A competência real é dada por ANO, MES e DIA.
-    # ANO_REFERENCIA: deixe None para usar automaticamente o ano mais recente
-    # presente na base (evita somar 2025 + 2026 juntos). Ou defina um ano fixo.
-    ANO_REFERENCIA = None
-    ano_alvo = ANO_REFERENCIA if ANO_REFERENCIA else int(d['ANO'].max())
-    print(f"📅 Ano de referência do painel: {ano_alvo} (defina ANO_REFERENCIA no topo do script para mudar)")
-    d = d[d['ANO'] == ano_alvo].copy()
-
-    fl = dict(zip(r['FILIAL'], r['LOJA']))
-    fr = dict(zip(r['FILIAL'], r['REGIONAL']))
-    fa = dict(zip(r['FILIAL'], r['AUDITOR']))
-    fs = dict(zip(r['FILIAL'], r['SIGLA']))
-    fg = dict(zip(r['FILIAL'], r['GERENTE']))
-    fsu = dict(zip(r['FILIAL'], r['SUPERVISOR']))
-    fe = dict(zip(r['FILIAL'], r['ESTADO']))
-
-    d['LOJA']=d['ID_FILIAL'].map(fl)
-    d['REGIONAL']=d['ID_FILIAL'].map(fr)
-    d['AUDITOR']=d['ID_FILIAL'].map(fa)
-    d['SIGLA']=d['ID_FILIAL'].map(fs).fillna(d['ID_FILIAL'].apply(lambda x: f'F{x}'))
-    d['GERENTE']=d['ID_FILIAL'].map(fg)
-    d['SUPERVISOR']=d['ID_FILIAL'].map(fsu)
-    d['ESTADO']=d['ID_FILIAL'].map(fe)
-    for col in ['LOJA','REGIONAL','AUDITOR','GERENTE','SUPERVISOR','ESTADO']:
-        d[col] = d[col].fillna('N/D')
-
-    # ==== CLASSIFICAÇÃO: FATURAMENTO x DESPESA ====
-    # Faturamento (Realizado) = SOMA de VLR_REALIZADO SOMENTE dos lançamentos cujo
-    # GRUPO_CONTA esteja listado abaixo. Tudo que não estiver nesta lista entra
-    # como despesa. Se surgir outro grupo de receita na base (ex.: devoluções,
-    # vendas de serviços), adicione-o aqui.
-    GRUPOS_RECEITA = [
-        '01-VENDAS DE MERCADORIAS',
-    ]
+    GRUPOS_RECEITA = ['01-VENDAS DE MERCADORIAS']
 
     def _norm(s):
         return str(s).strip().upper()
 
     grupos_receita_norm = {_norm(g) for g in GRUPOS_RECEITA}
+    d_ano = d_ano.copy()
+    d_ano['_GC_NORM'] = d_ano['GRUPO_CONTA'].apply(_norm)
+
+    fat  = d_ano[ d_ano['_GC_NORM'].isin(grupos_receita_norm)].copy()
+    desp = d_ano[~d_ano['_GC_NORM'].isin(grupos_receita_norm)].copy()
+
+    if fat.empty:
+        raise RuntimeError(
+            f"Ano {ano_alvo}: nenhum lançamento de '01-VENDAS DE MERCADORIAS' encontrado.")
+
+    meses_com_realizado = sorted(fat[fat['VLR_REALIZADO'] > 0]['MES'].unique())
+    if meses_com_realizado:
+        periodo_str = f"{mes_nomes[min(meses_com_realizado)]}-{mes_nomes[max(meses_com_realizado)]} {ano_alvo}"
+    else:
+        periodo_str = str(ano_alvo)
+
+    def pct(numer, denom):
+        return (numer / denom * 100).replace([float('inf'), float('-inf')], 0).fillna(0).round(2)
+
+    def pct_s(n, d_val):
+        return round(n / d_val * 100, 2) if d_val else 0.0
+
+    fat_comp  = fat[ fat['MES'].isin(meses_com_realizado)].copy()
+    desp_comp = desp[desp['MES'].isin(meses_com_realizado)].copy()
+
+    fat_fil = fat_comp.groupby(
+        ['ID_FILIAL','SIGLA','LOJA','REGIONAL','AUDITOR','GERENTE','SUPERVISOR','ESTADO']
+    ).agg(FAT_REAL=('VLR_REALIZADO','sum'), FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+    desp_fil = desp_comp.groupby('ID_FILIAL').agg(
+        DESP_REAL=('VLR_REALIZADO','sum'), DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+    filiais = fat_fil.merge(desp_fil, on='ID_FILIAL', how='left').fillna(0)
+    filiais['PERC_DESP']   = pct(filiais['DESP_REAL'], filiais['FAT_REAL'])
+    filiais['DESVIO_FAT']  = pct(filiais['FAT_REAL']  - filiais['FAT_PREV'],  filiais['FAT_PREV'])
+    filiais['DESVIO_DESP'] = pct(filiais['DESP_REAL'] - filiais['DESP_PREV'], filiais['DESP_PREV'])
+    filiais = filiais.sort_values('FAT_REAL', ascending=False)
+
+    fat_mes  = fat.groupby('MES').agg(
+        FAT_REAL=('VLR_REALIZADO','sum'), FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+    desp_mes = desp.groupby('MES').agg(
+        DESP_REAL=('VLR_REALIZADO','sum'), DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+    meses = fat_mes.merge(desp_mes, on='MES').fillna(0)
+    meses['NOME'] = meses['MES'].map(mes_nomes)
+    meses['PERC_DESP'] = pct(meses['DESP_REAL'], meses['FAT_REAL'])
+
+    fat_fil_mes  = fat.groupby(['ID_FILIAL','MES']).agg(
+        FAT_REAL=('VLR_REALIZADO','sum'), FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+    desp_fil_mes = desp.groupby(['ID_FILIAL','MES']).agg(
+        DESP_REAL=('VLR_REALIZADO','sum'), DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+    filiais_mes = fat_fil_mes.merge(desp_fil_mes, on=['ID_FILIAL','MES'], how='outer').fillna(0)
+    filiais_mes['ID_FILIAL'] = filiais_mes['ID_FILIAL'].astype(int)
+    filiais_mes['MES']       = filiais_mes['MES'].astype(int)
+
+    fat_reg  = fat_comp.groupby('REGIONAL').agg(
+        FAT_REAL=('VLR_REALIZADO','sum'), FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+    desp_reg = desp_comp.groupby('REGIONAL').agg(
+        DESP_REAL=('VLR_REALIZADO','sum'), DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+    regionais_out = fat_reg.merge(desp_reg, on='REGIONAL').fillna(0)
+    regionais_out['PERC_DESP'] = pct(regionais_out['DESP_REAL'], regionais_out['FAT_REAL'])
+
+    fat_aud  = fat_comp.groupby('AUDITOR').agg(
+        FAT_REAL=('VLR_REALIZADO','sum'), FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
+    desp_aud = desp_comp.groupby('AUDITOR').agg(
+        DESP_REAL=('VLR_REALIZADO','sum'), DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
+    auditores = fat_aud.merge(desp_aud, on='AUDITOR').fillna(0)
+    auditores['PERC_DESP'] = pct(auditores['DESP_REAL'], auditores['FAT_REAL'])
+
+    grupos = (desp_comp.groupby('GRUPO_CONTA')
+              .agg(DESP_REAL=('VLR_REALIZADO','sum'), DESP_PREV=('VLR_PREVISAO','sum'))
+              .reset_index().sort_values('DESP_REAL', ascending=False))
+    grupos['DESVIO'] = pct(grupos['DESP_REAL'] - grupos['DESP_PREV'], grupos['DESP_PREV'])
+
+    grupos_filial = (desp_comp.groupby(['ID_FILIAL','GRUPO_CONTA'])
+                    .agg(DESP_REAL=('VLR_REALIZADO','sum'), DESP_PREV=('VLR_PREVISAO','sum'))
+                    .reset_index())
+    grupos_filial['ID_FILIAL'] = grupos_filial['ID_FILIAL'].astype(int)
+
+    tot_fat_real      = fat_comp['VLR_REALIZADO'].sum()
+    tot_fat_prev      = fat_comp['VLR_PREVISAO'].sum()
+    tot_desp_real     = desp_comp['VLR_REALIZADO'].sum()
+    tot_desp_prev     = desp_comp['VLR_PREVISAO'].sum()
+    tot_fat_prev_ano  = fat['VLR_PREVISAO'].sum()
+    tot_desp_prev_ano = desp['VLR_PREVISAO'].sum()
+
+    return {
+        'meta': {
+            'periodo':          periodo_str,
+            'ano':              int(ano_alvo),
+            'filiais_count':    int(len(filiais)),
+            'tot_fat_real':     round(tot_fat_real,  2),
+            'tot_fat_prev':     round(tot_fat_prev,  2),
+            'tot_desp_real':    round(tot_desp_real, 2),
+            'tot_desp_prev':    round(tot_desp_prev, 2),
+            'tot_fat_prev_ano': round(tot_fat_prev_ano,  2),
+            'tot_desp_prev_ano':round(tot_desp_prev_ano, 2),
+            'perc_desp_real':   pct_s(tot_desp_real, tot_fat_real),
+            'perc_desp_plan':   pct_s(tot_desp_prev, tot_fat_prev),
+            'resultado':        round(tot_fat_real - tot_desp_real, 2),
+            'dev_fat':          pct_s(tot_fat_real  - tot_fat_prev,  tot_fat_prev),
+            'dev_desp':         pct_s(tot_desp_real - tot_desp_prev, tot_desp_prev),
+        },
+        'filiais':       filiais.to_dict('records'),
+        'meses':         meses.to_dict('records'),
+        'filiais_mes':   filiais_mes.to_dict('records'),
+        'regionais':     regionais_out.to_dict('records'),
+        'auditores':     auditores.to_dict('records'),
+        'grupos':        grupos.to_dict('records'),
+        'grupos_filial': grupos_filial.to_dict('records'),
+    }
+
+
+def main():
+    despesa_path   = encontrar_arquivo(DESPESA_FILE,   ['despesa'])
+    regionais_path = encontrar_arquivo(REGIONAIS_FILE, ['regio'])
+
+    d = pd.read_excel(despesa_path)
+    r = pd.read_excel(regionais_path)
+
+    fl  = dict(zip(r['FILIAL'], r['LOJA']))
+    fr  = dict(zip(r['FILIAL'], r['REGIONAL']))
+    fa  = dict(zip(r['FILIAL'], r['AUDITOR']))
+    fs  = dict(zip(r['FILIAL'], r['SIGLA']))
+    fg  = dict(zip(r['FILIAL'], r['GERENTE']))
+    fsu = dict(zip(r['FILIAL'], r['SUPERVISOR']))
+    fe  = dict(zip(r['FILIAL'], r['ESTADO']))
+
+    d['LOJA']       = d['ID_FILIAL'].map(fl)
+    d['REGIONAL']   = d['ID_FILIAL'].map(fr)
+    d['AUDITOR']    = d['ID_FILIAL'].map(fa)
+    d['SIGLA']      = d['ID_FILIAL'].map(fs).fillna(d['ID_FILIAL'].apply(lambda x: f'F{x}'))
+    d['GERENTE']    = d['ID_FILIAL'].map(fg)
+    d['SUPERVISOR'] = d['ID_FILIAL'].map(fsu)
+    d['ESTADO']     = d['ID_FILIAL'].map(fe)
+    for col in ['LOJA','REGIONAL','AUDITOR','GERENTE','SUPERVISOR','ESTADO']:
+        d[col] = d[col].fillna('N/D')
+
+    todos_anos = sorted(d['ANO'].dropna().unique().astype(int))
+    if not todos_anos:
+        raise RuntimeError("Coluna ANO não encontrada ou sem valores válidos.")
+
+    if ANO_REFERENCIA:
+        anos_processar = [int(ANO_REFERENCIA)]
+    else:
+        anos_processar = todos_anos
+
+    print(f"\\n📅 Anos encontrados na planilha: {todos_anos}")
+    print(f"📅 Anos que serão exportados:    {anos_processar}")
+    if len(todos_anos) > 1 and ANO_REFERENCIA is None:
+        print("   (Para exportar apenas um ano, defina ANO_REFERENCIA no topo do script)")
+
+    def _norm(s):
+        return str(s).strip().upper()
+    GRUPOS_RECEITA = ['01-VENDAS DE MERCADORIAS']
+    grupos_receita_norm = {_norm(g) for g in GRUPOS_RECEITA}
     d['_GC_NORM'] = d['GRUPO_CONTA'].apply(_norm)
-
-    fat = d[d['_GC_NORM'].isin(grupos_receita_norm)].copy()
-    desp = d[~d['_GC_NORM'].isin(grupos_receita_norm)].copy()
-
-    # Diagnóstico: mostra como cada GRUPO_CONTA da base foi classificado e o
-    # valor de VLR_REALIZADO somado em cada um. Use isso para conferir se o
-    # faturamento total bate com o esperado — se houver um grupo de receita
-    # faltando na lista acima, ele vai aparecer somado dentro de "DESPESA".
     _resumo = d.groupby('GRUPO_CONTA')['VLR_REALIZADO'].agg(['count','sum']).reset_index()
-    _resumo['CLASSIFICACAO'] = _resumo['GRUPO_CONTA'].apply(lambda g: 'RECEITA' if _norm(g) in grupos_receita_norm else 'DESPESA')
-    print("\n📋 Classificação por GRUPO_CONTA (confira se está correto):")
+    _resumo['CLASSIFICACAO'] = _resumo['GRUPO_CONTA'].apply(
+        lambda g: 'RECEITA' if _norm(g) in grupos_receita_norm else 'DESPESA')
+    print("\\n📋 Classificação por GRUPO_CONTA (todos os anos, confira se está correto):")
     for _, row in _resumo.sort_values('sum', ascending=False).iterrows():
         print(f"  [{row['CLASSIFICACAO']:8s}] {row['GRUPO_CONTA']:45s} | {int(row['count']):6d} lanç. | R$ {row['sum']:,.2f}")
     print()
 
-    if fat.empty:
-        raise RuntimeError("Nenhum lançamento casou com GRUPOS_RECEITA — faturamento ficaria zerado. Confira os nomes exatos em GRUPO_CONTA na planilha.")
+    anos_data = {}
+    for ano in anos_processar:
+        print(f"⏳ Processando {ano}...")
+        d_ano = d[d['ANO'] == ano].copy()
+        dados = processar_ano(d_ano, r, ano)
+        anos_data[str(ano)] = dados
+        m = dados['meta']
+        print(f"   ✅ {m['filiais_count']} filiais | {m['periodo']}")
+        print(f"   💰 Fat: R$ {m['tot_fat_real']:,.0f} | Desp: R$ {m['tot_desp_real']:,.0f} | Resultado: R$ {m['resultado']:,.0f}")
 
-    mes_nomes={1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'}
+    ano_ativo = max(int(a) for a in anos_data.keys())
 
-    # Período exibido no cabeçalho = meses do ano de referência que já têm
-    # faturamento realizado (> 0). Meses futuros com apenas orçamento (VLR_PREVISAO)
-    # e nenhum realizado ficam de fora do rótulo, mas continuam no gráfico de sazonalidade.
-    meses_com_realizado = sorted(fat[fat['VLR_REALIZADO']>0]['MES'].unique())
-    if meses_com_realizado:
-        periodo_str = f"{mes_nomes[min(meses_com_realizado)]}-{mes_nomes[max(meses_com_realizado)]} {ano_alvo}"
-    else:
-        periodo_str = f"{ano_alvo}"
-
-    # Divisão segura: evita NaN/Infinity quando o denominador é 0 (ex.: mês
-    # futuro sem faturamento realizado ainda). NaN/Infinity não são JSON válido
-    # e quebram o carregamento do painel no navegador (JSON.parse falha).
-    def pct(numer, denom):
-        return (numer/denom*100).replace([float('inf'),float('-inf')],0).fillna(0).round(2)
-
-    def pct_s(n, d):
-        return round(n/d*100, 2) if d else 0.0
-
-    # ==== JANELA DE COMPARAÇÃO (Realizado x Planejado) ====
-    # A planilha traz o orçamento do ANO INTEIRO (Jan-Dez), mas o Realizado só
-    # existe até o último mês já fechado (ex.: Jan-Mai). Comparar Realizado
-    # desses 5 meses contra o Planejado de 12 meses gera desvios gigantes e
-    # incorretos (sempre parece que ficou muito abaixo do plano). fat_comp/
-    # desp_comp restringem os DOIS lados (Realizado e Planejado) aos mesmos
-    # meses, para que Desvio % seja uma comparação válida. O gráfico de
-    # sazonalidade (meses/meses_com_realizado) continua usando o ano inteiro,
-    # pois ali a comparação é sempre mês-a-mês (não agregada).
-    fat_comp = fat[fat['MES'].isin(meses_com_realizado)].copy()
-    desp_comp = desp[desp['MES'].isin(meses_com_realizado)].copy()
-
-    fat_fil = fat_comp.groupby(['ID_FILIAL','SIGLA','LOJA','REGIONAL','AUDITOR','GERENTE','SUPERVISOR','ESTADO']).agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
-    desp_fil = desp_comp.groupby('ID_FILIAL').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
-    filiais = fat_fil.merge(desp_fil, on='ID_FILIAL', how='left').fillna(0)
-    filiais['PERC_DESP']=pct(filiais['DESP_REAL'], filiais['FAT_REAL'])
-    filiais['DESVIO_FAT']=pct(filiais['FAT_REAL']-filiais['FAT_PREV'], filiais['FAT_PREV'])
-    filiais['DESVIO_DESP']=pct(filiais['DESP_REAL']-filiais['DESP_PREV'], filiais['DESP_PREV'])
-    filiais=filiais.sort_values('FAT_REAL',ascending=False)
-
-    # meses: usa o ano inteiro (fat/desp, não fat_comp/desp_comp) — aqui a
-    # comparação já é mês-a-mês, então meses futuros (Realizado=0) são válidos.
-    fat_mes=fat.groupby('MES').agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
-    desp_mes=desp.groupby('MES').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
-    meses=fat_mes.merge(desp_mes,on='MES').fillna(0)
-    meses['NOME']=meses['MES'].map(mes_nomes)
-    meses['PERC_DESP']=pct(meses['DESP_REAL'], meses['FAT_REAL'])
-
-    # filiais_mes: igual a "meses", mas quebrado por filial — necessário para
-    # o filtro de Período na Visão Geral funcionar combinado com Regional/
-    # Auditor (o filtro escolhe as filiais primeiro, depois soma só o mês
-    # escolhido para essas filiais). Usa o ano inteiro (fat/desp), então
-    # meses futuros aparecem com Realizado=0 e Planejado do orçamento.
-    fat_fil_mes=fat.groupby(['ID_FILIAL','MES']).agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
-    desp_fil_mes=desp.groupby(['ID_FILIAL','MES']).agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
-    filiais_mes=fat_fil_mes.merge(desp_fil_mes,on=['ID_FILIAL','MES'],how='outer').fillna(0)
-    filiais_mes['ID_FILIAL']=filiais_mes['ID_FILIAL'].astype(int)
-    filiais_mes['MES']=filiais_mes['MES'].astype(int)
-
-    fat_reg=fat_comp.groupby('REGIONAL').agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
-    desp_reg=desp_comp.groupby('REGIONAL').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
-    regionais_out=fat_reg.merge(desp_reg,on='REGIONAL').fillna(0)
-    regionais_out['PERC_DESP']=pct(regionais_out['DESP_REAL'], regionais_out['FAT_REAL'])
-
-    fat_aud=fat_comp.groupby('AUDITOR').agg(FAT_REAL=('VLR_REALIZADO','sum'),FAT_PREV=('VLR_PREVISAO','sum')).reset_index()
-    desp_aud=desp_comp.groupby('AUDITOR').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
-    auditores=fat_aud.merge(desp_aud,on='AUDITOR').fillna(0)
-    auditores['PERC_DESP']=pct(auditores['DESP_REAL'], auditores['FAT_REAL'])
-
-    grupos=desp_comp.groupby('GRUPO_CONTA').agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index().sort_values('DESP_REAL',ascending=False)
-    grupos['DESVIO']=pct(grupos['DESP_REAL']-grupos['DESP_PREV'], grupos['DESP_PREV'])
-
-    grupos_filial=desp_comp.groupby(['ID_FILIAL','GRUPO_CONTA']).agg(DESP_REAL=('VLR_REALIZADO','sum'),DESP_PREV=('VLR_PREVISAO','sum')).reset_index()
-    grupos_filial['ID_FILIAL']=grupos_filial['ID_FILIAL'].astype(int)
-
-    tot_fat_real=fat_comp['VLR_REALIZADO'].sum()
-    tot_fat_prev=fat_comp['VLR_PREVISAO'].sum()
-    tot_desp_real=desp_comp['VLR_REALIZADO'].sum()
-    tot_desp_prev=desp_comp['VLR_PREVISAO'].sum()
-    # Orçamento do ano inteiro (Jan-Dez), só para referência/contexto — não
-    # entra em nenhum cálculo de desvio.
-    tot_fat_prev_ano=fat['VLR_PREVISAO'].sum()
-    tot_desp_prev_ano=desp['VLR_PREVISAO'].sum()
-
-    payload={
-        'meta':{
-            'periodo':periodo_str,'ano':int(ano_alvo),'filiais_count':int(len(filiais)),
-            'tot_fat_real':round(tot_fat_real,2),'tot_fat_prev':round(tot_fat_prev,2),
-            'tot_desp_real':round(tot_desp_real,2),'tot_desp_prev':round(tot_desp_prev,2),
-            'tot_fat_prev_ano':round(tot_fat_prev_ano,2),'tot_desp_prev_ano':round(tot_desp_prev_ano,2),
-            'perc_desp_real':pct_s(tot_desp_real,tot_fat_real),
-            'perc_desp_plan':pct_s(tot_desp_prev,tot_fat_prev),
-            'resultado':round(tot_fat_real-tot_desp_real,2),
-            'dev_fat':pct_s(tot_fat_real-tot_fat_prev,tot_fat_prev),
-            'dev_desp':pct_s(tot_desp_real-tot_desp_prev,tot_desp_prev)
-        },
-        'filiais':filiais.to_dict('records'),
-        'meses':meses.to_dict('records'),
-        'filiais_mes':filiais_mes.to_dict('records'),
-        'regionais':regionais_out.to_dict('records'),
-        'auditores':auditores.to_dict('records'),
-        'grupos':grupos.to_dict('records'),
-        'grupos_filial':grupos_filial.to_dict('records')
+    payload = {
+        '_multi_ano': True,
+        'ano_ativo':  ano_ativo,
+        'anos':       anos_data,
+        **anos_data[str(ano_ativo)],
     }
 
-    with open(OUT,'w',encoding='utf-8') as f:
-        json.dump(payload,f,ensure_ascii=False,default=str)
-    print(f"✅ {OUT} gerado | Grupos de receita: {', '.join(GRUPOS_RECEITA)}")
-    print(f"✅ Fat: R$ {tot_fat_real:,.0f} | Desp: R$ {tot_desp_real:,.0f} | Resultado: R$ {tot_fat_real-tot_desp_real:,.0f}")
+    with open(OUT, 'w', encoding='utf-8') as f:
+        json.dump(payload, f, ensure_ascii=False, default=str)
+
+    print(f"\\n✅ {OUT} gerado com sucesso!")
+    print(f"✅ Anos incluídos: {', '.join(str(a) for a in sorted(int(k) for k in anos_data.keys()))}")
+    print(f"✅ Ano ativo no painel: {ano_ativo}")
 
 
 if __name__ == '__main__':
-    # Roda tudo dentro de um try/except e SEMPRE espera um ENTER no final —
-    # assim, se der 2 cliques no arquivo no Windows, a janela do console
-    # não fecha sozinha antes de dar tempo de ler o resultado (ou o erro).
     try:
         main()
-        print("\n🎉 Concluído! Arraste o aqm_data.json no painel (aba Atualizar Base).")
+        print("\\n🎉 Concluído! Arraste o aqm_data.json no painel (aba Atualizar Base).")
     except Exception as e:
-        print("\n" + "="*60)
+        print("\\n" + "="*60)
         print("❌ ERRO ao gerar o aqm_data.json:")
         print(f"   {type(e).__name__}: {e}")
         print("="*60)
-    input("\nPressione ENTER para fechar esta janela...")
+    input("\\nPressione ENTER para fechar esta janela...")
 `;
   const blob=new Blob([script],{type:'text/plain'});
   const a=document.createElement('a');
