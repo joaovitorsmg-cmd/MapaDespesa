@@ -1378,7 +1378,7 @@ function renderDiscrepancia(){
   charts_reg['ch-disc']=new Chart(ctx,{
     type:'bar',
     data:{
-      labels:sorted.map(f=>f.SIGLA||f.ID_FILIAL),
+      labels:sorted.map(f=>f.LOJA||f.SIGLA||String(f.ID_FILIAL)),
       datasets:[{label:'% Desp/Fat',data:sorted.map(f=>f.PERC_DESP),
         backgroundColor:sorted.map(f=>_discColor(f.PERC_DESP,avg)),borderRadius:4}]
     },
@@ -1394,7 +1394,7 @@ function renderDiscrepancia(){
             backgroundColor:'rgba(242,169,0,.15)',color:'#F2A900',font:{size:10,weight:'bold'},padding:4}}}}},
       scales:{y:{ticks:{callback:v=>v+'%',font:{size:10}},
                  grid:{color:isDark()?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)'}},
-              x:{ticks:{font:{size:9}}}}}
+              x:{ticks:{font:{size:8},maxRotation:50,minRotation:40}}}}}
   });
 }
 
@@ -1415,16 +1415,17 @@ async function exportDiscrepanciaHD(){
   }};
   const ch=new Chart(tmp.getContext('2d'),{
     type:'bar',
-    data:{labels:sorted.map(f=>`${f.SIGLA}${f.LOJA?' – '+f.LOJA:''}`),
+    data:{labels:sorted.map(f=>f.LOJA||f.SIGLA||String(f.ID_FILIAL)),
           datasets:[{label:'% Desp/Fat',data:sorted.map(f=>f.PERC_DESP),
             backgroundColor:sorted.map(f=>_discColor(f.PERC_DESP,avg)),borderRadius:6}]},
     options:{animation:false,responsive:false,
       plugins:{legend:{display:false},tooltip:{enabled:false},
         annotation:{annotations:{avgLine:{type:'line',yMin:avg,yMax:avg,borderColor:'#F2A900',borderWidth:3}}}},
       scales:{
-        y:{ticks:{callback:v=>v+'%',font:{size:20}},
-           title:{display:true,text:'% Despesa / Faturamento',font:{size:22,weight:'bold'}}},
-        x:{ticks:{font:{size:15,weight:'bold'},maxRotation:40,minRotation:30}}}},
+        y:{ticks:{callback:v=>v+'%',font:{size:20},color:'#111'},
+           title:{display:true,text:'% Despesa / Faturamento',font:{size:22,weight:'bold'},color:'#111'},
+           grid:{color:'rgba(0,0,0,.08)'}},
+        x:{ticks:{font:{size:14,weight:'bold'},color:'#111',maxRotation:45,minRotation:45}}}},
     plugins:[labelPlugin,bgPlugin]
   });
   await new Promise(r=>setTimeout(r,250));
