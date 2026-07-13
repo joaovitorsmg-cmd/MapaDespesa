@@ -299,8 +299,8 @@ body.presentation-mode .content{padding-top:16px}
 .btn-xs:hover{background:var(--cinza-cl)}
 /* ---- Comparativo multi-ano ---- */
 .cmp-yr-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;margin-right:4px}
-.badge-y1{background:rgba(30,136,229,.15);color:#1e88e5}
-.badge-y2{background:rgba(198,40,40,.12);color:#c62828}
+.badge-y1{background:rgba(13,71,161,.15);color:#0D47A1}
+.badge-y2{background:rgba(0,43,91,.18);color:#002B5B}
 </style>
 </head>
 <body>
@@ -445,7 +445,7 @@ body.presentation-mode .content{padding-top:16px}
 
   <!-- CHARTS -->
   <div class="charts-grid">
-    <div class="chart-box">
+    <div class="chart-box" style="grid-column:1/-1">
       <div class="chart-box-head">
         <h3>📅 Sazonalidade — Faturamento vs Despesas</h3>
         <button class="ico-mini" onclick="exportBox(this)" title="Exportar como imagem"><span class="tooltip">Exportar como imagem</span>📥</button>
@@ -454,17 +454,17 @@ body.presentation-mode .content{padding-top:16px}
     </div>
     <div class="chart-box">
       <div class="chart-box-head">
-        <h3>🥧 % Despesa / Faturamento por Regional</h3>
-        <button class="ico-mini" onclick="exportBox(this)" title="Exportar como imagem"><span class="tooltip">Exportar como imagem</span>📥</button>
-      </div>
-      <div class="chart-wrap"><canvas id="ch-regional-perc"></canvas></div>
-    </div>
-    <div class="chart-box">
-      <div class="chart-box-head">
         <h3>📊 Top 10 Filiais — Faturamento Realizado</h3>
         <button class="ico-mini" onclick="exportBox(this)" title="Exportar como imagem"><span class="tooltip">Exportar como imagem</span>📥</button>
       </div>
       <div class="chart-wrap"><canvas id="ch-top-filiais"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-box-head">
+        <h3>% Desp/Fat por Regional</h3>
+        <button class="ico-mini" onclick="exportBox(this)" title="Exportar como imagem"><span class="tooltip">Exportar como imagem</span>📥</button>
+      </div>
+      <div class="chart-wrap"><canvas id="ch-regional-perc"></canvas></div>
     </div>
     <div class="chart-box" style="grid-column:1/-1">
       <div class="chart-box-head">
@@ -1131,6 +1131,7 @@ function showNoDataState(){
 
 function initAll(){
   _applyGlobalExclusions();
+  DATA.meta.filiais_count = DATA.filiais.length; // corrige contagem após exclusões globais
   const m = DATA.meta;
   document.getElementById('hd-periodo').textContent = m.periodo || 'Jan-Mai 2026';
   document.getElementById('hd-filiais').textContent = `${m.filiais_count} filiais ativas`;
@@ -1307,7 +1308,7 @@ function renderSazon(){
       datasets:[
         {label:'Fat. Realizado',data:meses.map(m=>m.FAT_REAL),backgroundColor:'#0D47A1',borderRadius:4},
         {label:'Fat. Planejado',data:meses.map(m=>m.FAT_PREV),backgroundColor:'rgba(13,71,161,.3)',borderRadius:4},
-        {label:'Desp. Realizada',data:meses.map(m=>m.DESP_REAL),type:'line',borderColor:'#C62828',backgroundColor:'rgba(198,40,40,.1)',borderWidth:2,fill:true,tension:.3}
+        {label:'Desp. Realizada',data:meses.map(m=>m.DESP_REAL),type:'line',borderColor:'#64B5F6',backgroundColor:'rgba(100,181,246,.1)',borderWidth:2,fill:true,tension:.3}
       ]
     },
     options:{responsive:true,maintainAspectRatio:false,
@@ -1353,13 +1354,20 @@ function renderTopFiliais(){
   });
 }
 
+// Escala monocromática Agroquima: Azul Claro (#64B5F6) → Azul Royal (#0D47A1) → Azul Escuro (#002B5B)
+// Barras acima da média (pior desempenho) → azul mais escuro; abaixo (melhor) → azul mais claro
 function _discColor(perc, avg){
   const delta=perc-avg;
-  if(delta<=-6) return '#1B8A3C';
-  if(delta<-2){ const t=(delta+6)/4; return `rgb(${Math.round(27+t*(13-27))},${Math.round(138+t*(71-138))},${Math.round(60+t*(161-60))})` }
-  if(delta<=2)  return '#0D47A1';
-  if(delta<6){  const t=(delta-2)/4; return `rgb(${Math.round(13+t*(198-13))},${Math.round(71+t*(40-71))},${Math.round(161+t*(40-161))})` }
-  return '#C62828';
+  const t=Math.max(0,Math.min(1,(delta+8)/16)); // 0=melhor(claro), 1=pior(escuro)
+  let r,g,b;
+  if(t<0.5){
+    const s=t*2;
+    r=Math.round(100+s*(13-100)); g=Math.round(181+s*(71-181)); b=Math.round(246+s*(161-246));
+  } else {
+    const s=(t-0.5)*2;
+    r=Math.round(13+s*(0-13)); g=Math.round(71+s*(43-71)); b=Math.round(161+s*(91-161));
+  }
+  return `rgb(${r},${g},${b})`;
 }
 
 function renderDiscrepancia(){
@@ -1436,7 +1444,7 @@ function renderRegFat(){
       labels:reg.map(r=>r.REGIONAL),
       datasets:[
         {label:'Fat. Realizado',data:reg.map(r=>r.FAT_REAL),backgroundColor:'#0D47A1',borderRadius:4},
-        {label:'Desp. Realizada',data:reg.map(r=>r.DESP_REAL),backgroundColor:'#C62828',borderRadius:4}
+        {label:'Desp. Realizada',data:reg.map(r=>r.DESP_REAL),backgroundColor:'#64B5F6',borderRadius:4}
       ]
     },
     options:{responsive:true,maintainAspectRatio:false,
@@ -1493,7 +1501,7 @@ function renderGruposDesvData(g){
     data:{
       labels:g.map(x=>x.GRUPO_CONTA.replace(/^\d+\-/,'')),
       datasets:[{label:'Desvio %',data:g.map(x=>x.DESVIO),
-        backgroundColor:g.map(x=>x.DESVIO>0?'#C62828':'#1B8A3C'),borderRadius:3}]
+        backgroundColor:g.map(x=>x.DESVIO>0?'#002B5B':'#64B5F6'),borderRadius:3}]
     },
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false}},
@@ -1969,11 +1977,23 @@ function updateCardGeral(m){
   document.getElementById('cg-perc-real').textContent=fmtP(m.perc_desp_real);
   document.getElementById('cg-count').textContent=m.filiais_count;
   const fils=m._fils||(DATA?DATA.filiais:[]);
-  const atRisk=fils.filter(f=>f.FAT_PREV>0&&f.FAT_REAL/f.FAT_PREV<0.80).length;
+  const atRisk=fils.filter(f=>f.FAT_PREV>0&&f.FAT_REAL/f.FAT_PREV<0.80)
+    .sort((a,b)=>a.FAT_REAL/a.FAT_PREV - b.FAT_REAL/b.FAT_PREV);
   const badge=document.getElementById('cg-alert-badge');
-  if(badge) badge.innerHTML=atRisk>0
-    ?`<div style="background:rgba(239,154,154,.25);border:1px solid rgba(239,154,154,.5);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;color:#EF9A9A">⚠️ ${atRisk} filial${atRisk>1?'is':''} abaixo de 80% da meta de faturamento</div>`
-    :`<div style="background:rgba(165,214,167,.2);border:1px solid rgba(165,214,167,.4);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;color:#A5D6A7">✅ Todas as filiais com dado disponível estão acima de 80% da meta</div>`;
+  if(badge){
+    if(atRisk.length>0){
+      const pills=atRisk.map(f=>{
+        const pct=(f.FAT_REAL/f.FAT_PREV*100).toFixed(0);
+        return `<span style="background:rgba(239,154,154,.2);border:1px solid rgba(239,154,154,.4);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:#EF9A9A;white-space:nowrap">${f.SIGLA} ${pct}%</span>`;
+      }).join(' ');
+      badge.innerHTML=`<div style="background:rgba(239,154,154,.12);border:1px solid rgba(239,154,154,.35);border-radius:8px;padding:10px 14px">
+        <div style="font-size:11px;font-weight:700;color:#EF9A9A;margin-bottom:7px;letter-spacing:.3px">⚠️ ${atRisk.length} filial${atRisk.length>1?'is':''} abaixo de 80% da meta de faturamento</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">${pills}</div>
+      </div>`;
+    } else {
+      badge.innerHTML=`<div style="background:rgba(100,181,246,.12);border:1px solid rgba(100,181,246,.3);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;color:#64B5F6">✓ Todas as filiais com dado disponível estão acima de 80% da meta</div>`;
+    }
+  }
 }
 
 // =========================================================
@@ -2462,7 +2482,7 @@ function _updateYearSelector(){
   if(anoPanel){
     anoPanel.innerHTML=years.map(y=>`
       <label class="chk-dd-item">
-        <input type="radio" name="chk-ano" value="${y}"${y===_activeYear?' checked':''} onchange="onChkAno(${y})"> ${y}
+        <input type="checkbox" class="chk-ano" value="${y}"${y===_activeYear?' checked':''} onchange="onChkAnoChk(this,${y})"> ${y}
       </label>`).join('');
   }
   if(anoLabel) anoLabel.textContent=_activeYear||'—';
@@ -2632,7 +2652,7 @@ function _renderAnaliseComparativo(years,anRegs,anAuds,allR,allA,filialId){
 
   const fatDesvR=d2.totFatReal-d1.totFatReal;
   const fatDesvPct=d1.totFatReal>0?fatDesvR/d1.totFatReal*100:0;
-  let rows=`<tr style="background:rgba(27,94,32,.10);font-weight:600;border-bottom:2px solid rgba(27,94,32,.25)">
+  let rows=`<tr style="background:rgba(13,71,161,.10);font-weight:600;border-bottom:2px solid rgba(13,71,161,.25)">
     <td>01-VENDAS DE MERCADORIAS <span style="font-size:10px;font-weight:400;opacity:.65">(Faturamento)</span></td>
     <td class="num tx-pos">${fmtM(d1.totFatReal)}</td><td class="num">${fmtM(d1.totFatPrev)}</td>
     <td class="num tx-pos">${fmtM(d2.totFatReal)}</td><td class="num">${fmtM(d2.totFatPrev)}</td>
@@ -2696,8 +2716,8 @@ function _renderAnaliseComparativo(years,anRegs,anAuds,allR,allA,filialId){
       data:{
         labels:top.map(g=>g.replace(/^\d+\-/,'')),
         datasets:[
-          {label:String(y1),data:top.map(g=>(g1Map[g]||{DESP_REAL:0}).DESP_REAL),backgroundColor:'rgba(30,136,229,.65)',borderRadius:3},
-          {label:String(y2),data:top.map(g=>(g2Map[g]||{DESP_REAL:0}).DESP_REAL),backgroundColor:'rgba(198,40,40,.65)',borderRadius:3}
+          {label:String(y1),data:top.map(g=>(g1Map[g]||{DESP_REAL:0}).DESP_REAL),backgroundColor:'rgba(13,71,161,.85)',borderRadius:3},
+          {label:String(y2),data:top.map(g=>(g2Map[g]||{DESP_REAL:0}).DESP_REAL),backgroundColor:'rgba(0,43,91,.75)',borderRadius:3}
         ]
       },
       options:{
@@ -2733,7 +2753,7 @@ function _renderAnaliseGruposTable(grupos,totalDesp,fatR,fatP){
   if(!grupos.length&&!(fatR>0)){b.innerHTML='<tr><td colspan="6" class="empty">Sem dados — carregue um arquivo com grupos_filial</td></tr>';return;}
   const fatDesvR=(fatR||0)-(fatP||0);
   const fatDesvPct=fatP>0?fatDesvR/fatP*100:0;
-  const fatRow=`<tr style="background:rgba(27,94,32,.10);font-weight:600;border-bottom:2px solid rgba(27,94,32,.25)">
+  const fatRow=`<tr style="background:rgba(13,71,161,.10);font-weight:600;border-bottom:2px solid rgba(13,71,161,.25)">
     <td>01-VENDAS DE MERCADORIAS <span style="font-size:10px;font-weight:400;opacity:.65">(Faturamento)</span></td>
     <td class="num tx-pos">${fmtM(fatR||0)}</td>
     <td class="num">${fmtM(fatP||0)}</td>
@@ -2768,8 +2788,8 @@ function _renderAnaliseChart(grupos){
     data:{
       labels:top.map(g=>g.GRUPO_CONTA.replace(/^\d+\-/,'')),
       datasets:[
-        {label:'Realizado',data:top.map(g=>g.DESP_REAL),backgroundColor:'#C62828',borderRadius:3},
-        {label:'Planejado',data:top.map(g=>g.DESP_PREV),backgroundColor:'rgba(198,40,40,.22)',borderRadius:3,borderColor:'#C62828',borderWidth:1}
+        {label:'Realizado',data:top.map(g=>g.DESP_REAL),backgroundColor:'#0D47A1',borderRadius:3},
+        {label:'Planejado',data:top.map(g=>g.DESP_PREV),backgroundColor:'rgba(13,71,161,.25)',borderRadius:3,borderColor:'rgba(13,71,161,.5)',borderWidth:1}
       ]
     },
     options:{
@@ -3195,6 +3215,12 @@ function onChkMes(el){
 }
 
 function onChkAno(year){
+  _setActiveYear(year);
+}
+function onChkAnoChk(el, year){
+  // Comportamento de seleção única: deseleciona os outros
+  document.querySelectorAll('.chk-ano').forEach(c=>{ if(c!==el) c.checked=false; });
+  el.checked=true; // Não permite desmarcar o ano ativo
   _setActiveYear(year);
 }
 
