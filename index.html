@@ -1511,8 +1511,8 @@ async function exportDiscrepanciaHD(){
       scales:{
         y:{ticks:{callback:v=>v+'%',font:{size:20},color:'#111'},
            title:{display:true,text:'% Despesa / Faturamento',font:{size:22,weight:'bold'},color:'#111'},
-           grid:{color:'rgba(0,0,0,.08)'}},
-        x:{ticks:{font:{size:14,weight:'bold'},color:'#111',maxRotation:45,minRotation:45}}}},
+           grid:{display:false}},
+        x:{ticks:{font:{size:14,weight:'bold'},color:'#111',maxRotation:45,minRotation:45},grid:{display:false}}},
     plugins:[labelPlugin,bgPlugin]
   });
   await new Promise(r=>setTimeout(r,250));
@@ -2110,6 +2110,20 @@ async function captureAndDownload(el, filename){
   root.setAttribute('data-theme', 'light');
   applyChartTheme(false); // falso = light
 
+  // Ocultar linhas de grade de todos os charts durante a captura
+  const gridStates = Object.values(charts_reg).map(c=>{
+    const saved = {};
+    if(c && c.options && c.options.scales){
+      Object.entries(c.options.scales).forEach(([k,s])=>{
+        saved[k] = s.grid ? s.grid.display : undefined;
+        if(!s.grid) s.grid={};
+        s.grid.display = false;
+      });
+      c.update('none');
+    }
+    return {chart:c, saved};
+  });
+
   try{
     let bgColor = EXPORT_TRANSPARENT ? null : '#ffffff';
     const canvas=await html2canvas(el,{
@@ -2125,7 +2139,16 @@ async function captureAndDownload(el, filename){
     link.click();
   } finally {
     buttons.forEach((b,i)=>b.style.visibility=prevVis[i]);
-    // Restaurar tema original após captura
+    // Restaurar grade e tema original após captura
+    gridStates.forEach(({chart,saved})=>{
+      if(chart && chart.options && chart.options.scales){
+        Object.entries(saved).forEach(([k,v])=>{
+          if(v===undefined) delete chart.options.scales[k].grid;
+          else chart.options.scales[k].grid.display = v;
+        });
+        chart.update('none');
+      }
+    });
     if(prevTheme) root.setAttribute('data-theme', prevTheme);
     else root.removeAttribute('data-theme');
     applyChartTheme(); // restaura cores dos gráficos conforme tema atual
