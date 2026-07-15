@@ -479,7 +479,13 @@ body.presentation-mode .content{padding-top:16px}
     <div class="chart-box" style="grid-column:1/-1">
       <div class="chart-box-head">
         <h3>% Despesa / Faturamento por Filial</h3>
-        <div style="display:flex;gap:6px">
+        <div style="display:flex;gap:6px;align-items:center">
+          <div class="chk-dropdown" id="dd-disc-fil" title="Selecionar filiais visíveis no gráfico">
+            <button class="chk-dd-trigger" onclick="toggleChkDropdown('dd-disc-fil')" type="button" style="min-width:90px;font-size:12px;padding:4px 8px">
+              <span id="disc-filtro-label">Todas</span><span class="dd-arrow">▾</span>
+            </button>
+            <div class="chk-dd-panel" id="dd-disc-fil-panel" style="min-width:220px;max-height:280px;overflow-y:auto"></div>
+          </div>
           <button class="ico-mini" onclick="exportBox(this.closest('.chart-box'))" title="Exportar tela atual"><span class="tooltip">Exportar tela atual</span>📥</button>
           <button class="ico-mini" onclick="exportDiscrepanciaHD()" title="Exportar HD — nome completo + %"><span class="tooltip">Exportar HD</span>🖨️</button>
         </div>
@@ -972,23 +978,25 @@ let _lastDespRows = null; // rows brutas do último xlsx de despesa (para rebuil
 let _dataByYear = {};   // {2026: {meta,filiais,...}, 2025: {...}}
 let _activeYear = null;
 
-// Filiais com estrutura especial: compartilham CNPJ com polo industrial/fábrica.
-// As despesas dessas filiais incluem custos industriais que não são comparáveis
-// com despesas operacionais das demais filiais. São excluídas dos rankings,
-// gráficos de discrepância e comparativo entre filiais, mas mantidas nos totais
-// consolidados de faturamento e resultado.
+// Filiais especiais: compartilham CNPJ com polo industrial/fábrica.
+// Aparecem no gráfico "% Despesa / Fat por Filial" (para visibilidade dos gastos),
+// mas ficam FORA dos rankings, comparativo entre filiais e alertas de meta —
+// pois seus custos industriais distorcem a comparação operacional.
 const _FIL_ESPECIAIS = [25]; // FCB Cuiabá (polo industrial + filial no mesmo CNPJ)
 const _SIGLAS_EXCLUIR   = new Set(['F2','FAP','F18','F33','GRA']);
 const _REGIONAIS_EXCLUIR = new Set(['ANNAPAULLA GARCIA','EVANDRO MACEDO','HENISLEY SABINO','N/D']);
+let _discOcultasIds = new Set(); // IDs ocultos pelo usuário no gráfico % por filial
+
+function _isFilialEspecial(f){
+  return _FIL_ESPECIAIS.includes(Number(f.ID_FILIAL));
+}
 
 function _isFilialExcluida(f){
-  if(_FIL_ESPECIAIS.includes(Number(f.ID_FILIAL))) return true;
+  if(_isFilialEspecial(f)) return true;
   if(_SIGLAS_EXCLUIR.has(String(f.SIGLA||'').trim().toUpperCase())) return true;
   if(_REGIONAIS_EXCLUIR.has(String(f.REGIONAL||'').trim().toUpperCase())) return true;
   return false;
 }
-
-function _isFilialEspecial(f){ return _isFilialExcluida(f); }
 
 function _filiaisComparaveis(){
   return (DATA && DATA.filiais) ? DATA.filiais.filter(f=>!_isFilialExcluida(f)) : [];
@@ -996,9 +1004,68 @@ function _filiaisComparaveis(){
 
 function _applyGlobalExclusions(){
   if(!DATA) return;
+  // Guardar especiais antes de remover — aparecem no gráfico % mas não no comparativo
+  DATA.filiais_especiais = (DATA.filiais||[]).filter(f=>_isFilialEspecial(f));
   DATA.filiais   = (DATA.filiais||[]).filter(f=>!_isFilialExcluida(f));
   DATA.regionais = (DATA.regionais||[]).filter(r=>!_REGIONAIS_EXCLUIR.has(String(r.REGIONAL||'').trim().toUpperCase()));
   DATA.auditores = (DATA.auditores||[]).filter(a=>!_REGIONAIS_EXCLUIR.has(String(a.AUDITOR||'').trim().toUpperCase()));
+}
+
+// Retorna comparáveis + especiais, excluindo as ocultas pelo usuário
+function _filiaisParaDisc(){
+  const todas=[..._filiaisComparaveis(),...(DATA&&DATA.filiais_especiais?DATA.filiais_especiais:[])];
+  return todas.filter(f=>!_discOcultasIds.has(Number(f.ID_FILIAL)));
+}
+
+function _toggleDiscFilial(id,vis){
+  if(vis) _discOcultasIds.delete(id); else _discOcultasIds.add(id);
+  _syncDiscSelAll();
+  _updateDiscFiltroLabel();
+  renderDiscrepancia();
+}
+
+function _discToggleAll(vis){
+  _discOcultasIds.clear();
+  if(!vis){
+    [..._filiaisComparaveis(),...(DATA&&DATA.filiais_especiais?DATA.filiais_especiais:[])].forEach(f=>_discOcultasIds.add(Number(f.ID_FILIAL)));
+  }
+  document.querySelectorAll('#dd-disc-fil-panel .chk-disc-fil').forEach(c=>c.checked=vis);
+  _updateDiscFiltroLabel();
+  renderDiscrepancia();
+}
+
+function _syncDiscSelAll(){
+  const all=document.querySelector('#dd-disc-fil-panel #disc-sel-all');
+  if(!all) return;
+  all.checked=_discOcultasIds.size===0;
+}
+
+function _updateDiscFiltroLabel(){
+  if(!DATA) return;
+  const tot=_filiaisComparaveis().length+(DATA.filiais_especiais||[]).length;
+  const vis=tot-_discOcultasIds.size;
+  const el=document.getElementById('disc-filtro-label');
+  if(el) el.textContent=_discOcultasIds.size===0?'Todas':`${vis} de ${tot}`;
+}
+
+function _buildDiscFiltro(){
+  if(!DATA) return;
+  const panel=document.getElementById('dd-disc-fil-panel');
+  if(!panel) return;
+  _discOcultasIds.clear();
+  const comp=_filiaisComparaveis();
+  const esp=DATA.filiais_especiais||[];
+  const todas=[...comp,...esp].sort((a,b)=>(a.LOJA||a.SIGLA||'').localeCompare(b.LOJA||b.SIGLA||''));
+  let html=`<label class="chk-dd-item item-all"><input type="checkbox" id="disc-sel-all" checked onchange="_discToggleAll(this.checked)"> Todas</label><div style="border-top:1px solid var(--border-strong);margin:4px 0"></div>`;
+  todas.forEach(f=>{
+    const id=Number(f.ID_FILIAL);
+    const nome=f.LOJA||f.SIGLA||String(f.ID_FILIAL);
+    const isEsp=_isFilialEspecial(f);
+    const tag=isEsp?` <span style="font-size:10px;background:rgba(245,158,11,.18);color:#F59E0B;padding:1px 5px;border-radius:4px;vertical-align:middle">não comparável</span>`:'';
+    html+=`<label class="chk-dd-item"><input type="checkbox" class="chk-disc-fil" checked onchange="_toggleDiscFilial(${id},this.checked)"> ${nome}${tag}</label>`;
+  });
+  panel.innerHTML=html;
+  _updateDiscFiltroLabel();
 }
 
 function toggleHideAuditor(checked){
@@ -1160,6 +1227,7 @@ function initAll(){
   renderKPIs(m);
   renderTop3();
   renderCharts();
+  _buildDiscFiltro();
   renderTabFiliais(DATA.filiais);
   renderTabRegional();
   renderAnalise();
@@ -1387,7 +1455,9 @@ function _discColor(perc, avg){
 
 function renderDiscrepancia(){
   destroyChart('ch-disc');
-  const sorted=[..._filiaisComparaveis()].sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
+  if(!DATA) return;
+  const especiaisIds=new Set(_FIL_ESPECIAIS.map(Number));
+  const sorted=[..._filiaisParaDisc()].sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
   const avg=DATA.meta.perc_desp_real;
   const ctx=document.getElementById('ch-disc').getContext('2d');
   charts_reg['ch-disc']=new Chart(ctx,{
@@ -1395,14 +1465,15 @@ function renderDiscrepancia(){
     data:{
       labels:sorted.map(f=>f.LOJA||f.SIGLA||String(f.ID_FILIAL)),
       datasets:[{label:'% Desp/Fat',data:sorted.map(f=>f.PERC_DESP),
-        backgroundColor:sorted.map(f=>_discColor(f.PERC_DESP,avg)),borderRadius:4}]
+        backgroundColor:sorted.map(f=>especiaisIds.has(Number(f.ID_FILIAL))?'rgba(245,158,11,.8)':_discColor(f.PERC_DESP,avg)),
+        borderRadius:4}]
     },
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},
         tooltip:{callbacks:{
           title:cs=>{ const f=sorted[cs[0].dataIndex]; return (f.LOJA?`${f.SIGLA} — ${f.LOJA}`:f.SIGLA)||f.ID_FILIAL; },
           label:c=>`% Desp/Fat: ${c.raw.toFixed(2)}%`,
-          afterLabel:c=>{ const f=sorted[c.dataIndex]; return `Regional: ${f.REGIONAL||'—'}`; }
+          afterLabel:c=>{ const f=sorted[c.dataIndex]; const esp=especiaisIds.has(Number(f.ID_FILIAL)); return `Regional: ${f.REGIONAL||'—'}`+(esp?' | ⚠ não entra no comparativo':''); }
         }},
         annotation:{annotations:{avgLine:{type:'line',yMin:avg,yMax:avg,borderColor:'#F2A900',borderWidth:2,
           label:{display:true,content:`Média ${avg.toFixed(1)}%`,position:'end',
@@ -1414,7 +1485,8 @@ function renderDiscrepancia(){
 }
 
 async function exportDiscrepanciaHD(){
-  const sorted=[..._filiaisComparaveis()].sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
+  const especiaisIds=new Set(_FIL_ESPECIAIS.map(Number));
+  const sorted=[..._filiaisParaDisc()].sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
   const avg=DATA.meta.perc_desp_real;
   const W=3200,H=1400;
   const tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H;
@@ -1432,7 +1504,7 @@ async function exportDiscrepanciaHD(){
     type:'bar',
     data:{labels:sorted.map(f=>f.LOJA||f.SIGLA||String(f.ID_FILIAL)),
           datasets:[{label:'% Desp/Fat',data:sorted.map(f=>f.PERC_DESP),
-            backgroundColor:sorted.map(f=>_discColor(f.PERC_DESP,avg)),borderRadius:6}]},
+            backgroundColor:sorted.map(f=>especiaisIds.has(Number(f.ID_FILIAL))?'rgba(245,158,11,.85)':_discColor(f.PERC_DESP,avg)),borderRadius:6}]},
     options:{animation:false,responsive:false,
       plugins:{legend:{display:false},tooltip:{enabled:false},
         annotation:{annotations:{avgLine:{type:'line',yMin:avg,yMax:avg,borderColor:'#F2A900',borderWidth:3}}}},
@@ -2859,6 +2931,10 @@ OUT            = 'aqm_data.json'
 #   2026  -> exporta SOMENTE o ano informado
 ANO_REFERENCIA = None
 
+# Filiais especiais: aparecem no gráfico % Despesa/Faturamento por Filial
+# mas ficam fora dos rankings e comparativo (custos industriais não comparáveis).
+FIL_ESPECIAIS_IDS = {25}  # 25 = FCB Cuiabá (polo industrial + filial no mesmo CNPJ)
+
 
 def encontrar_arquivo(nome_esperado, pistas):
     if os.path.exists(nome_esperado):
@@ -2981,6 +3057,7 @@ def processar_ano(d_ano, r, ano_alvo):
         'meta': {
             'periodo':          periodo_str,
             'ano':              int(ano_alvo),
+            'fil_especiais_ids': sorted(FIL_ESPECIAIS_IDS),
             'filiais_count':    int(len(filiais)),
             'tot_fat_real':     round(tot_fat_real,  2),
             'tot_fat_prev':     round(tot_fat_prev,  2),
