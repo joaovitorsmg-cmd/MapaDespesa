@@ -1105,6 +1105,7 @@ function isDark(){
 }
 
 function applyChartTheme(forceDark){
+  if(typeof Chart==='undefined') return; // CDN ainda não carregado
   const dark = (forceDark !== undefined) ? forceDark : isDark();
   Chart.defaults.color = dark ? '#B8C4DA' : '#555';
   Chart.defaults.borderColor = dark ? '#28324A' : '#e6e6e6';
@@ -1493,8 +1494,22 @@ async function exportDiscrepanciaHD(){
   document.body.appendChild(tmp);
   const labelPlugin={id:'barLabels',afterDatasetsDraw(chart){
     const c=chart.ctx,ds=chart.data.datasets[0];
-    c.save(); c.font='bold 24px Arial'; c.textAlign='center'; c.textBaseline='bottom'; c.fillStyle='#111';
-    chart.getDatasetMeta(0).data.forEach((bar,i)=>{ c.fillText(ds.data[i].toFixed(1)+'%',bar.x,bar.y-4); });
+    c.save();
+    c.font='bold 28px Arial'; c.textAlign='center';
+    chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+      const txt=ds.data[i].toFixed(1)+'%';
+      const tw=c.measureText(txt).width;
+      const px=bar.x, py=bar.y-8;
+      const ph=32, pw=tw+16, prx=px-pw/2, pry=py-ph;
+      // fundo branco atrás do percentual
+      c.fillStyle='rgba(255,255,255,.92)';
+      c.fillRect(prx,pry,pw,ph);
+      c.strokeStyle='rgba(0,0,0,.08)'; c.lineWidth=1;
+      c.strokeRect(prx,pry,pw,ph);
+      // texto
+      c.fillStyle='#111'; c.textBaseline='bottom';
+      c.fillText(txt,px,py);
+    });
     c.restore();
   }};
   const bgPlugin={id:'bgwhite',beforeDraw(chart){
@@ -1504,15 +1519,17 @@ async function exportDiscrepanciaHD(){
     type:'bar',
     data:{labels:sorted.map(f=>f.LOJA||f.SIGLA||String(f.ID_FILIAL)),
           datasets:[{label:'% Desp/Fat',data:sorted.map(f=>f.PERC_DESP),
-            backgroundColor:sorted.map(f=>especiaisIds.has(Number(f.ID_FILIAL))?'rgba(245,158,11,.85)':_discColor(f.PERC_DESP,avg)),borderRadius:6}]},
+            backgroundColor:sorted.map(f=>especiaisIds.has(Number(f.ID_FILIAL))?'rgba(245,158,11,.85)':_discColor(f.PERC_DESP,avg)),
+            borderRadius:6, barPercentage:0.5, categoryPercentage:0.85}]},
     options:{animation:false,responsive:false,
+      layout:{padding:{top:20,bottom:10}},
       plugins:{legend:{display:false},tooltip:{enabled:false},
         annotation:{annotations:{avgLine:{type:'line',yMin:avg,yMax:avg,borderColor:'#F2A900',borderWidth:3}}}},
       scales:{
-        y:{ticks:{callback:v=>v+'%',font:{size:20},color:'#111'},
-           title:{display:true,text:'% Despesa / Faturamento',font:{size:22,weight:'bold'},color:'#111'},
+        y:{ticks:{callback:v=>v+'%',font:{size:22,weight:'bold'},color:'#111'},
+           title:{display:true,text:'% Despesa / Faturamento',font:{size:24,weight:'bold'},color:'#111'},
            grid:{display:false}},
-        x:{ticks:{font:{size:14,weight:'bold'},color:'#111',maxRotation:45,minRotation:45},grid:{display:false}}},
+        x:{ticks:{font:{size:18,weight:'bold'},color:'#000',maxRotation:75,minRotation:60},grid:{display:false}}},
     plugins:[labelPlugin,bgPlugin]
   });
   await new Promise(r=>setTimeout(r,250));
@@ -2110,21 +2127,22 @@ async function captureAndDownload(el, filename){
   root.setAttribute('data-theme', 'light');
   applyChartTheme(false); // falso = light
 
-  // Ocultar linhas de grade de todos os charts durante a captura
-  const gridStates = Object.values(charts_reg).map(c=>{
-    const saved = {};
-    if(c && c.options && c.options.scales){
-      Object.entries(c.options.scales).forEach(([k,s])=>{
-        saved[k] = s.grid ? s.grid.display : undefined;
-        if(!s.grid) s.grid={};
-        s.grid.display = false;
-      });
-      c.update('none');
-    }
-    return {chart:c, saved};
-  });
-
+  let gridStates = [];
   try{
+    // Ocultar linhas de grade de todos os charts durante a captura
+    gridStates = Object.values(charts_reg).filter(Boolean).map(c=>{
+      const saved = {};
+      if(c.options && c.options.scales){
+        Object.entries(c.options.scales).forEach(([k,s])=>{
+          saved[k] = s.grid ? s.grid.display : undefined;
+          if(!s.grid) s.grid={};
+          s.grid.display = false;
+        });
+        try{ c.update('none'); }catch(_){}
+      }
+      return {chart:c, saved};
+    });
+
     let bgColor = EXPORT_TRANSPARENT ? null : '#ffffff';
     const canvas=await html2canvas(el,{
       scale:4,
@@ -2143,10 +2161,12 @@ async function captureAndDownload(el, filename){
     gridStates.forEach(({chart,saved})=>{
       if(chart && chart.options && chart.options.scales){
         Object.entries(saved).forEach(([k,v])=>{
-          if(v===undefined) delete chart.options.scales[k].grid;
-          else chart.options.scales[k].grid.display = v;
+          if(chart.options.scales[k]){
+            if(v===undefined) delete chart.options.scales[k].grid;
+            else chart.options.scales[k].grid.display = v;
+          }
         });
-        chart.update('none');
+        try{ chart.update('none'); }catch(_){}
       }
     });
     if(prevTheme) root.setAttribute('data-theme', prevTheme);
