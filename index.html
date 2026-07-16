@@ -1486,7 +1486,6 @@ function renderDiscrepancia(){
 }
 
 async function exportDiscrepanciaHD(){
-  const especiaisIds=new Set(_FIL_ESPECIAIS.map(Number));
   const sorted=[..._filiaisParaDisc()].sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
   const avg=DATA.meta.perc_desp_real;
   const W=3200,H=1400;
@@ -1519,7 +1518,7 @@ async function exportDiscrepanciaHD(){
     type:'bar',
     data:{labels:sorted.map(f=>f.LOJA||f.SIGLA||String(f.ID_FILIAL)),
           datasets:[{label:'% Desp/Fat',data:sorted.map(f=>f.PERC_DESP),
-            backgroundColor:sorted.map(f=>especiaisIds.has(Number(f.ID_FILIAL))?'rgba(245,158,11,.85)':_discColor(f.PERC_DESP,avg)),
+            backgroundColor:sorted.map(f=>_discColor(f.PERC_DESP,avg)),
             borderRadius:6, barPercentage:0.5, categoryPercentage:0.85}]},
     options:{animation:false,responsive:false,
       layout:{padding:{top:20,bottom:10}},
