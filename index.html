@@ -301,6 +301,18 @@ body.presentation-mode .content{padding-top:16px}
 .cmp-yr-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;margin-right:4px}
 .badge-y1{background:rgba(13,71,161,.15);color:#0D47A1}
 .badge-y2{background:rgba(0,43,91,.18);color:#002B5B}
+/* ---- Tabelas ordenáveis ---- */
+th[onclick]{cursor:pointer;user-select:none;transition:background .15s}
+th[onclick]:hover{background:rgba(13,71,161,.06)}
+th.sort-active{background:rgba(13,71,161,.08)}
+th.sort-asc::after{content:' ▲';font-size:9px;color:var(--accent-text);opacity:.8}
+th.sort-desc::after{content:' ▼';font-size:9px;color:var(--accent-text);opacity:.8}
+/* ---- Tooltips de cabeçalho ---- */
+th[data-tip]{position:relative}
+th[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#1a2744;color:#e2e8f0;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:400;white-space:pre-wrap;max-width:220px;width:max-content;display:none;z-index:200;line-height:1.4;box-shadow:0 2px 8px rgba(0,0,0,.35);pointer-events:none;text-align:left}
+th[data-tip]:hover::after{display:block}
+/* ---- Aba Mensal ---- */
+.mensal-nota{font-size:12px;color:var(--text-muted);margin:8px 0 16px;padding:8px 12px;background:rgba(13,71,161,.06);border-radius:6px;border-left:3px solid var(--azul-cl)}
 </style>
 </head>
 <body>
@@ -339,6 +351,7 @@ body.presentation-mode .content{padding-top:16px}
   <div class="tab" onclick="switchTab('tab-grupos')" id="tab-grupos">📂 Grupos de Conta</div>
   <div class="tab" onclick="switchTab('tab-comparativo')" id="tab-comparativo">⚖️ Comparativo Filiais</div>
   <div class="tab" onclick="switchTab('tab-analise')" id="tab-analise">🔍 Análise Detalhada</div>
+  <div class="tab" onclick="switchTab('tab-mensal')" id="tab-mensal">📅 Mensal</div>
   <div class="tab" onclick="switchTab('tab-upload')" id="tab-upload">🔄 Atualizar Base</div>
 </div>
 
@@ -553,18 +566,18 @@ body.presentation-mode .content{padding-top:16px}
     <table id="tbl-filiais">
       <thead>
         <tr>
-          <th>Filial</th>
-          <th>Loja</th>
-          <th>Regional</th>
-          <th class="col-auditor">Auditor</th>
-          <th class="num">Fat. Realizado</th>
-          <th class="num">Fat. Planejado</th>
-          <th class="num">Desv. Fat %</th>
-          <th class="num">Desp. Realizada</th>
-          <th class="num">Desp. Planejada</th>
-          <th class="num">Desv. Desp %</th>
-          <th class="num">% Desp/Fat</th>
-          <th class="num">Tendência</th>
+          <th onclick="sortTbl(this,'tbl-filiais')" data-tip="Sigla da filial">Filial</th>
+          <th onclick="sortTbl(this,'tbl-filiais')" data-tip="Nome da loja/unidade">Loja</th>
+          <th onclick="sortTbl(this,'tbl-filiais')" data-tip="Gerente Regional responsável pela filial">Regional</th>
+          <th class="col-auditor" onclick="sortTbl(this,'tbl-filiais')" data-tip="Auditor / supervisor responsável">Auditor</th>
+          <th class="num" onclick="sortTbl(this,'tbl-filiais')" data-tip="Faturamento bruto realizado no período">Fat. Realizado</th>
+          <th class="num" onclick="sortTbl(this,'tbl-filiais')" data-tip="Faturamento orçado para o mesmo período">Fat. Planejado</th>
+          <th class="num" onclick="sortTbl(this,'tbl-filiais')" data-tip="Desvio do faturamento vs. orçado&#10;Positivo = acima do plano ✓&#10;Negativo = abaixo do plano ✗">Desv. Fat %</th>
+          <th class="num" onclick="sortTbl(this,'tbl-filiais')" data-tip="Despesas totais realizadas no período">Desp. Realizada</th>
+          <th class="num" onclick="sortTbl(this,'tbl-filiais')" data-tip="Despesas orçadas para o mesmo período">Desp. Planejada</th>
+          <th class="num" onclick="sortTbl(this,'tbl-filiais')" data-tip="Desvio das despesas vs. orçado&#10;Positivo = gastou mais que o plano ✗&#10;Negativo = gastou menos que o plano ✓">Desv. Desp %</th>
+          <th class="num" onclick="sortTbl(this,'tbl-filiais')" data-tip="Proporção despesas / faturamento&#10;Limite máximo: 12%&#10;Verde ≤12% | Amarelo 12-16% | Vermelho >16%">% Desp/Fat</th>
+          <th class="num" data-tip="Tendência mensal do faturamento realizado">Tendência</th>
           <th></th>
         </tr>
       </thead>
@@ -632,14 +645,14 @@ body.presentation-mode .content{padding-top:16px}
     <table id="tbl-regional">
       <thead>
         <tr>
-          <th>Regional</th>
-          <th class="num">Fat. Realizado</th>
-          <th class="num">Fat. Planejado</th>
-          <th class="num">Desv. Fat %</th>
-          <th class="num">Desp. Realizada</th>
-          <th class="num">Desp. Planejada</th>
-          <th class="num">Desv. Desp %</th>
-          <th class="num">% Desp/Fat</th>
+          <th onclick="sortTbl(this,'tbl-regional')">Regional</th>
+          <th class="num" onclick="sortTbl(this,'tbl-regional')" data-tip="Faturamento bruto realizado no período">Fat. Realizado</th>
+          <th class="num" onclick="sortTbl(this,'tbl-regional')" data-tip="Faturamento orçado para o mesmo período">Fat. Planejado</th>
+          <th class="num" onclick="sortTbl(this,'tbl-regional')" data-tip="Desvio do faturamento vs. orçado">Desv. Fat %</th>
+          <th class="num" onclick="sortTbl(this,'tbl-regional')" data-tip="Despesas totais realizadas">Desp. Realizada</th>
+          <th class="num" onclick="sortTbl(this,'tbl-regional')" data-tip="Despesas orçadas para o período">Desp. Planejada</th>
+          <th class="num" onclick="sortTbl(this,'tbl-regional')" data-tip="Desvio das despesas vs. orçado&#10;Positivo = gastou mais que o plano ✗">Desv. Desp %</th>
+          <th class="num" onclick="sortTbl(this,'tbl-regional')" data-tip="% Despesas/Faturamento — limite máximo: 12%">% Desp/Fat</th>
           <th></th>
         </tr>
       </thead>
@@ -658,12 +671,12 @@ body.presentation-mode .content{padding-top:16px}
     <table id="tbl-auditor">
       <thead>
         <tr>
-          <th>Auditor</th>
-          <th class="num">Fat. Realizado</th>
-          <th class="num">Fat. Planejado</th>
-          <th class="num">Desp. Realizada</th>
-          <th class="num">Desp. Planejada</th>
-          <th class="num">% Desp/Fat</th>
+          <th onclick="sortTbl(this,'tbl-auditor')">Auditor</th>
+          <th class="num" onclick="sortTbl(this,'tbl-auditor')" data-tip="Faturamento bruto realizado">Fat. Realizado</th>
+          <th class="num" onclick="sortTbl(this,'tbl-auditor')" data-tip="Faturamento orçado">Fat. Planejado</th>
+          <th class="num" onclick="sortTbl(this,'tbl-auditor')" data-tip="Despesas totais realizadas">Desp. Realizada</th>
+          <th class="num" onclick="sortTbl(this,'tbl-auditor')" data-tip="Despesas orçadas para o período">Desp. Planejada</th>
+          <th class="num" onclick="sortTbl(this,'tbl-auditor')" data-tip="% Despesas/Faturamento — limite máximo: 12%">% Desp/Fat</th>
         </tr>
       </thead>
       <tbody id="body-auditor"></tbody>
@@ -717,12 +730,12 @@ body.presentation-mode .content{padding-top:16px}
     <table id="tbl-grupos">
       <thead>
         <tr>
-          <th>Grupo de Conta</th>
-          <th class="num">Realizado</th>
-          <th class="num">Planejado</th>
-          <th class="num">Desvio R$</th>
-          <th class="num">Desvio %</th>
-          <th class="num">% Total Desp</th>
+          <th onclick="sortTbl(this,'tbl-grupos')" data-tip="Nome do grupo de despesa">Grupo de Conta</th>
+          <th class="num" onclick="sortTbl(this,'tbl-grupos')" data-tip="Valor total despendido no período">Realizado</th>
+          <th class="num" onclick="sortTbl(this,'tbl-grupos')" data-tip="Valor orçado para o mesmo período">Planejado</th>
+          <th class="num" onclick="sortTbl(this,'tbl-grupos')" data-tip="Diferença em R$ entre realizado e planejado&#10;Positivo = acima do orçado">Desvio R$</th>
+          <th class="num" onclick="sortTbl(this,'tbl-grupos')" data-tip="Desvio percentual em relação ao orçado&#10;Positivo = acima do orçado ✗">Desvio %</th>
+          <th class="num" onclick="sortTbl(this,'tbl-grupos')" data-tip="Participação deste grupo no total de despesas">% Total Desp</th>
         </tr>
       </thead>
       <tbody id="body-grupos"></tbody>
@@ -813,12 +826,12 @@ body.presentation-mode .content{padding-top:16px}
     <table id="tbl-comparativo">
       <thead>
         <tr>
-          <th>Filial</th>
-          <th>Loja</th>
-          <th>Regional</th>
-          <th class="num">Fat. Realizado</th>
-          <th class="num">% Desp/Fat</th>
-          <th>Grupo (faixa de faturamento parecido)</th>
+          <th onclick="sortTbl(this,'tbl-comparativo')">Filial</th>
+          <th onclick="sortTbl(this,'tbl-comparativo')">Loja</th>
+          <th onclick="sortTbl(this,'tbl-comparativo')">Regional</th>
+          <th class="num" onclick="sortTbl(this,'tbl-comparativo')" data-tip="Faturamento bruto realizado">Fat. Realizado</th>
+          <th class="num" onclick="sortTbl(this,'tbl-comparativo')" data-tip="% Despesas/Faturamento — limite máximo: 12%&#10;Comparado com filiais de faturamento parecido">% Desp/Fat</th>
+          <th onclick="sortTbl(this,'tbl-comparativo')" data-tip="Grupo de filiais com faturamento similar (±tolerância %)">Grupo (faixa de faturamento parecido)</th>
         </tr>
       </thead>
       <tbody id="body-comparativo"></tbody>
@@ -918,6 +931,29 @@ body.presentation-mode .content{padding-top:16px}
       </table>
     </div>
   </div>
+</div>
+
+<!-- ======================== TAB: MENSAL ======================== -->
+<div class="content" id="content-tab-mensal">
+  <div class="filters">
+    <div class="f-group">
+      <label>Mês de referência</label>
+      <select id="sel-mensal-mes" onchange="renderTabMensal()">
+        <option value="">Selecione o mês...</option>
+      </select>
+    </div>
+    <div class="f-group">
+      <label>Visão</label>
+      <select id="sel-mensal-visao" onchange="renderTabMensal()">
+        <option value="filial">Por Filial</option>
+        <option value="regional">Por Regional</option>
+        <option value="auditor">Por Auditor</option>
+      </select>
+    </div>
+  </div>
+  <p class="mensal-nota">💡 <strong>Análise mensal isolada:</strong> mostra quem desviou mais/menos no mês selecionado e a saúde de cada filial em relação ao limite de 12%. Para análise de grupos de conta por mês, importe o <em>aqm_data.json</em> gerado pelo Python.</p>
+  <div id="mensal-cards" class="kpi-grid" style="margin:12px 0 16px"></div>
+  <div id="mensal-ranking"></div>
 </div>
 
 <!-- ======================== TAB: UPLOAD ======================== -->
@@ -1144,6 +1180,37 @@ darkModeQuery.addEventListener('change', ()=>{
 });
 
 // =========================================================
+// TABELAS — ordenação por coluna clicável
+// =========================================================
+let _sortState = {};
+function sortTbl(th, tableId){
+  const allTh=[...th.closest('thead').querySelectorAll('th')];
+  const col=allTh.indexOf(th);
+  const st=_sortState[tableId]||{col:-1,asc:true};
+  const asc=st.col===col?!st.asc:true;
+  _sortState[tableId]={col,asc};
+  allTh.forEach((t,i)=>{
+    t.classList.remove('sort-asc','sort-desc','sort-active');
+    if(i===col) t.classList.add('sort-active',asc?'sort-asc':'sort-desc');
+  });
+  const tbody=document.querySelector(`#${tableId} tbody`);
+  if(!tbody) return;
+  const rows=[...tbody.rows];
+  rows.sort((a,b)=>{
+    const ca=a.cells[col],cb=b.cells[col];
+    if(!ca||!cb) return 0;
+    let va=(ca.textContent||'').trim();
+    let vb=(cb.textContent||'').trim();
+    // tenta parse numérico (remove símbolos de moeda, espaços, troca , por .)
+    const na=parseFloat(va.replace(/[^\d,.\-]/g,'').replace(/\.(?=.*\.)/g,'').replace(',','.'));
+    const nb=parseFloat(vb.replace(/[^\d,.\-]/g,'').replace(/\.(?=.*\.)/g,'').replace(',','.'));
+    if(!isNaN(na)&&!isNaN(nb)) return asc?na-nb:nb-na;
+    return asc?va.localeCompare(vb,'pt-BR'):vb.localeCompare(va,'pt-BR');
+  });
+  tbody.append(...rows);
+}
+
+// =========================================================
 // EXPORTAÇÃO — controle de fundo (branco ou transparente)
 // =========================================================
 let EXPORT_TRANSPARENT = false;
@@ -1166,6 +1233,7 @@ function switchTab(id){
   document.getElementById(id).classList.add('active');
   document.getElementById('content-'+id).classList.add('active');
   if(id==='tab-analise'&&DATA) renderAnalise();
+  if(id==='tab-mensal'&&DATA){ _populateMensalSel(); renderTabMensal(); }
 }
 
 // =========================================================
@@ -1235,6 +1303,7 @@ function initAll(){
   renderTabGrupos();
   renderComparativo();
   updateCardGeral(m);
+  _populateMensalSel();
   _updateThemeBtn();
   if(_firstLoad){_firstLoad=false;_applyUrlFilters();}
 }
@@ -1460,13 +1529,31 @@ function renderDiscrepancia(){
   const especiaisIds=new Set(_FIL_ESPECIAIS.map(Number));
   const sorted=[..._filiaisParaDisc()].sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
   const avg=DATA.meta.perc_desp_real;
+  // Linhas de referência desenhadas via plugin inline (sem necessidade de chartjs-plugin-annotation)
+  const refPlugin={id:'discRefLines',afterDraw(chart){
+    const {ctx,chartArea:ca,scales:{y}}=chart;
+    if(!y||!ca) return;
+    const drawLine=(val,color,dash,label)=>{
+      const yp=y.getPixelForValue(val);
+      if(yp<ca.top||yp>ca.bottom) return;
+      ctx.save();
+      ctx.beginPath();ctx.moveTo(ca.left,yp);ctx.lineTo(ca.right,yp);
+      ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.setLineDash(dash);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle=color;ctx.font='bold 10px Arial';ctx.textAlign='right';ctx.textBaseline='bottom';
+      ctx.fillText(label,ca.right-2,yp-2);
+      ctx.restore();
+    };
+    drawLine(_LIMITE_META,'#1B8A3C',[5,4],`Limite ${_LIMITE_META}%`);
+    drawLine(avg,'#F2A900',[5,4],`Média ${avg.toFixed(1)}%`);
+  }};
   const ctx=document.getElementById('ch-disc').getContext('2d');
   charts_reg['ch-disc']=new Chart(ctx,{
     type:'bar',
     data:{
       labels:sorted.map(f=>f.LOJA||f.SIGLA||String(f.ID_FILIAL)),
       datasets:[{label:'% Desp/Fat',data:sorted.map(f=>f.PERC_DESP),
-        backgroundColor:sorted.map(f=>especiaisIds.has(Number(f.ID_FILIAL))?'rgba(245,158,11,.8)':_discColor(f.PERC_DESP,avg)),
+        backgroundColor:sorted.map(f=>_discColor(f.PERC_DESP,avg)),
         borderRadius:4}]
     },
     options:{responsive:true,maintainAspectRatio:false,
@@ -1475,13 +1562,11 @@ function renderDiscrepancia(){
           title:cs=>{ const f=sorted[cs[0].dataIndex]; return (f.LOJA?`${f.SIGLA} — ${f.LOJA}`:f.SIGLA)||f.ID_FILIAL; },
           label:c=>`% Desp/Fat: ${c.raw.toFixed(2)}%`,
           afterLabel:c=>{ const f=sorted[c.dataIndex]; const esp=especiaisIds.has(Number(f.ID_FILIAL)); return `Regional: ${f.REGIONAL||'—'}`+(esp?' | ⚠ não entra no comparativo':''); }
-        }},
-        annotation:{annotations:{avgLine:{type:'line',yMin:avg,yMax:avg,borderColor:'#F2A900',borderWidth:2,
-          label:{display:true,content:`Média ${avg.toFixed(1)}%`,position:'end',
-            backgroundColor:'rgba(242,169,0,.15)',color:'#F2A900',font:{size:10,weight:'bold'},padding:4}}}}},
+        }}},
       scales:{y:{ticks:{callback:v=>v+'%',font:{size:10}},
                  grid:{color:isDark()?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)'}},
-              x:{ticks:{font:{size:8},maxRotation:50,minRotation:40}}}}
+              x:{ticks:{font:{size:8},maxRotation:50,minRotation:40}}}},
+    plugins:[refPlugin]
   });
 }
 
@@ -1514,6 +1599,23 @@ async function exportDiscrepanciaHD(){
   const bgPlugin={id:'bgwhite',beforeDraw(chart){
     const c=chart.ctx; c.save(); c.fillStyle='#ffffff'; c.fillRect(0,0,W,H); c.restore();
   }};
+  const hdRefPlugin={id:'hdRef',afterDraw(chart){
+    const {ctx,chartArea:ca,scales:{y}}=chart;
+    if(!y||!ca) return;
+    const draw=(val,color,lbl)=>{
+      const yp=y.getPixelForValue(val);
+      if(yp<ca.top||yp>ca.bottom) return;
+      ctx.save();
+      ctx.beginPath();ctx.moveTo(ca.left,yp);ctx.lineTo(ca.right,yp);
+      ctx.strokeStyle=color;ctx.lineWidth=3;ctx.setLineDash([10,8]);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle=color;ctx.font='bold 22px Arial';ctx.textAlign='right';ctx.textBaseline='bottom';
+      ctx.fillText(lbl,ca.right-4,yp-4);
+      ctx.restore();
+    };
+    draw(_LIMITE_META,'#1B8A3C',`Limite ${_LIMITE_META}%`);
+    draw(avg,'#F2A900',`Média ${avg.toFixed(1)}%`);
+  }};
   const ch=new Chart(tmp.getContext('2d'),{
     type:'bar',
     data:{labels:sorted.map(f=>f.LOJA||f.SIGLA||String(f.ID_FILIAL)),
@@ -1529,7 +1631,7 @@ async function exportDiscrepanciaHD(){
            title:{display:true,text:'% Despesa / Faturamento',font:{size:24,weight:'bold'},color:'#111'},
            grid:{display:false}},
         x:{ticks:{font:{size:18,weight:'bold'},color:'#000',maxRotation:75,minRotation:60},grid:{display:false}}}},
-    plugins:[labelPlugin,bgPlugin]
+    plugins:[labelPlugin,bgPlugin,hdRefPlugin]
   });
   await new Promise(r=>setTimeout(r,250));
   const a=document.createElement('a');
@@ -1632,7 +1734,7 @@ function renderTabFiliais(filiais){
       <td class="num">${fmtM(f.DESP_REAL)}</td>
       <td class="num">${fmtM(f.DESP_PREV)}</td>
       <td class="num ${clP(dd,true)}">${fmtP(dd)}</td>
-      <td class="num ${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</td>
+      <td class="num ${pctClass(f.PERC_DESP)}">${fmtP(f.PERC_DESP)}</td>
       <td style="padding:4px 8px"><canvas class="spk" data-fid="${f.ID_FILIAL}" width="80" height="26" style="display:block"></canvas></td>
       <td><button class="ico-mini" onclick="exportFilialCardPNG('${f.SIGLA}')" title="Exportar card desta filial"><span class="tooltip">Exportar card desta filial</span>🖼️</button></td>
     </tr>`;
@@ -1656,7 +1758,7 @@ function renderTabRegionalFiltered(regData, audData){
       <td class="num">${fmtM(r.DESP_REAL)}</td>
       <td class="num">${fmtM(r.DESP_PREV)}</td>
       <td class="num ${clP(dd,true)}">${fmtP(dd)}</td>
-      <td class="num ${r.PERC_DESP>20?'tx-neg':r.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(r.PERC_DESP)}</td>
+      <td class="num ${pctClass(r.PERC_DESP)}">${fmtP(r.PERC_DESP)}</td>
       <td><button class="ico-mini" onclick="exportRegionalCardPNG('${r.REGIONAL.replace(/'/g,"\\'")}')" title="Exportar card desta regional"><span class="tooltip">Exportar card desta regional</span>🖼️</button></td>
     </tr>`;
   }).join('');
@@ -1672,7 +1774,7 @@ function renderTabRegionalFiltered(regData, audData){
       <td class="num">${fmtM(a.FAT_PREV)}</td>
       <td class="num">${fmtM(a.DESP_REAL)}</td>
       <td class="num">${fmtM(a.DESP_PREV)}</td>
-      <td class="num ${a.PERC_DESP>20?'tx-neg':a.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(a.PERC_DESP)}</td>
+      <td class="num ${pctClass(a.PERC_DESP)}">${fmtP(a.PERC_DESP)}</td>
     </tr>`;
   }).join('');
 }
@@ -1694,6 +1796,180 @@ function renderTabGruposData(grupos){
       <td class="num">${totalDesp>0?((g.DESP_REAL/totalDesp)*100).toFixed(1)+'%':'—'}</td>
     </tr>`;
   }).join('');
+}
+
+// =========================================================
+// ABA MENSAL — ranking e saúde por mês
+// =========================================================
+function _populateMensalSel(){
+  const sel=document.getElementById('sel-mensal-mes');
+  if(!sel||!DATA) return;
+  const meses=(DATA.meses||[]).filter(m=>m.FAT_REAL>0);
+  sel.innerHTML='<option value="">Selecione o mês...</option>'+
+    meses.map(m=>`<option value="${m.MES}">${m.NOME}</option>`).join('');
+  if(meses.length) sel.value=meses[meses.length-1].MES;
+}
+
+function renderTabMensal(){
+  if(!DATA||!DATA.filiais_mes){ document.getElementById('mensal-cards').innerHTML='<div class="empty">Dados mensais não disponíveis.</div>'; return; }
+  const mes=+(document.getElementById('sel-mensal-mes')||{}).value||0;
+  const visao=(document.getElementById('sel-mensal-visao')||{}).value||'filial';
+  if(!mes){ document.getElementById('mensal-cards').innerHTML=''; document.getElementById('mensal-ranking').innerHTML=''; return; }
+  const nomeMes=(DATA.meses.find(m=>m.MES===mes)||{}).NOME||`M${mes}`;
+
+  if(visao==='regional'){
+    _renderMensalRegional(mes,nomeMes); return;
+  }
+  if(visao==='auditor'){
+    _renderMensalAuditor(mes,nomeMes); return;
+  }
+
+  // ---- visão por filial ----
+  const filMap=new Map();
+  (DATA.filiais||[]).forEach(f=>filMap.set(+f.ID_FILIAL,f));
+  (DATA.filiais_especiais||[]).forEach(f=>filMap.set(+f.ID_FILIAL,f));
+
+  const rows=DATA.filiais_mes
+    .filter(r=>r.MES===mes&&filMap.has(+r.ID_FILIAL)&&r.FAT_REAL>0)
+    .map(r=>{
+      const f=filMap.get(+r.ID_FILIAL);
+      const perc=r.FAT_REAL>0?(r.DESP_REAL/r.FAT_REAL*100):0;
+      const dDesp=r.DESP_PREV>0?((r.DESP_REAL-r.DESP_PREV)/r.DESP_PREV*100):0;
+      const dFat=r.FAT_PREV>0?((r.FAT_REAL-r.FAT_PREV)/r.FAT_PREV*100):0;
+      return{...r,SIGLA:f.SIGLA,LOJA:f.LOJA,REGIONAL:f.REGIONAL,AUDITOR:f.AUDITOR,PERC_DESP:perc,DESVIO_DESP:dDesp,DESVIO_FAT:dFat};
+    })
+    .sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
+
+  if(!rows.length){
+    document.getElementById('mensal-cards').innerHTML='<div class="empty">Sem dados de filiais para este mês.</div>';
+    document.getElementById('mensal-ranking').innerHTML=''; return;
+  }
+  const pior=rows[0],melhor=rows[rows.length-1];
+  const avgP=rows.reduce((s,r)=>s+r.PERC_DESP,0)/rows.length;
+  const acima=rows.filter(r=>r.PERC_DESP>_LIMITE_META).length;
+
+  document.getElementById('mensal-cards').innerHTML=`
+    <div class="kpi vermelho">
+      <div class="kpi-label">🔴 Maior % Desp/Fat — ${nomeMes}</div>
+      <div class="kpi-val">${fmtP(pior.PERC_DESP)}</div>
+      <div class="kpi-sub">${pior.SIGLA} — ${pior.LOJA||'—'} · ${pior.REGIONAL||'—'}</div>
+      ${badgeP(pior.DESVIO_DESP,true)}
+    </div>
+    <div class="kpi verde">
+      <div class="kpi-label">🟢 Menor % Desp/Fat — ${nomeMes}</div>
+      <div class="kpi-val">${fmtP(melhor.PERC_DESP)}</div>
+      <div class="kpi-sub">${melhor.SIGLA} — ${melhor.LOJA||'—'} · ${melhor.REGIONAL||'—'}</div>
+      ${badgeP(melhor.DESVIO_DESP,true)}
+    </div>
+    <div class="kpi ${avgP>_LIMITE_META?'vermelho':'verde'}">
+      <div class="kpi-label">📊 Média do Mês</div>
+      <div class="kpi-val">${avgP.toFixed(1)}%</div>
+      <div class="kpi-sub">Limite máximo: ${_LIMITE_META}%</div>
+    </div>
+    <div class="kpi ${acima>0?'vermelho':'verde'}">
+      <div class="kpi-label">⚠️ Acima de ${_LIMITE_META}% — ${nomeMes}</div>
+      <div class="kpi-val">${acima}</div>
+      <div class="kpi-sub">de ${rows.length} filiais com faturamento no mês</div>
+    </div>`;
+
+  document.getElementById('mensal-ranking').innerHTML=`
+    <div class="tbl-box">
+      <div class="tbl-box-head">
+        <h3>📅 Ranking por Filial — ${nomeMes}</h3>
+        <button class="ico-mini" onclick="exportTable('tbl-mensal','mensal_${nomeMes}')" title="Exportar PNG"><span class="tooltip">Exportar PNG</span>📥</button>
+      </div>
+      <table id="tbl-mensal">
+        <thead><tr>
+          <th onclick="sortTbl(this,'tbl-mensal')" data-tip="Sigla da filial">Filial</th>
+          <th onclick="sortTbl(this,'tbl-mensal')">Loja</th>
+          <th onclick="sortTbl(this,'tbl-mensal')">Regional</th>
+          <th onclick="sortTbl(this,'tbl-mensal')" class="col-auditor">Auditor</th>
+          <th class="num" onclick="sortTbl(this,'tbl-mensal')" data-tip="Faturamento realizado no mês">Fat. Real</th>
+          <th class="num" onclick="sortTbl(this,'tbl-mensal')" data-tip="Faturamento planejado para o mês">Fat. Plan</th>
+          <th class="num" onclick="sortTbl(this,'tbl-mensal')" data-tip="Desvio do faturamento vs. plano&#10;Positivo = acima do plano ✓">Desv. Fat%</th>
+          <th class="num" onclick="sortTbl(this,'tbl-mensal')" data-tip="Despesas realizadas no mês">Desp. Real</th>
+          <th class="num" onclick="sortTbl(this,'tbl-mensal')" data-tip="Despesas planejadas para o mês">Desp. Plan</th>
+          <th class="num" onclick="sortTbl(this,'tbl-mensal')" data-tip="Desvio das despesas vs. plano&#10;Positivo = gastou mais que o orçado ✗">Desv. Desp%</th>
+          <th class="num" onclick="sortTbl(this,'tbl-mensal')" data-tip="% Despesas/Faturamento — limite máximo: ${_LIMITE_META}%">% Desp/Fat</th>
+          <th class="num" onclick="sortTbl(this,'tbl-mensal')" data-tip="Status em relação ao limite de ${_LIMITE_META}%">Status</th>
+        </tr></thead>
+        <tbody>${rows.map(r=>{
+          const status=r.PERC_DESP<=_LIMITE_META
+            ?'<span class="kpi-badge badge-ok">✓ Dentro</span>'
+            :r.PERC_DESP<=16
+              ?'<span class="kpi-badge badge-warn">⚠ Atenção</span>'
+              :'<span class="kpi-badge badge-bad">✗ Crítico</span>';
+          return`<tr>
+            <td><span class="sigla">${r.SIGLA||r.ID_FILIAL}</span></td>
+            <td>${r.LOJA||'—'}</td><td>${r.REGIONAL||'—'}</td><td class="col-auditor">${r.AUDITOR||'—'}</td>
+            <td class="num">${fmtM(r.FAT_REAL)}</td><td class="num">${fmtM(r.FAT_PREV)}</td>
+            <td class="num ${clP(r.DESVIO_FAT)}">${fmtP(r.DESVIO_FAT)}</td>
+            <td class="num">${fmtM(r.DESP_REAL)}</td><td class="num">${fmtM(r.DESP_PREV)}</td>
+            <td class="num ${clP(r.DESVIO_DESP,true)}">${fmtP(r.DESVIO_DESP)}</td>
+            <td class="num ${pctClass(r.PERC_DESP)}">${fmtP(r.PERC_DESP)}</td>
+            <td style="text-align:center">${status}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function _renderMensalRegional(mes,nomeMes){
+  const regMap=new Map();
+  (DATA.filiais_mes||[]).filter(r=>r.MES===mes).forEach(r=>{
+    const f=(DATA.filiais||[]).find(f=>+f.ID_FILIAL===+r.ID_FILIAL);
+    if(!f||!r.FAT_REAL) return;
+    const reg=f.REGIONAL||'—';
+    const cur=regMap.get(reg)||{REGIONAL:reg,FAT_REAL:0,FAT_PREV:0,DESP_REAL:0,DESP_PREV:0};
+    cur.FAT_REAL+=r.FAT_REAL;cur.FAT_PREV+=r.FAT_PREV;cur.DESP_REAL+=r.DESP_REAL;cur.DESP_PREV+=r.DESP_PREV;
+    regMap.set(reg,cur);
+  });
+  const rows=[...regMap.values()].map(r=>({...r,PERC_DESP:r.FAT_REAL>0?r.DESP_REAL/r.FAT_REAL*100:0,DESVIO_DESP:r.DESP_PREV>0?(r.DESP_REAL-r.DESP_PREV)/r.DESP_PREV*100:0})).sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
+  if(!rows.length){document.getElementById('mensal-cards').innerHTML='<div class="empty">Sem dados de regionais para este mês.</div>';document.getElementById('mensal-ranking').innerHTML='';return;}
+  const pior=rows[0],melhor=rows[rows.length-1],avgP=rows.reduce((s,r)=>s+r.PERC_DESP,0)/rows.length;
+  document.getElementById('mensal-cards').innerHTML=`
+    <div class="kpi vermelho"><div class="kpi-label">🔴 Regional com Maior % — ${nomeMes}</div><div class="kpi-val">${fmtP(pior.PERC_DESP)}</div><div class="kpi-sub">${pior.REGIONAL}</div>${badgeP(pior.DESVIO_DESP,true)}</div>
+    <div class="kpi verde"><div class="kpi-label">🟢 Regional com Menor % — ${nomeMes}</div><div class="kpi-val">${fmtP(melhor.PERC_DESP)}</div><div class="kpi-sub">${melhor.REGIONAL}</div>${badgeP(melhor.DESVIO_DESP,true)}</div>
+    <div class="kpi ${avgP>_LIMITE_META?'vermelho':'verde'}"><div class="kpi-label">📊 Média do Mês</div><div class="kpi-val">${avgP.toFixed(1)}%</div><div class="kpi-sub">Limite: ${_LIMITE_META}%</div></div>`;
+  document.getElementById('mensal-ranking').innerHTML=`<div class="tbl-box"><div class="tbl-box-head"><h3>📅 Por Regional — ${nomeMes}</h3></div>
+    <table id="tbl-mensal"><thead><tr>
+      <th onclick="sortTbl(this,'tbl-mensal')">Regional</th>
+      <th class="num" onclick="sortTbl(this,'tbl-mensal')">Fat. Real</th><th class="num" onclick="sortTbl(this,'tbl-mensal')">Desp. Real</th>
+      <th class="num" onclick="sortTbl(this,'tbl-mensal')">Desv. Desp%</th><th class="num" onclick="sortTbl(this,'tbl-mensal')">% Desp/Fat</th><th class="num">Status</th>
+    </tr></thead><tbody>${rows.map(r=>{
+      const status=r.PERC_DESP<=_LIMITE_META?'<span class="kpi-badge badge-ok">✓ Dentro</span>':r.PERC_DESP<=16?'<span class="kpi-badge badge-warn">⚠ Atenção</span>':'<span class="kpi-badge badge-bad">✗ Crítico</span>';
+      return`<tr><td><strong>${r.REGIONAL}</strong></td><td class="num">${fmtM(r.FAT_REAL)}</td><td class="num">${fmtM(r.DESP_REAL)}</td>
+        <td class="num ${clP(r.DESVIO_DESP,true)}">${fmtP(r.DESVIO_DESP)}</td><td class="num ${pctClass(r.PERC_DESP)}">${fmtP(r.PERC_DESP)}</td><td style="text-align:center">${status}</td></tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+function _renderMensalAuditor(mes,nomeMes){
+  const audMap=new Map();
+  (DATA.filiais_mes||[]).filter(r=>r.MES===mes).forEach(r=>{
+    const f=(DATA.filiais||[]).find(f=>+f.ID_FILIAL===+r.ID_FILIAL);
+    if(!f||!r.FAT_REAL) return;
+    const aud=f.AUDITOR||'—';
+    const cur=audMap.get(aud)||{AUDITOR:aud,FAT_REAL:0,FAT_PREV:0,DESP_REAL:0,DESP_PREV:0};
+    cur.FAT_REAL+=r.FAT_REAL;cur.FAT_PREV+=r.FAT_PREV;cur.DESP_REAL+=r.DESP_REAL;cur.DESP_PREV+=r.DESP_PREV;
+    audMap.set(aud,cur);
+  });
+  const rows=[...audMap.values()].map(r=>({...r,PERC_DESP:r.FAT_REAL>0?r.DESP_REAL/r.FAT_REAL*100:0,DESVIO_DESP:r.DESP_PREV>0?(r.DESP_REAL-r.DESP_PREV)/r.DESP_PREV*100:0})).sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
+  if(!rows.length){document.getElementById('mensal-cards').innerHTML='<div class="empty">Sem dados de auditores para este mês.</div>';document.getElementById('mensal-ranking').innerHTML='';return;}
+  const pior=rows[0],melhor=rows[rows.length-1],avgP=rows.reduce((s,r)=>s+r.PERC_DESP,0)/rows.length;
+  document.getElementById('mensal-cards').innerHTML=`
+    <div class="kpi vermelho"><div class="kpi-label">🔴 Auditor com Maior % — ${nomeMes}</div><div class="kpi-val">${fmtP(pior.PERC_DESP)}</div><div class="kpi-sub">${pior.AUDITOR}</div>${badgeP(pior.DESVIO_DESP,true)}</div>
+    <div class="kpi verde"><div class="kpi-label">🟢 Auditor com Menor % — ${nomeMes}</div><div class="kpi-val">${fmtP(melhor.PERC_DESP)}</div><div class="kpi-sub">${melhor.AUDITOR}</div>${badgeP(melhor.DESVIO_DESP,true)}</div>
+    <div class="kpi ${avgP>_LIMITE_META?'vermelho':'verde'}"><div class="kpi-label">📊 Média do Mês</div><div class="kpi-val">${avgP.toFixed(1)}%</div><div class="kpi-sub">Limite: ${_LIMITE_META}%</div></div>`;
+  document.getElementById('mensal-ranking').innerHTML=`<div class="tbl-box"><div class="tbl-box-head"><h3>📅 Por Auditor — ${nomeMes}</h3></div>
+    <table id="tbl-mensal"><thead><tr>
+      <th onclick="sortTbl(this,'tbl-mensal')">Auditor</th>
+      <th class="num" onclick="sortTbl(this,'tbl-mensal')">Fat. Real</th><th class="num" onclick="sortTbl(this,'tbl-mensal')">Desp. Real</th>
+      <th class="num" onclick="sortTbl(this,'tbl-mensal')">Desv. Desp%</th><th class="num" onclick="sortTbl(this,'tbl-mensal')">% Desp/Fat</th><th class="num">Status</th>
+    </tr></thead><tbody>${rows.map(r=>{
+      const status=r.PERC_DESP<=_LIMITE_META?'<span class="kpi-badge badge-ok">✓ Dentro</span>':r.PERC_DESP<=16?'<span class="kpi-badge badge-warn">⚠ Atenção</span>':'<span class="kpi-badge badge-bad">✗ Crítico</span>';
+      return`<tr><td><strong>${r.AUDITOR}</strong></td><td class="num">${fmtM(r.FAT_REAL)}</td><td class="num">${fmtM(r.DESP_REAL)}</td>
+        <td class="num ${clP(r.DESVIO_DESP,true)}">${fmtP(r.DESVIO_DESP)}</td><td class="num ${pctClass(r.PERC_DESP)}">${fmtP(r.PERC_DESP)}</td><td style="text-align:center">${status}</td></tr>`;
+    }).join('')}</tbody></table></div>`;
 }
 
 // =========================================================
@@ -1865,8 +2141,9 @@ function computeGruposComparativo(tolPerc){
   return grupos;
 }
 
-function pctClass(v){ return v>20?'tx-neg':v<13?'tx-pos':'tx-warn'; }
-function pctColor(v){ return v>20?'#C62828':v<13?'#1B8A3C':'#F2A900'; }
+const _LIMITE_META = 12; // % Desp/Fat — limite máximo anual por filial
+function pctClass(v){ return v>16?'tx-neg':v<=_LIMITE_META?'tx-pos':'tx-warn'; }
+function pctColor(v){ return v>16?'#C62828':v<=_LIMITE_META?'#1B8A3C':'#F2A900'; }
 
 function renderComparativo(){
   if(!DATA)return;
@@ -2215,7 +2492,7 @@ function filialCardHTML(f){
     <div class="ec-filial-row"><span>Plano Fat. (${DATA.meta.periodo})</span><span>${fmtM(f.FAT_PREV)}</span></div>
     <div class="ec-filial-row"><span>Desvio Fat.</span><span class="${clP(f.DESVIO_FAT)}">${fmtP(f.DESVIO_FAT)}</span></div>
     <div class="ec-filial-row"><span>Despesas</span><span style="color:var(--vermelho)">${fmtM(f.DESP_REAL)}</span></div>
-    <div class="ec-filial-row"><span>% Desp/Fat</span><span class="${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</span></div>
+    <div class="ec-filial-row"><span>% Desp/Fat</span><span class="${pctClass(f.PERC_DESP)}">${fmtP(f.PERC_DESP)}</span></div>
   </div>`;
 }
 
@@ -2950,7 +3227,7 @@ function _renderAnaliseFiliais(filiais){
       <td class="num">${fmtM(f.DESP_REAL)}</td>
       <td class="num">${fmtM(f.DESP_PREV)}</td>
       <td class="num ${clP(dd,true)}">${dd>=0?'+':''}${fmtP(dd)}</td>
-      <td class="num ${f.PERC_DESP>20?'tx-neg':f.PERC_DESP<13?'tx-pos':'tx-warn'}">${fmtP(f.PERC_DESP)}</td>
+      <td class="num ${pctClass(f.PERC_DESP)}">${fmtP(f.PERC_DESP)}</td>
     </tr>`;
   }).join('');
 }
