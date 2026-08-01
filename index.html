@@ -301,6 +301,81 @@ body.presentation-mode .content{padding-top:16px}
 .cmp-yr-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;margin-right:4px}
 .badge-y1{background:rgba(13,71,161,.15);color:#0D47A1}
 .badge-y2{background:rgba(0,43,91,.18);color:#002B5B}
+
+/* ===== DIAGNÓSTICO COMPARATIVO ===== */
+.diag-layout{display:flex;gap:16px;align-items:flex-start}
+.diag-sidebar{width:270px;flex-shrink:0;background:var(--branco);border-radius:10px;box-shadow:0 1px 6px var(--shadow);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 180px);position:sticky;top:16px}
+.diag-sidebar-head{padding:11px 14px;background:var(--azul-esc);display:flex;align-items:center;justify-content:space-between}
+.diag-sidebar-head h3{color:#fff;font-size:12px;font-weight:700;margin:0;text-transform:uppercase;letter-spacing:.4px}
+.diag-clear-btn{font-size:10px;color:rgba(255,255,255,.65);background:rgba(255,255,255,.12);border:none;border-radius:4px;padding:3px 8px;cursor:pointer;transition:.15s}
+.diag-clear-btn:hover{background:rgba(255,255,255,.25);color:#fff}
+.diag-search-wrap{padding:8px 10px;border-bottom:1px solid var(--border)}
+.diag-search{width:100%;border:1px solid var(--border-strong);border-radius:6px;padding:5px 9px;font-size:12px;background:var(--fundo);color:var(--cinza);outline:none}
+.diag-search:focus{border-color:var(--azul-cl)}
+.diag-reg-wrap{padding:5px 10px;border-bottom:1px solid var(--border);font-size:11px}
+.diag-fil-list{overflow-y:auto;flex:1;padding:3px 0}
+.diag-fil-item{padding:7px 12px;cursor:pointer;border-left:3px solid transparent;transition:.12s;display:flex;align-items:center;gap:8px}
+.diag-fil-item:hover{background:var(--hover-tint)}
+.diag-fil-item.diag-sel{background:var(--hover-tint)}
+.diag-fil-check{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;flex-shrink:0;transition:.12s}
+.diag-fil-info{flex:1;min-width:0}
+.diag-fil-nome{display:block;font-size:12px;font-weight:600;color:var(--cinza);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diag-fil-meta{display:block;font-size:10px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diag-fil-perc{font-size:10px;font-weight:700;flex-shrink:0}
+.diag-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px}
+.diag-chips-bar{background:var(--branco);border-radius:8px;padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;box-shadow:0 1px 4px var(--shadow);min-height:46px}
+.diag-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;border:1.5px solid;font-size:11px;font-weight:700;white-space:nowrap}
+.diag-chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.diag-chip-x{cursor:pointer;opacity:.6;font-size:13px;line-height:1;margin-left:1px;font-weight:400}
+.diag-chip-x:hover{opacity:1}
+.diag-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:56px 24px;background:var(--branco);border-radius:10px;box-shadow:0 1px 4px var(--shadow);color:var(--text-muted);text-align:center}
+.diag-empty-icon{font-size:52px}
+.diag-empty-title{font-size:14px;font-weight:700;color:var(--heading)}
+.diag-empty-sub{font-size:12px;max-width:340px;line-height:1.6}
+.diag-summary-bar{background:var(--azul-esc);border-radius:10px;padding:14px 6px;display:flex;flex-wrap:wrap;gap:0;overflow:hidden}
+.diag-summ-item{flex:1;min-width:130px;padding:4px 16px;border-right:1px solid rgba(255,255,255,.14);text-align:center}
+.diag-summ-item:last-child{border-right:none}
+.diag-summ-label{display:block;font-size:10px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.diag-summ-val{display:block;font-size:16px;font-weight:800;color:#fff}
+.diag-summ-sub{display:block;font-size:10px;color:rgba(255,255,255,.5);margin-top:1px}
+.diag-kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px}
+.diag-kpi-card{background:var(--branco);border-radius:10px;padding:13px 15px;box-shadow:0 1px 5px var(--shadow);display:flex;flex-direction:column;gap:5px;border-top:3px solid}
+.diag-kpi-nome{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px}
+.diag-kpi-loja{font-size:11px;font-weight:400;color:var(--text-muted);text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+.diag-kpi-row{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:2px 0}
+.diag-kpi-label{font-size:10px;color:var(--text-muted);flex-shrink:0}
+.diag-kpi-val{font-size:12px;font-weight:600;text-align:right}
+.diag-kpi-perc-big{font-size:20px;font-weight:800;text-align:right}
+.diag-kpi-divider{height:1px;background:var(--border);margin:4px 0}
+.diag-badge{font-size:9px;padding:1px 6px;border-radius:10px;font-weight:700}
+.diag-charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.diag-section-hd{font-size:12px;font-weight:800;color:var(--heading);text-transform:uppercase;letter-spacing:.5px;padding:0 0 8px;border-bottom:2px solid var(--azul);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.diag-insights-list{display:flex;flex-direction:column;gap:9px}
+.diag-insight-card{border-radius:8px;padding:11px 14px;border-left:4px solid;animation:fadein .3s}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.diag-insight-bad{background:var(--badge-bad-bg);border-color:var(--vermelho)}
+.diag-insight-warn{background:var(--badge-warn-bg);border-color:var(--amarelo)}
+.diag-insight-good{background:var(--badge-ok-bg);border-color:var(--verde)}
+.diag-insight-hd{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.diag-insight-icon{font-size:15px}
+.diag-insight-title{font-size:12px;font-weight:700;color:var(--heading)}
+.diag-insight-body{font-size:11px;color:var(--text-muted);line-height:1.65}
+.diag-insight-empty{text-align:center;padding:14px;color:var(--badge-ok-fg);font-size:12px;background:var(--badge-ok-bg);border-radius:8px;border-left:4px solid var(--verde);font-weight:600}
+.diag-alert-wrap{overflow-x:auto}
+.diag-alert-wrap table{width:100%}
+.diag-alert-wrap th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text-muted);padding:6px 8px;border-bottom:2px solid var(--border)}
+.diag-alert-wrap td{font-size:11px;padding:5px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+.diag-alert-wrap tr:hover td{background:var(--hover-tint)}
+.diag-gap-pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.diag-gap-high{background:var(--badge-bad-bg);color:var(--badge-bad-fg)}
+.diag-gap-mid{background:var(--badge-warn-bg);color:var(--badge-warn-fg)}
+.diag-gap-low{background:var(--badge-ok-bg);color:var(--badge-ok-fg)}
+.diag-score-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.diag-score-label{font-size:11px;color:var(--text-muted);width:150px;flex-shrink:0}
+.diag-score-track{flex:1;height:8px;background:var(--cinza-cl);border-radius:4px;overflow:hidden}
+.diag-score-fill{height:100%;border-radius:4px;transition:width .6s}
+.diag-score-val{font-size:11px;font-weight:700;width:36px;text-align:right;flex-shrink:0}
+@media(max-width:900px){.diag-layout{flex-direction:column}.diag-sidebar{width:100%;max-height:260px;position:static}.diag-charts-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -338,6 +413,7 @@ body.presentation-mode .content{padding-top:16px}
   <div class="tab" onclick="switchTab('tab-regional')" id="tab-regional">🗺️ Regional / Auditor</div>
   <div class="tab" onclick="switchTab('tab-grupos')" id="tab-grupos">📂 Grupos de Conta</div>
   <div class="tab" onclick="switchTab('tab-comparativo')" id="tab-comparativo">⚖️ Comparativo Filiais</div>
+  <div class="tab" onclick="switchTab('tab-diag')" id="tab-diag">🔬 Diagnóstico</div>
   <div class="tab" onclick="switchTab('tab-analise')" id="tab-analise">🔍 Análise Detalhada</div>
   <div class="tab" onclick="switchTab('tab-upload')" id="tab-upload">🔄 Atualizar Base</div>
 </div>
@@ -826,6 +902,133 @@ body.presentation-mode .content{padding-top:16px}
   </div>
 </div>
 
+<!-- ======================== TAB: DIAGNÓSTICO COMPARATIVO ======================== -->
+<div class="content" id="content-tab-diag">
+
+  <!-- Intro / instrução -->
+  <div style="background:var(--branco);border-radius:8px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 4px var(--shadow);display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+    <div style="font-size:28px">🔬</div>
+    <div style="flex:1;min-width:200px">
+      <div style="font-size:14px;font-weight:800;color:var(--heading);margin-bottom:3px">Diagnóstico Comparativo de Filiais</div>
+      <div style="font-size:12px;color:var(--text-muted);line-height:1.6">Selecione <strong>2 a 8 filiais</strong> na lista à esquerda para uma análise gerencial profunda lado a lado — índices de eficiência, tendência mensal, detalhamento por grupo de conta e diagnóstico automático de desvios críticos.</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+      <button class="ico-btn-light" onclick="exportElementById('diag-main','diagnostico_filiais')" title="Exportar diagnóstico em PNG"><span class="tooltip">Exportar diagnóstico em PNG</span>📥</button>
+    </div>
+  </div>
+
+  <!-- Layout principal: sidebar + painel -->
+  <div class="diag-layout">
+
+    <!-- SIDEBAR: seletor de filiais -->
+    <div class="diag-sidebar">
+      <div class="diag-sidebar-head">
+        <h3>Selecionar Filiais</h3>
+        <button class="diag-clear-btn" onclick="_diagClearAll()">✕ Limpar</button>
+      </div>
+      <div class="diag-search-wrap">
+        <input class="diag-search" id="diag-search" type="text" placeholder="🔍 Buscar filial..." oninput="renderDiagFilialList()">
+      </div>
+      <div class="diag-reg-wrap">
+        <div class="chk-dropdown" id="dd-diag-reg" style="width:100%">
+          <button class="chk-dd-trigger" onclick="toggleChkDropdown('dd-diag-reg')" type="button" style="width:100%">
+            <span id="dd-diag-reg-label">Todas regionais</span><span class="dd-arrow">▾</span>
+          </button>
+          <div class="chk-dd-panel" id="dd-diag-reg-panel">
+            <label class="chk-dd-item item-all">
+              <input type="checkbox" id="chk-diag-reg-all" checked onchange="onChkDiagRegAll(this)"> Todas
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="diag-fil-list" id="diag-fil-list"></div>
+      <div style="padding:8px 12px;border-top:1px solid var(--border);font-size:10px;color:var(--text-muted);display:flex;justify-content:space-between">
+        <span id="diag-sel-count">0 selecionadas</span>
+        <span style="color:var(--amarelo);font-weight:700" id="diag-limit-warn"></span>
+      </div>
+    </div>
+
+    <!-- PAINEL PRINCIPAL -->
+    <div class="diag-main" id="diag-main">
+
+      <!-- Chips das filiais selecionadas -->
+      <div class="diag-chips-bar" id="diag-chips">
+        <span style="color:var(--text-muted);font-size:12px">← Selecione 2 ou mais filiais para comparar</span>
+      </div>
+
+      <!-- Estado vazio -->
+      <div class="diag-empty" id="diag-empty">
+        <div class="diag-empty-icon">🏢</div>
+        <div class="diag-empty-title">Nenhuma filial selecionada</div>
+        <div class="diag-empty-sub">Selecione ao menos 2 filiais na lista à esquerda para iniciar o diagnóstico comparativo. Use o campo de busca ou filtre por regional.</div>
+      </div>
+
+      <!-- Conteúdo do diagnóstico (oculto até 2+ filiais serem selecionadas) -->
+      <div id="diag-content" style="display:none;flex-direction:column;gap:14px">
+
+        <!-- Barra resumo executivo -->
+        <div id="diag-summary"></div>
+
+        <!-- Cards KPI por filial -->
+        <div>
+          <div class="diag-section-hd">📊 Painel de Indicadores por Filial</div>
+          <div class="diag-kpi-grid" id="diag-kpis"></div>
+        </div>
+
+        <!-- Score de Eficiência (gráfico de radar) + Tendência Mensal -->
+        <div class="diag-charts-row">
+          <div class="chart-box" style="min-height:340px">
+            <div class="chart-box-head">
+              <h3>🕸️ Radar de Eficiência</h3>
+              <button class="ico-mini" onclick="exportBox(this)" title="Exportar">📥</button>
+            </div>
+            <div style="position:relative;height:290px"><canvas id="ch-diag-radar"></canvas></div>
+          </div>
+          <div class="chart-box" style="min-height:340px">
+            <div class="chart-box-head">
+              <h3>📈 % Desp/Fat — Evolução Mensal</h3>
+              <button class="ico-mini" onclick="exportBox(this)" title="Exportar">📥</button>
+            </div>
+            <div style="position:relative;height:290px"><canvas id="ch-diag-trend"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Detalhamento por Grupo de Conta (barras agrupadas) -->
+        <div class="chart-box">
+          <div class="chart-box-head">
+            <h3>📂 Despesa por Grupo de Conta — Comparativo</h3>
+            <button class="ico-mini" onclick="exportBox(this)" title="Exportar">📥</button>
+          </div>
+          <div style="position:relative;height:420px"><canvas id="ch-diag-grupos"></canvas></div>
+        </div>
+
+        <!-- Tabela de Alerta: gap por grupo de conta -->
+        <div class="chart-box">
+          <div class="chart-box-head">
+            <h3 id="diag-tbl-title">⚠️ Gaps por Grupo de Conta — Ordenado por Maior Desvio</h3>
+            <div class="icon-toolbar">
+              <button class="ico-mini" onclick="copyTableCSV('tbl-diag-alert')" title="Copiar CSV">📋</button>
+              <button class="ico-mini" onclick="exportBox(this)" title="Exportar">📥</button>
+            </div>
+          </div>
+          <div class="diag-alert-wrap">
+            <table id="tbl-diag-alert">
+              <thead id="diag-alert-head"></thead>
+              <tbody id="diag-alert-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Diagnóstico automático (insights narrativos) -->
+        <div class="chart-box">
+          <div id="diag-insights"></div>
+        </div>
+
+      </div><!-- /diag-content -->
+    </div><!-- /diag-main -->
+  </div><!-- /diag-layout -->
+</div>
+
 <!-- ======================== TAB: ANÁLISE DETALHADA ======================== -->
 <div class="content" id="content-tab-analise">
   <div class="filtros-bar" id="analise-filtros">
@@ -1166,6 +1369,7 @@ function switchTab(id){
   document.getElementById(id).classList.add('active');
   document.getElementById('content-'+id).classList.add('active');
   if(id==='tab-analise'&&DATA) renderAnalise();
+  if(id==='tab-diag'&&DATA) renderDiagnostico();
 }
 
 // =========================================================
@@ -1225,6 +1429,7 @@ function initAll(){
   ['tbl-filiais-title','tbl-regional-title','tbl-auditor-title','tbl-grupos-title'].forEach(tituloPeriodo);
 
   populateSelects();
+  initDiagFilters();
   renderKPIs(m);
   renderTop3();
   renderCharts();
@@ -1275,6 +1480,9 @@ function populateSelects(){
   _updateChkLabel('dd-an-aud-label','chk-an-aud','Todos');
 
   populateCmpFilters();
+  // Diagnóstico: regional filter
+  _fillChkPanel('dd-diag-reg-panel', regionais, 'chk-diag-reg', 'renderDiagFilialList');
+  _updateChkLabel('dd-diag-reg-label','chk-diag-reg','Todas regionais');
 
   // Popula dropdown de meses com checkboxes
   const mesPanel=document.getElementById('dd-mes-panel');
@@ -3592,6 +3800,506 @@ function clearGruFilters(){
   renderTabGrupos();
   renderGruposBar();
   renderGruposDesv();
+}
+
+// =========================================================
+// DIAGNÓSTICO COMPARATIVO — estado
+// =========================================================
+const _DIAG_PALETTE = [
+  '#1565C0','#C62828','#2E7D32','#E65100',
+  '#6A1B9A','#00838F','#AD1457','#558B2F'
+];
+let _diagSelectedIds = []; // ordered array of ID_FILIAL (numbers)
+let _diagColorMap = {};    // ID_FILIAL -> color string
+
+function _diagAssignColors(){
+  _diagColorMap = {};
+  _diagSelectedIds.forEach((id,i)=>{ _diagColorMap[id] = _DIAG_PALETTE[i % _DIAG_PALETTE.length]; });
+}
+
+function initDiagFilters(){
+  if(!DATA) return;
+  _diagSelectedIds = [];
+  _diagColorMap = {};
+  renderDiagFilialList();
+  renderDiagChips();
+  renderDiagnostico();
+}
+
+function onChkDiagRegAll(cb){
+  document.querySelectorAll('.chk-diag-reg').forEach(c=>c.checked=cb.checked);
+  _updateChkLabel('dd-diag-reg-label','chk-diag-reg','Todas regionais');
+  renderDiagFilialList();
+}
+
+function renderDiagFilialList(){
+  if(!DATA) return;
+  const selRegs = new Set([...document.querySelectorAll('.chk-diag-reg:checked')].map(c=>c.value));
+  const allRegs = selRegs.size===document.querySelectorAll('.chk-diag-reg').length || !selRegs.size;
+  const search = ((document.getElementById('diag-search')||{}).value||'').trim().toLowerCase();
+  const filiais = _filiaisComparaveis()
+    .filter(f=>(allRegs||selRegs.has(f.REGIONAL))
+      && (!search || (f.LOJA||'').toLowerCase().includes(search) || (f.SIGLA||'').toLowerCase().includes(search)))
+    .sort((a,b)=>(a.LOJA||'').localeCompare(b.LOJA||''));
+
+  const list = document.getElementById('diag-fil-list');
+  if(!list) return;
+
+  list.innerHTML = filiais.map(f=>{
+    const id = Number(f.ID_FILIAL);
+    const sel = _diagSelectedIds.includes(id);
+    const color = sel ? (_diagColorMap[id]||'#ccc') : '';
+    const percCls = pctClass(f.PERC_DESP);
+    return `<div class="diag-fil-item${sel?' diag-sel':''}" onclick="_diagToggle(${id})"
+                 style="${sel?`border-left-color:${color}`:''}">
+      <div class="diag-fil-check" style="${sel?`background:${color};border-color:${color}`:''}">${sel?'✓':''}</div>
+      <div class="diag-fil-info">
+        <span class="diag-fil-nome">${f.LOJA||f.SIGLA||('Filial '+id)}</span>
+        <span class="diag-fil-meta">${f.SIGLA||''} · ${f.REGIONAL||'—'}</span>
+      </div>
+      <span class="diag-fil-perc ${percCls}">${fmtP(f.PERC_DESP)}</span>
+    </div>`;
+  }).join('') || '<div style="padding:16px;text-align:center;font-size:12px;color:var(--text-muted)">Nenhuma filial encontrada</div>';
+
+  const sc = document.getElementById('diag-sel-count');
+  if(sc) sc.textContent = `${_diagSelectedIds.length} selecionada${_diagSelectedIds.length!==1?'s':''}`;
+  const lw = document.getElementById('diag-limit-warn');
+  if(lw) lw.textContent = _diagSelectedIds.length>=8 ? 'Máx. 8 atingido' : '';
+}
+
+function _diagToggle(id){
+  const idx = _diagSelectedIds.indexOf(id);
+  if(idx>=0){
+    _diagSelectedIds.splice(idx,1);
+  } else {
+    if(_diagSelectedIds.length>=8) return;
+    _diagSelectedIds.push(id);
+  }
+  _diagAssignColors();
+  renderDiagFilialList();
+  renderDiagChips();
+  renderDiagnostico();
+}
+
+function _diagClearAll(){
+  _diagSelectedIds=[];
+  _diagColorMap={};
+  renderDiagFilialList();
+  renderDiagChips();
+  renderDiagnostico();
+}
+
+function renderDiagChips(){
+  const container = document.getElementById('diag-chips');
+  if(!container) return;
+  if(!_diagSelectedIds.length){
+    container.innerHTML='<span style="color:var(--text-muted);font-size:12px">← Selecione 2 ou mais filiais para comparar</span>';
+    return;
+  }
+  const filiais = _filiaisComparaveis();
+  container.innerHTML = _diagSelectedIds.map(id=>{
+    const f = filiais.find(x=>Number(x.ID_FILIAL)===id);
+    if(!f) return '';
+    const color = _diagColorMap[id]||'#ccc';
+    return `<span class="diag-chip" style="background:${color}22;border-color:${color};color:${color}">
+      <span class="diag-chip-dot" style="background:${color}"></span>
+      ${f.SIGLA||('F'+id)} <span style="font-weight:400;color:var(--text-muted);font-size:10px">${(f.LOJA||'').substring(0,20)}</span>
+      <span class="diag-chip-x" onclick="_diagToggle(${id});event.stopPropagation()">×</span>
+    </span>`;
+  }).join('');
+}
+
+// ---- RENDER PRINCIPAL ----
+function renderDiagnostico(){
+  if(!DATA) return;
+  const filiais = _filiaisComparaveis();
+  const selF = _diagSelectedIds.map(id=>filiais.find(f=>Number(f.ID_FILIAL)===id)).filter(Boolean);
+  const empty = document.getElementById('diag-empty');
+  const content = document.getElementById('diag-content');
+  if(selF.length < 2){
+    if(empty)  { empty.style.display='flex'; }
+    if(content){ content.style.display='none'; }
+    // destroy charts to free memory
+    ['ch-diag-radar','ch-diag-trend','ch-diag-grupos'].forEach(destroyChart);
+    return;
+  }
+  if(empty)  { empty.style.display='none'; }
+  if(content){ content.style.display='flex'; }
+  renderDiagSummary(selF);
+  renderDiagKPIs(selF);
+  renderDiagRadar(selF);
+  renderDiagTrend(selF);
+  renderDiagGrupos(selF);
+  renderDiagInsights(selF);
+  renderDiagAlertTable(selF);
+}
+
+// ---- BARRA RESUMO EXECUTIVO ----
+function renderDiagSummary(selF){
+  const el = document.getElementById('diag-summary');
+  if(!el) return;
+  const avg = selF.reduce((s,f)=>s+f.PERC_DESP,0)/selF.length;
+  const best = selF.reduce((a,b)=>a.PERC_DESP<b.PERC_DESP?a:b);
+  const worst = selF.reduce((a,b)=>a.PERC_DESP>b.PERC_DESP?a:b);
+  const gap = worst.PERC_DESP - best.PERC_DESP;
+  const totFat = selF.reduce((s,f)=>s+f.FAT_REAL,0);
+  const totDesp = selF.reduce((s,f)=>s+f.DESP_REAL,0);
+  // Custo adicional: quanto o pior gasta além do nível do melhor, em relação ao seu faturamento
+  const custoExtra = (worst.PERC_DESP - best.PERC_DESP) / 100 * worst.FAT_REAL;
+  el.innerHTML = `<div class="diag-summary-bar">
+    <div class="diag-summ-item">
+      <span class="diag-summ-label">Filiais Comparadas</span>
+      <span class="diag-summ-val">${selF.length}</span>
+      <span class="diag-summ-sub">${selF.map(f=>f.SIGLA||('F'+f.ID_FILIAL)).join(', ')}</span>
+    </div>
+    <div class="diag-summ-item">
+      <span class="diag-summ-label">Média % Desp/Fat</span>
+      <span class="diag-summ-val" style="color:${pctColor(avg)}">${fmtP(avg)}</span>
+      <span class="diag-summ-sub">das filiais selecionadas</span>
+    </div>
+    <div class="diag-summ-item">
+      <span class="diag-summ-label">Melhor Eficiência</span>
+      <span class="diag-summ-val" style="color:#A5D6A7">${best.SIGLA||('F'+best.ID_FILIAL)}</span>
+      <span class="diag-summ-sub">${fmtP(best.PERC_DESP)} do faturamento</span>
+    </div>
+    <div class="diag-summ-item">
+      <span class="diag-summ-label">Maior Custo Relativo</span>
+      <span class="diag-summ-val" style="color:#EF9A9A">${worst.SIGLA||('F'+worst.ID_FILIAL)}</span>
+      <span class="diag-summ-sub">${fmtP(worst.PERC_DESP)} do faturamento</span>
+    </div>
+    <div class="diag-summ-item">
+      <span class="diag-summ-label">Gap Máximo</span>
+      <span class="diag-summ-val" style="color:${gap>10?'#EF9A9A':gap>5?'#FFCC80':'#A5D6A7'}">${gap.toFixed(1)} p.p.</span>
+      <span class="diag-summ-sub">custo extra ≈ ${fmtM(custoExtra)}</span>
+    </div>
+    <div class="diag-summ-item">
+      <span class="diag-summ-label">Fat. Total Selecionado</span>
+      <span class="diag-summ-val">${fmtM(totFat)}</span>
+      <span class="diag-summ-sub">Desp: ${fmtM(totDesp)}</span>
+    </div>
+  </div>`;
+}
+
+// ---- KPI CARDS ----
+function renderDiagKPIs(selF){
+  const el = document.getElementById('diag-kpis');
+  if(!el) return;
+  const best = selF.reduce((a,b)=>a.PERC_DESP<b.PERC_DESP?a:b);
+  const worst = selF.reduce((a,b)=>a.PERC_DESP>b.PERC_DESP?a:b);
+  el.innerHTML = selF.map(f=>{
+    const id = Number(f.ID_FILIAL);
+    const color = _diagColorMap[id]||'#ccc';
+    const isBest = f===best && selF.length>1;
+    const isWorst = f===worst && selF.length>1;
+    return `<div class="diag-kpi-card" style="border-top-color:${color}">
+      <div class="diag-kpi-nome" style="color:${color}">${f.SIGLA||('F'+id)}</div>
+      <div class="diag-kpi-loja">${f.LOJA||'—'}</div>
+      <div class="diag-kpi-perc-big ${pctClass(f.PERC_DESP)}">${fmtP(f.PERC_DESP)}</div>
+      <div style="display:flex;gap:4px;margin-bottom:4px;flex-wrap:wrap">
+        ${isBest?`<span class="diag-badge" style="background:var(--badge-ok-bg);color:var(--badge-ok-fg)">✓ Mais eficiente</span>`:''}
+        ${isWorst?`<span class="diag-badge" style="background:var(--badge-bad-bg);color:var(--badge-bad-fg)">⚠ Maior custo</span>`:''}
+      </div>
+      <div class="diag-kpi-divider"></div>
+      <div class="diag-kpi-row"><span class="diag-kpi-label">Fat. Realizado</span><span class="diag-kpi-val">${fmtM(f.FAT_REAL)}</span></div>
+      <div class="diag-kpi-row"><span class="diag-kpi-label">Desvio Fat.</span><span class="diag-kpi-val ${f.DESVIO_FAT>=0?'tx-pos':'tx-neg'}">${f.DESVIO_FAT>=0?'+':''}${fmtP(f.DESVIO_FAT)}</span></div>
+      <div class="diag-kpi-row"><span class="diag-kpi-label">Desp. Realizada</span><span class="diag-kpi-val tx-neg">${fmtM(f.DESP_REAL)}</span></div>
+      <div class="diag-kpi-row"><span class="diag-kpi-label">Desvio Desp.</span><span class="diag-kpi-val ${f.DESVIO_DESP<=0?'tx-pos':'tx-neg'}">${f.DESVIO_DESP>=0?'+':''}${fmtP(f.DESVIO_DESP)}</span></div>
+      <div class="diag-kpi-divider"></div>
+      <div class="diag-kpi-row"><span class="diag-kpi-label">Regional</span><span class="diag-kpi-val" style="font-size:10px">${f.REGIONAL||'—'}</span></div>
+      <div class="diag-kpi-row"><span class="diag-kpi-label">Auditor</span><span class="diag-kpi-val" style="font-size:10px">${f.AUDITOR||'—'}</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ---- RADAR ----
+function renderDiagRadar(selF){
+  destroyChart('ch-diag-radar');
+  const ctx = document.getElementById('ch-diag-radar');
+  if(!ctx) return;
+
+  // Pontuação 0-100 em 5 dimensões (100 = melhor)
+  function clamp(v,lo,hi){ return Math.max(lo,Math.min(hi,v)); }
+  const scores = selF.map(f=>({
+    f,
+    s_efic: clamp(100 - f.PERC_DESP * 2, 0, 100),                         // menor % desp = melhor
+    s_fat:  clamp(50 + (f.DESVIO_FAT||0) * 2, 0, 100),                    // desvio fat positivo = melhor
+    s_desp: clamp(100 - Math.abs(f.DESVIO_DESP||0) * 3, 0, 100),          // mais próximo do plano = melhor
+    s_marg: clamp(f.FAT_REAL>0?(f.FAT_REAL-f.DESP_REAL)/f.FAT_REAL*400:0, 0, 100), // margem bruta normalizada
+    s_oper: clamp(50 + ((f.FAT_PREV>0?(f.FAT_REAL-f.FAT_PREV)/f.FAT_PREV*100:0)) * 1.5, 0, 100),
+  }));
+
+  const dark = isDark();
+  const datasets = scores.map(({f,s_efic,s_fat,s_desp,s_marg,s_oper})=>{
+    const id = Number(f.ID_FILIAL);
+    const color = _diagColorMap[id]||'#ccc';
+    return {
+      label: f.SIGLA||('F'+id),
+      data: [s_efic, s_fat, s_desp, s_marg, s_oper],
+      backgroundColor: color+'28',
+      borderColor: color,
+      borderWidth: 2,
+      pointBackgroundColor: color,
+      pointRadius: 4,
+    };
+  });
+
+  charts_reg['ch-diag-radar'] = new Chart(ctx.getContext('2d'), {
+    type: 'radar',
+    data: {
+      labels: ['Eficiência\nde Custos','Atingimento\nFaturamento','Controle\nDespesas','Margem\nOperacional','Performance\nGeral'],
+      datasets,
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      scales:{r:{min:0,max:100,ticks:{display:false,stepSize:25},
+        grid:{color:dark?'#28324A':'#e6e6e6'},
+        angleLines:{color:dark?'#28324A':'#e6e6e6'},
+        pointLabels:{font:{size:10},color:dark?'#B8C4DA':'#555'}}},
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${Number(ctx.raw).toFixed(0)} pts`}}
+      }
+    }
+  });
+}
+
+// ---- TENDÊNCIA MENSAL ----
+function renderDiagTrend(selF){
+  destroyChart('ch-diag-trend');
+  const ctx = document.getElementById('ch-diag-trend');
+  if(!ctx||!DATA.filiais_mes) return;
+  const meses = (DATA.meses||[]).filter(m=>m.FAT_REAL>0);
+  const mesIds = meses.map(m=>m.MES);
+  const mesNomes = meses.map(m=>m.NOME);
+  const dark = isDark();
+
+  const datasets = selF.map(f=>{
+    const id = Number(f.ID_FILIAL);
+    const color = _diagColorMap[id]||'#ccc';
+    const data = mesIds.map(mes=>{
+      const r = DATA.filiais_mes.find(x=>x.ID_FILIAL===f.ID_FILIAL && x.MES===mes);
+      if(!r||r.FAT_REAL<=0) return null;
+      return parseFloat((r.DESP_REAL/r.FAT_REAL*100).toFixed(2));
+    });
+    return {label:f.SIGLA||('F'+id),data,borderColor:color,backgroundColor:'transparent',borderWidth:2.5,pointBackgroundColor:color,pointRadius:4,tension:.3,spanGaps:true};
+  });
+
+  // Linha de média geral
+  const avgData = mesIds.map(mes=>{
+    const rows = DATA.filiais_mes.filter(r=>r.MES===mes&&r.FAT_REAL>0);
+    const totF = rows.reduce((s,r)=>s+r.FAT_REAL,0);
+    const totD = rows.reduce((s,r)=>s+r.DESP_REAL,0);
+    return totF>0?parseFloat((totD/totF*100).toFixed(2)):null;
+  });
+  datasets.push({label:'Média Geral',data:avgData,borderColor:dark?'#5B6B87':'#bbb',backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,3],pointRadius:2,tension:.3,spanGaps:true});
+
+  charts_reg['ch-diag-trend'] = new Chart(ctx.getContext('2d'), {
+    type:'line',
+    data:{labels:mesNomes,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw!==null?Number(ctx.raw).toFixed(2)+'%':'—'}`}}
+      },
+      scales:{
+        y:{title:{display:true,text:'% Desp/Fat',font:{size:10}},ticks:{callback:v=>v+'%'},grid:{color:dark?'#28324A':'#e6e6e6'}},
+        x:{grid:{color:dark?'#28324A':'#e6e6e6'}}
+      }
+    }
+  });
+}
+
+// ---- GRUPOS DE CONTA (barra horizontal agrupada) ----
+function renderDiagGrupos(selF){
+  destroyChart('ch-diag-grupos');
+  const ctx = document.getElementById('ch-diag-grupos');
+  if(!ctx||!DATA.grupos_filial) return;
+  const idSet = new Set(selF.map(f=>f.ID_FILIAL));
+  const rows = DATA.grupos_filial.filter(r=>idSet.has(r.ID_FILIAL));
+
+  // Top 15 grupos por total de despesa entre as filiais selecionadas
+  const gMap = {};
+  rows.forEach(r=>{
+    gMap[r.GRUPO_CONTA] = (gMap[r.GRUPO_CONTA]||0) + r.DESP_REAL;
+  });
+  const topGrupos = Object.entries(gMap).sort((a,b)=>b[1]-a[1]).slice(0,15).reverse().map(e=>e[0]);
+
+  const dark = isDark();
+  const datasets = selF.map(f=>{
+    const id = Number(f.ID_FILIAL);
+    const color = _diagColorMap[id]||'#ccc';
+    const data = topGrupos.map(g=>{
+      const r = DATA.grupos_filial.find(x=>x.ID_FILIAL===f.ID_FILIAL && x.GRUPO_CONTA===g);
+      return r ? r.DESP_REAL : 0;
+    });
+    return {label:f.SIGLA||('F'+id),data,backgroundColor:color+'CC',borderColor:color,borderWidth:1,borderRadius:3};
+  });
+
+  charts_reg['ch-diag-grupos'] = new Chart(ctx.getContext('2d'), {
+    type:'bar',
+    data:{labels:topGrupos,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.raw)}`}}
+      },
+      scales:{
+        x:{ticks:{callback:v=>fmtM(v)},grid:{color:dark?'#28324A':'#e6e6e6'}},
+        y:{grid:{display:false},ticks:{font:{size:10}}}
+      }
+    }
+  });
+}
+
+// ---- TABELA DE ALERTA (gap por grupo) ----
+function renderDiagAlertTable(selF){
+  const head = document.getElementById('diag-alert-head');
+  const body = document.getElementById('diag-alert-body');
+  const title = document.getElementById('diag-tbl-title');
+  if(!body||!DATA.grupos_filial) return;
+
+  const idSet = new Set(selF.map(f=>f.ID_FILIAL));
+  const rows = DATA.grupos_filial.filter(r=>idSet.has(r.ID_FILIAL));
+  const gruposUnicos = [...new Set(rows.map(r=>r.GRUPO_CONTA))];
+
+  const tableRows = gruposUnicos.map(grupo=>{
+    const filData = selF.map(f=>{
+      const r = DATA.grupos_filial.find(x=>x.ID_FILIAL===f.ID_FILIAL && x.GRUPO_CONTA===grupo);
+      const desp = r ? r.DESP_REAL : 0;
+      const perc = f.FAT_REAL>0 ? desp/f.FAT_REAL*100 : 0;
+      return {f,desp,perc};
+    });
+    const maxP = Math.max(...filData.map(d=>d.perc));
+    const minP = Math.min(...filData.map(d=>d.perc));
+    const gap = maxP - minP;
+    const total = filData.reduce((s,d)=>s+d.desp,0);
+    return {grupo,filData,gap,total,maxP,minP};
+  }).filter(r=>r.total>0).sort((a,b)=>b.gap-a.gap);
+
+  // Cabeçalho dinâmico
+  if(head){
+    const cols = selF.map(f=>{
+      const color = _diagColorMap[Number(f.ID_FILIAL)]||'#ccc';
+      return `<th class="num" style="color:${color};font-size:10px">${f.SIGLA||('F'+f.ID_FILIAL)}<br><span style="font-weight:400;opacity:.7">R$</span></th>
+              <th class="num" style="color:${color};font-size:10px;opacity:.8">%&nbsp;Fat</th>`;
+    }).join('');
+    head.innerHTML = `<tr>
+      <th>Grupo de Conta</th>
+      ${cols}
+      <th class="num">Gap (p.p.)</th>
+    </tr>`;
+  }
+
+  if(title) title.textContent = `⚠️ Gaps por Grupo de Conta — ${tableRows.length} grupos · ordenado pelo maior desvio`;
+
+  body.innerHTML = tableRows.map(row=>{
+    const gapCls = row.gap>5?'diag-gap-high':row.gap>2?'diag-gap-mid':'diag-gap-low';
+    const cells = row.filData.map(d=>{
+      const isMax = d.perc===row.maxP && row.gap>0.5;
+      const isMin = d.perc===row.minP && row.gap>0.5;
+      return `<td class="num">${d.desp>0?fmtM(d.desp):'—'}</td>
+              <td class="num ${isMax?'tx-neg':isMin?'tx-pos':''}" style="font-size:10px">${d.perc>0?fmtP(d.perc):'—'}</td>`;
+    }).join('');
+    return `<tr>
+      <td style="font-size:11px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${row.grupo}">${row.grupo}</td>
+      ${cells}
+      <td class="num">${row.gap>0.5?`<span class="diag-gap-pill ${gapCls}">${row.gap.toFixed(1)} p.p.</span>`:'—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="99" class="empty">Sem dados de grupos por filial</td></tr>';
+}
+
+// ---- INSIGHTS AUTOMÁTICOS ----
+function renderDiagInsights(selF){
+  const el = document.getElementById('diag-insights');
+  if(!el) return;
+  const insights = [];
+  const best = selF.reduce((a,b)=>a.PERC_DESP<b.PERC_DESP?a:b);
+  const worst = selF.reduce((a,b)=>a.PERC_DESP>b.PERC_DESP?a:b);
+  const gap = worst.PERC_DESP - best.PERC_DESP;
+  const avg = selF.reduce((s,f)=>s+f.PERC_DESP,0)/selF.length;
+
+  // 1. Gap principal
+  if(gap>3){
+    const custoExtra = gap/100*worst.FAT_REAL;
+    insights.push({icon:'⚠️',type:'bad',
+      title:`Gap crítico: ${worst.SIGLA||'pior'} vs ${best.SIGLA||'melhor'} — ${gap.toFixed(1)} p.p.`,
+      text:`<b>${worst.SIGLA} (${worst.LOJA||''})</b> compromete <b>${fmtP(worst.PERC_DESP)}</b> do faturamento com despesas, enquanto <b>${best.SIGLA}</b> opera com apenas <b>${fmtP(best.PERC_DESP)}</b>. A diferença de <b>${gap.toFixed(1)} pontos percentuais</b> representa um custo adicional de <b>${fmtM(custoExtra)}</b> no período. Equalizar ao nível de ${best.SIGLA} liberaria essa margem.`});
+  }
+
+  // 2. Grupos de conta com maior gap entre as filiais selecionadas
+  if(DATA.grupos_filial){
+    const idSet = new Set(selF.map(f=>f.ID_FILIAL));
+    const rows = DATA.grupos_filial.filter(r=>idSet.has(r.ID_FILIAL));
+    const gruposUnicos = [...new Set(rows.map(r=>r.GRUPO_CONTA))];
+    const gapGrupos = gruposUnicos.map(grupo=>{
+      const filData = selF.map(f=>{
+        const r = DATA.grupos_filial.find(x=>x.ID_FILIAL===f.ID_FILIAL && x.GRUPO_CONTA===grupo);
+        const desp = r?r.DESP_REAL:0;
+        const perc = f.FAT_REAL>0?desp/f.FAT_REAL*100:0;
+        return {f,desp,perc};
+      });
+      const maxR = filData.reduce((a,b)=>a.perc>b.perc?a:b);
+      const minR = filData.reduce((a,b)=>a.perc<b.perc?a:b);
+      const g = maxR.perc - minR.perc;
+      return {grupo,maxR,minR,gap:g,total:filData.reduce((s,d)=>s+d.desp,0)};
+    }).filter(x=>x.total>0).sort((a,b)=>b.gap-a.gap).slice(0,4);
+
+    gapGrupos.forEach(g=>{
+      if(g.gap<1) return;
+      const diff = g.maxR.desp - g.minR.desp;
+      insights.push({
+        icon:'🔍', type:g.gap>5?'bad':'warn',
+        title:`${g.grupo}: diferença de ${g.gap.toFixed(1)} p.p. entre as filiais`,
+        text:`Em <b>${g.grupo}</b>, <b>${g.maxR.f.SIGLA}</b> gasta <b>${fmtP(g.maxR.perc)}</b> do faturamento (<b>${fmtM(g.maxR.desp)}</b>), enquanto <b>${g.minR.f.SIGLA}</b> gasta apenas <b>${fmtP(g.minR.perc)}</b> (${fmtM(g.minR.desp)}). Diferença absoluta de <b>${fmtM(Math.abs(diff))}</b> — oportunidade de revisão deste grupo na filial ${g.maxR.f.SIGLA}.`
+      });
+    });
+  }
+
+  // 3. Desvios de faturamento individuais
+  selF.forEach(f=>{
+    const dv = f.DESVIO_FAT||0;
+    if(dv < -12){
+      insights.push({icon:'📉',type:'bad',
+        title:`${f.SIGLA}: faturamento ${fmtP(Math.abs(dv))} abaixo do plano`,
+        text:`<b>${f.SIGLA} (${f.LOJA||''})</b> realizou ${fmtM(f.FAT_REAL)} contra um plano de ${fmtM(f.FAT_PREV)}. Com o faturamento baixo, o mesmo patamar de despesas eleva automaticamente o % Desp/Fat — o problema pode não ser de custo, mas de receita.`});
+    } else if(dv > 15){
+      insights.push({icon:'📈',type:'good',
+        title:`${f.SIGLA}: faturamento ${fmtP(dv)} acima do plano`,
+        text:`<b>${f.SIGLA} (${f.LOJA||''})</b> superou o faturamento planejado em <b>+${fmtP(dv)}</b>, realizando ${fmtM(f.FAT_REAL)}. Verifique se as despesas cresceram proporcionalmente ou se a eficiência de custo melhorou.`});
+    }
+  });
+
+  // 4. Filiais abaixo/acima da média das selecionadas
+  selF.forEach(f=>{
+    const diff = f.PERC_DESP - avg;
+    if(Math.abs(diff)>5 && f!==worst && f!==best){
+      insights.push({icon:'📌',type:diff>0?'warn':'good',
+        title:`${f.SIGLA}: ${diff>0?diff.toFixed(1)+' p.p. acima':Math.abs(diff).toFixed(1)+' p.p. abaixo'} da média do grupo`,
+        text:`<b>${f.SIGLA} (${f.LOJA||''})</b> opera a <b>${fmtP(f.PERC_DESP)}</b> de % Desp/Fat — ${diff>0?`<b>${diff.toFixed(1)} pontos acima</b> da média (${fmtP(avg)}) das filiais selecionadas, indicando ineficiência relativa`:`<b>${Math.abs(diff).toFixed(1)} pontos abaixo</b> da média (${fmtP(avg)}), referência positiva`}.`});
+    }
+  });
+
+  if(!insights.length){
+    el.innerHTML = `<div class="diag-section-hd">💡 Diagnóstico Automático</div>
+      <div class="diag-insight-empty">✅ Nenhum desvio crítico identificado entre as filiais selecionadas. O comportamento de custos está dentro de uma variação aceitável.</div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="diag-section-hd">💡 Diagnóstico Automático — ${insights.length} ponto${insights.length>1?'s':''} identificado${insights.length>1?'s':''}</div>
+    <div class="diag-insights-list">
+      ${insights.map(ins=>`
+        <div class="diag-insight-card diag-insight-${ins.type}">
+          <div class="diag-insight-hd">
+            <span class="diag-insight-icon">${ins.icon}</span>
+            <span class="diag-insight-title">${ins.title}</span>
+          </div>
+          <div class="diag-insight-body">${ins.text}</div>
+        </div>`).join('')}
+    </div>`;
 }
 
 // URL HASH — persistência de filtros da Visão Geral
