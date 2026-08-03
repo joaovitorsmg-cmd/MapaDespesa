@@ -312,8 +312,8 @@ button,.tab,.kpi-click,.ico-btn,.ico-btn-light,.ico-mini,
 /* ===== BOTTOM-SHEET DETAIL MODAL ===== */
 #detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:900;opacity:0;pointer-events:none;transition:opacity .25s}
 #detail-overlay.active{opacity:1;pointer-events:all}
-#detail-modal{position:fixed;bottom:0;left:0;right:0;z-index:901;background:var(--branco);border-radius:18px 18px 0 0;max-height:85vh;display:flex;flex-direction:column;transform:translateY(102%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 28px rgba(0,0,0,.22)}
-#detail-modal.active{transform:translateY(0)}
+#detail-modal{position:fixed;bottom:0;left:0;right:0;z-index:901;background:var(--branco);border-radius:18px 18px 0 0;max-height:85vh;display:flex;flex-direction:column;transform:translateY(102%);transition:transform .28s cubic-bezier(.4,0,.2,1),opacity .2s;box-shadow:0 -4px 28px rgba(0,0,0,.22);opacity:0;pointer-events:none}
+#detail-modal.active{transform:translateY(0);opacity:1;pointer-events:all}
 .dm-handle{width:38px;height:4px;border-radius:2px;background:var(--cinza-cl);margin:12px auto 0;flex-shrink:0}
 .dm-header{display:flex;align-items:center;gap:10px;padding:12px 18px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
 .dm-title-text{font-size:13px;font-weight:800;color:var(--heading);flex:1;line-height:1.3}
@@ -321,7 +321,7 @@ button,.tab,.kpi-click,.ico-btn,.ico-btn-light,.ico-mini,
 .dm-close:hover{background:var(--cinza-cl)}
 #dm-body{overflow-y:auto;padding:14px 18px 30px;flex:1;-webkit-overflow-scrolling:touch}
 .dm-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;gap:8px}
-.dm-row:last-of-type{border-bottom:none}
+.dm-row+.dm-nav-btn,.dm-row+.dm-section{margin-top:2px}
 .dm-label{color:var(--text-muted);flex-shrink:0;max-width:55%}
 .dm-val{font-weight:700;text-align:right;color:var(--heading)}
 .dm-section{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin:14px 0 4px;padding-top:10px;border-top:1px solid var(--border)}
@@ -343,7 +343,7 @@ tr.tr-click{cursor:pointer}
 tr.tr-click:hover td{background:var(--hover-tint)}
 @media(min-width:640px){
   #detail-modal{bottom:auto;top:50%;left:50%;right:auto;transform:translate(-50%,-40%) scale(.96);width:min(540px,92vw);border-radius:14px;max-height:80vh}
-  #detail-modal.active{transform:translate(-50%,-50%) scale(1)}
+  #detail-modal.active{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all}
   .dm-handle{display:none}
 }
 /* Mobile diag summary: grid 2×3 instead of horizontal scroll */
@@ -615,20 +615,20 @@ th[data-tip]:hover::after{display:block}
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
-      <div style="background:rgba(255,255,255,.08);border-radius:8px;padding:14px">
-        <div style="font-size:10px;color:var(--azul-cl);margin-bottom:4px">FATURAMENTO REALIZADO</div>
+      <div onclick="openKpiDetail('fat')" style="background:rgba(255,255,255,.08);border-radius:8px;padding:14px;cursor:pointer;touch-action:manipulation;transition:.15s" onmouseenter="this.style.background='rgba(255,255,255,.14)'" onmouseleave="this.style.background='rgba(255,255,255,.08)'" title="Ver detalhes do faturamento">
+        <div style="font-size:10px;color:var(--azul-cl);margin-bottom:4px">FATURAMENTO REALIZADO ▸</div>
         <div style="font-size:20px;font-weight:800" id="cg-fat">—</div>
         <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Plano: <span id="cg-fat-prev">—</span></div>
         <div style="font-size:11px;font-weight:700;margin-top:4px" id="cg-fat-desv">—</div>
       </div>
-      <div style="background:rgba(255,255,255,.08);border-radius:8px;padding:14px">
-        <div style="font-size:10px;color:var(--azul-cl);margin-bottom:4px">DESPESAS REALIZADAS</div>
+      <div onclick="openKpiDetail('desp')" style="background:rgba(255,255,255,.08);border-radius:8px;padding:14px;cursor:pointer;touch-action:manipulation;transition:.15s" onmouseenter="this.style.background='rgba(255,255,255,.14)'" onmouseleave="this.style.background='rgba(255,255,255,.08)'" title="Ver detalhes das despesas">
+        <div style="font-size:10px;color:var(--azul-cl);margin-bottom:4px">DESPESAS REALIZADAS ▸</div>
         <div style="font-size:20px;font-weight:800" id="cg-desp">—</div>
         <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Plano: <span id="cg-desp-prev">—</span></div>
         <div style="font-size:11px;font-weight:700;margin-top:4px" id="cg-desp-desv">—</div>
       </div>
-      <div style="background:rgba(100,181,246,.2);border-radius:8px;padding:14px;border:1px solid rgba(100,181,246,.4)">
-        <div style="font-size:10px;color:var(--azul-cl);margin-bottom:4px">RESULTADO ORÇAMENTÁRIO</div>
+      <div onclick="openKpiDetail('resultado')" style="background:rgba(100,181,246,.2);border-radius:8px;padding:14px;border:1px solid rgba(100,181,246,.4);cursor:pointer;touch-action:manipulation;transition:.15s" onmouseenter="this.style.background='rgba(100,181,246,.3)'" onmouseleave="this.style.background='rgba(100,181,246,.2)'" title="Ver detalhes do resultado">
+        <div style="font-size:10px;color:var(--azul-cl);margin-bottom:4px">RESULTADO ORÇAMENTÁRIO ▸</div>
         <div style="font-size:20px;font-weight:800;color:#A5D6A7" id="cg-result">—</div>
         <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">% Desp/Fat Plan: <span id="cg-perc-plan">—</span></div>
         <div style="font-size:11px;font-weight:700;color:var(--azul-cl);margin-top:2px">% Desp/Fat Real: <span id="cg-perc-real">—</span></div>
@@ -2088,7 +2088,7 @@ function renderTabRegionalFiltered(regData, audData){
   const adList=audData||DATA.auditores;
   if(!adList||!adList.length){ba.innerHTML='<tr><td colspan="6" class="empty">Sem dados</td></tr>';return;}
   ba.innerHTML=adList.map(a=>{
-    return `<tr>
+    return `<tr class="tr-click" data-aud="${a.AUDITOR.replace(/"/g,'&quot;')}" onclick="openAuditorDetail(this.dataset.aud)">
       <td><strong>${a.AUDITOR}</strong></td>
       <td class="num">${fmtM(a.FAT_REAL)}</td>
       <td class="num">${fmtM(a.FAT_PREV)}</td>
@@ -2169,17 +2169,17 @@ function renderTabMensal(){
   const acima=rows.filter(r=>r.PERC_DESP>_LIMITE_META).length;
 
   document.getElementById('mensal-cards').innerHTML=`
-    <div class="kpi vermelho">
+    <div class="kpi vermelho kpi-click" data-sigla="${(pior.SIGLA||String(pior.ID_FILIAL)).replace(/"/g,'&quot;')}" onclick="openFilialDetail(this.dataset.sigla)" title="Ver detalhes da filial">
       <div class="kpi-label">🔴 Maior % Desp/Fat — ${nomeMes}</div>
       <div class="kpi-val">${fmtP(pior.PERC_DESP)}</div>
       <div class="kpi-sub">${pior.SIGLA} — ${pior.LOJA||'—'} · ${pior.REGIONAL||'—'}</div>
-      ${badgeP(pior.DESVIO_DESP,true)}
+      ${badgeP(pior.DESVIO_DESP,true)}<span class="kpi-goto">▸</span>
     </div>
-    <div class="kpi verde">
+    <div class="kpi verde kpi-click" data-sigla="${(melhor.SIGLA||String(melhor.ID_FILIAL)).replace(/"/g,'&quot;')}" onclick="openFilialDetail(this.dataset.sigla)" title="Ver detalhes da filial">
       <div class="kpi-label">🟢 Menor % Desp/Fat — ${nomeMes}</div>
       <div class="kpi-val">${fmtP(melhor.PERC_DESP)}</div>
       <div class="kpi-sub">${melhor.SIGLA} — ${melhor.LOJA||'—'} · ${melhor.REGIONAL||'—'}</div>
-      ${badgeP(melhor.DESVIO_DESP,true)}
+      ${badgeP(melhor.DESVIO_DESP,true)}<span class="kpi-goto">▸</span>
     </div>
     <div class="kpi ${avgP>_LIMITE_META?'vermelho':'verde'}">
       <div class="kpi-label">📊 Média do Mês</div>
@@ -2219,7 +2219,7 @@ function renderTabMensal(){
             :r.PERC_DESP<=16
               ?'<span class="kpi-badge badge-warn">⚠ Atenção</span>'
               :'<span class="kpi-badge badge-bad">✗ Crítico</span>';
-          return`<tr>
+          return`<tr class="tr-click" data-sigla="${(r.SIGLA||String(r.ID_FILIAL)).replace(/"/g,'&quot;')}" onclick="openFilialDetail(this.dataset.sigla)">
             <td><span class="sigla">${r.SIGLA||r.ID_FILIAL}</span></td>
             <td>${r.LOJA||'—'}</td><td>${r.REGIONAL||'—'}</td><td class="col-auditor">${r.AUDITOR||'—'}</td>
             <td class="num">${fmtM(r.FAT_REAL)}</td><td class="num">${fmtM(r.FAT_PREV)}</td>
@@ -2248,8 +2248,8 @@ function _renderMensalRegional(mes,nomeMes){
   if(!rows.length){document.getElementById('mensal-cards').innerHTML='<div class="empty">Sem dados de regionais para este mês.</div>';document.getElementById('mensal-ranking').innerHTML='';return;}
   const pior=rows[0],melhor=rows[rows.length-1],avgP=rows.reduce((s,r)=>s+r.PERC_DESP,0)/rows.length;
   document.getElementById('mensal-cards').innerHTML=`
-    <div class="kpi vermelho"><div class="kpi-label">🔴 Regional com Maior % — ${nomeMes}</div><div class="kpi-val">${fmtP(pior.PERC_DESP)}</div><div class="kpi-sub">${pior.REGIONAL}</div>${badgeP(pior.DESVIO_DESP,true)}</div>
-    <div class="kpi verde"><div class="kpi-label">🟢 Regional com Menor % — ${nomeMes}</div><div class="kpi-val">${fmtP(melhor.PERC_DESP)}</div><div class="kpi-sub">${melhor.REGIONAL}</div>${badgeP(melhor.DESVIO_DESP,true)}</div>
+    <div class="kpi vermelho kpi-click" data-reg="${(pior.REGIONAL||'').replace(/"/g,'&quot;')}" onclick="openRegionalDetail(this.dataset.reg)" title="Ver detalhes da regional"><div class="kpi-label">🔴 Regional com Maior % — ${nomeMes}</div><div class="kpi-val">${fmtP(pior.PERC_DESP)}</div><div class="kpi-sub">${pior.REGIONAL}</div>${badgeP(pior.DESVIO_DESP,true)}<span class="kpi-goto">▸</span></div>
+    <div class="kpi verde kpi-click" data-reg="${(melhor.REGIONAL||'').replace(/"/g,'&quot;')}" onclick="openRegionalDetail(this.dataset.reg)" title="Ver detalhes da regional"><div class="kpi-label">🟢 Regional com Menor % — ${nomeMes}</div><div class="kpi-val">${fmtP(melhor.PERC_DESP)}</div><div class="kpi-sub">${melhor.REGIONAL}</div>${badgeP(melhor.DESVIO_DESP,true)}<span class="kpi-goto">▸</span></div>
     <div class="kpi ${avgP>_LIMITE_META?'vermelho':'verde'}"><div class="kpi-label">📊 Média do Mês</div><div class="kpi-val">${avgP.toFixed(1)}%</div><div class="kpi-sub">Limite: ${_LIMITE_META}%</div></div>`;
   document.getElementById('mensal-ranking').innerHTML=`<div class="tbl-box"><div class="tbl-box-head"><h3>📅 Por Regional — ${nomeMes}</h3></div>
     <table id="tbl-mensal"><thead><tr>
@@ -2258,7 +2258,7 @@ function _renderMensalRegional(mes,nomeMes){
       <th class="num" onclick="sortTbl(this,'tbl-mensal')">Desv. Desp%</th><th class="num" onclick="sortTbl(this,'tbl-mensal')">% Desp/Fat</th><th class="num">Status</th>
     </tr></thead><tbody>${rows.map(r=>{
       const status=r.PERC_DESP<=_LIMITE_META?'<span class="kpi-badge badge-ok">✓ Dentro</span>':r.PERC_DESP<=16?'<span class="kpi-badge badge-warn">⚠ Atenção</span>':'<span class="kpi-badge badge-bad">✗ Crítico</span>';
-      return`<tr><td><strong>${r.REGIONAL}</strong></td><td class="num">${fmtM(r.FAT_REAL)}</td><td class="num">${fmtM(r.DESP_REAL)}</td>
+      return`<tr class="tr-click" data-reg="${(r.REGIONAL||'').replace(/"/g,'&quot;')}" onclick="openRegionalDetail(this.dataset.reg)"><td><strong>${r.REGIONAL}</strong></td><td class="num">${fmtM(r.FAT_REAL)}</td><td class="num">${fmtM(r.DESP_REAL)}</td>
         <td class="num ${clP(r.DESVIO_DESP,true)}">${fmtP(r.DESVIO_DESP)}</td><td class="num ${pctClass(r.PERC_DESP)}">${fmtP(r.PERC_DESP)}</td><td style="text-align:center">${status}</td></tr>`;
     }).join('')}</tbody></table></div>`;
 }
@@ -2277,8 +2277,8 @@ function _renderMensalAuditor(mes,nomeMes){
   if(!rows.length){document.getElementById('mensal-cards').innerHTML='<div class="empty">Sem dados de auditores para este mês.</div>';document.getElementById('mensal-ranking').innerHTML='';return;}
   const pior=rows[0],melhor=rows[rows.length-1],avgP=rows.reduce((s,r)=>s+r.PERC_DESP,0)/rows.length;
   document.getElementById('mensal-cards').innerHTML=`
-    <div class="kpi vermelho"><div class="kpi-label">🔴 Auditor com Maior % — ${nomeMes}</div><div class="kpi-val">${fmtP(pior.PERC_DESP)}</div><div class="kpi-sub">${pior.AUDITOR}</div>${badgeP(pior.DESVIO_DESP,true)}</div>
-    <div class="kpi verde"><div class="kpi-label">🟢 Auditor com Menor % — ${nomeMes}</div><div class="kpi-val">${fmtP(melhor.PERC_DESP)}</div><div class="kpi-sub">${melhor.AUDITOR}</div>${badgeP(melhor.DESVIO_DESP,true)}</div>
+    <div class="kpi vermelho kpi-click" data-aud="${(pior.AUDITOR||'').replace(/"/g,'&quot;')}" onclick="openAuditorDetail(this.dataset.aud)" title="Ver detalhes do auditor"><div class="kpi-label">🔴 Auditor com Maior % — ${nomeMes}</div><div class="kpi-val">${fmtP(pior.PERC_DESP)}</div><div class="kpi-sub">${pior.AUDITOR}</div>${badgeP(pior.DESVIO_DESP,true)}<span class="kpi-goto">▸</span></div>
+    <div class="kpi verde kpi-click" data-aud="${(melhor.AUDITOR||'').replace(/"/g,'&quot;')}" onclick="openAuditorDetail(this.dataset.aud)" title="Ver detalhes do auditor"><div class="kpi-label">🟢 Auditor com Menor % — ${nomeMes}</div><div class="kpi-val">${fmtP(melhor.PERC_DESP)}</div><div class="kpi-sub">${melhor.AUDITOR}</div>${badgeP(melhor.DESVIO_DESP,true)}<span class="kpi-goto">▸</span></div>
     <div class="kpi ${avgP>_LIMITE_META?'vermelho':'verde'}"><div class="kpi-label">📊 Média do Mês</div><div class="kpi-val">${avgP.toFixed(1)}%</div><div class="kpi-sub">Limite: ${_LIMITE_META}%</div></div>`;
   document.getElementById('mensal-ranking').innerHTML=`<div class="tbl-box"><div class="tbl-box-head"><h3>📅 Por Auditor — ${nomeMes}</h3></div>
     <table id="tbl-mensal"><thead><tr>
@@ -2287,7 +2287,7 @@ function _renderMensalAuditor(mes,nomeMes){
       <th class="num" onclick="sortTbl(this,'tbl-mensal')">Desv. Desp%</th><th class="num" onclick="sortTbl(this,'tbl-mensal')">% Desp/Fat</th><th class="num">Status</th>
     </tr></thead><tbody>${rows.map(r=>{
       const status=r.PERC_DESP<=_LIMITE_META?'<span class="kpi-badge badge-ok">✓ Dentro</span>':r.PERC_DESP<=16?'<span class="kpi-badge badge-warn">⚠ Atenção</span>':'<span class="kpi-badge badge-bad">✗ Crítico</span>';
-      return`<tr><td><strong>${r.AUDITOR}</strong></td><td class="num">${fmtM(r.FAT_REAL)}</td><td class="num">${fmtM(r.DESP_REAL)}</td>
+      return`<tr class="tr-click" data-aud="${(r.AUDITOR||'').replace(/"/g,'&quot;')}" onclick="openAuditorDetail(this.dataset.aud)"><td><strong>${r.AUDITOR}</strong></td><td class="num">${fmtM(r.FAT_REAL)}</td><td class="num">${fmtM(r.DESP_REAL)}</td>
         <td class="num ${clP(r.DESVIO_DESP,true)}">${fmtP(r.DESVIO_DESP)}</td><td class="num ${pctClass(r.PERC_DESP)}">${fmtP(r.PERC_DESP)}</td><td style="text-align:center">${status}</td></tr>`;
     }).join('')}</tbody></table></div>`;
 }
@@ -4841,7 +4841,7 @@ function openGrupoDetail(grupoNome){
     if(rows.length){
       topFilHtml=`<div class="dm-section">Top filiais neste grupo</div>`
         +rows.map(r=>{
-          const f=DATA.filiais.find(x=>x.ID_FILIAL===r.ID_FILIAL);
+          const f=DATA.filiais.find(x=>Number(x.ID_FILIAL)===Number(r.ID_FILIAL));
           const perc=f&&f.FAT_REAL>0?(r.DESP_REAL/f.FAT_REAL*100):null;
           return `<div class="dm-row"><span class="dm-label">${f?f.SIGLA:'#'+r.ID_FILIAL} — ${f?f.LOJA||'':'—'}</span><span class="dm-val">${fmtM(r.DESP_REAL)}${perc!==null?' ('+fmtP(perc)+')':''}</span></div>`;
         }).join('');
@@ -4914,6 +4914,29 @@ function openRegionalDetail(nome){
     <div class="dm-row"><span class="dm-label">Desp. realizada</span><span class="dm-val">${fmt(r.DESP_REAL)}</span></div>
     <div class="dm-row"><span class="dm-label">Desvio desp.</span><span class="dm-val ${dd<=0?'tx-pos':'tx-neg'}">${dd>=0?'+':''}${fmtP(dd)}</span></div>
     <div class="dm-row"><span class="dm-label">% Desp/Fat</span><span class="dm-val ${pctClass(r.PERC_DESP)}">${fmtP(r.PERC_DESP)}</span></div>
+    ${filiaisHtml}
+  `);
+}
+
+// ---- Auditor ----
+function openAuditorDetail(nome){
+  if(!DATA) return;
+  const a=DATA.auditores.find(x=>x.AUDITOR===nome);
+  if(!a) return;
+  const df=a.FAT_PREV?((a.FAT_REAL-a.FAT_PREV)/a.FAT_PREV*100):0;
+  const dd=a.DESP_PREV?((a.DESP_REAL-a.DESP_PREV)/a.DESP_PREV*100):0;
+  const filiais=DATA.filiais.filter(f=>f.AUDITOR===nome).sort((a,b)=>b.PERC_DESP-a.PERC_DESP);
+  const filiaisHtml=filiais.length
+    ?`<div class="dm-section">Filiais auditadas (${filiais.length}) — por % Desp/Fat</div>`
+      +filiais.map(f=>`<div class="dm-row"><span class="dm-label">${f.SIGLA} — ${f.LOJA||''}</span><span class="dm-val ${pctClass(f.PERC_DESP)}">${fmtP(f.PERC_DESP)}</span></div>`).join('')
+    :'';
+  openDetail('👤 Auditor: '+nome,`
+    <div class="dm-section">Consolidado do auditor</div>
+    <div class="dm-row"><span class="dm-label">Fat. realizado</span><span class="dm-val">${fmt(a.FAT_REAL)}</span></div>
+    <div class="dm-row"><span class="dm-label">Fat. planejado</span><span class="dm-val">${fmt(a.FAT_PREV)}</span></div>
+    <div class="dm-row"><span class="dm-label">Desvio fat.</span><span class="dm-val ${df>=0?'tx-pos':'tx-neg'}">${df>=0?'+':''}${fmtP(df)}</span></div>
+    <div class="dm-row"><span class="dm-label">Desp. realizada</span><span class="dm-val">${fmt(a.DESP_REAL)}</span></div>
+    <div class="dm-row"><span class="dm-label">% Desp/Fat</span><span class="dm-val ${pctClass(a.PERC_DESP)}">${fmtP(a.PERC_DESP)}</span></div>
     ${filiaisHtml}
   `);
 }
