@@ -145,6 +145,23 @@ def processar_ano(d_ano, r, ano_alvo):
                     .reset_index())
     grupos_filial['ID_FILIAL'] = grupos_filial['ID_FILIAL'].astype(int)
 
+    # Sub-contas (DESCRICAO dentro de cada GRUPO_CONTA) — totais consolidados
+    grupos_desc = (desp_comp.groupby(['GRUPO_CONTA', 'DESCRICAO'])
+                   .agg(DESP_REAL=('VLR_REALIZADO','sum'), DESP_PREV=('VLR_PREVISAO','sum'))
+                   .reset_index()
+                   .sort_values(['GRUPO_CONTA', 'DESP_REAL'], ascending=[True, False]))
+    grupos_desc['DESVIO'] = pct(grupos_desc['DESP_REAL'] - grupos_desc['DESP_PREV'], grupos_desc['DESP_PREV'])
+
+    # Sub-contas × Filial (drill-down por filial e Diagnóstico comparativo)
+    grupos_filial_desc = (desp_comp.groupby(['ID_FILIAL', 'GRUPO_CONTA', 'DESCRICAO'])
+                          .agg(DESP_REAL=('VLR_REALIZADO','sum'), DESP_PREV=('VLR_PREVISAO','sum'))
+                          .reset_index())
+    grupos_filial_desc['ID_FILIAL'] = grupos_filial_desc['ID_FILIAL'].astype(int)
+    grupos_filial_desc['DESVIO'] = pct(
+        grupos_filial_desc['DESP_REAL'] - grupos_filial_desc['DESP_PREV'],
+        grupos_filial_desc['DESP_PREV']
+    )
+
     # Totais
     tot_fat_real      = fat_comp['VLR_REALIZADO'].sum()
     tot_fat_prev      = fat_comp['VLR_PREVISAO'].sum()
@@ -175,8 +192,10 @@ def processar_ano(d_ano, r, ano_alvo):
         'filiais_mes':   filiais_mes.to_dict('records'),
         'regionais':     regionais_out.to_dict('records'),
         'auditores':     auditores.to_dict('records'),
-        'grupos':        grupos.to_dict('records'),
-        'grupos_filial': grupos_filial.to_dict('records'),
+        'grupos':             grupos.to_dict('records'),
+        'grupos_filial':      grupos_filial.to_dict('records'),
+        'grupos_desc':        grupos_desc.to_dict('records'),
+        'grupos_filial_desc': grupos_filial_desc.to_dict('records'),
     }
 
 

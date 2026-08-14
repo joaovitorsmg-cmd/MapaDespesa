@@ -346,6 +346,23 @@ tr.tr-click:hover td{background:var(--hover-tint)}
   #detail-modal.active{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all}
   .dm-handle{display:none}
 }
+/* ===== GRUPOS TREE TABLE — sub-contas expansíveis ===== */
+.grp-tree-toggle{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;cursor:pointer;transition:transform .2s;color:var(--text-muted);font-size:10px;vertical-align:middle;user-select:none;flex-shrink:0;margin-right:2px}
+.grp-tree-toggle:hover{background:var(--hover-tint);color:var(--azul)}
+.grp-tree-toggle.grp-open{transform:rotate(90deg)}
+.grp-tree-spacer{display:inline-block;width:20px;height:20px;vertical-align:middle;margin-right:2px;flex-shrink:0}
+.grp-child-count{display:inline-block;padding:1px 6px;border-radius:10px;background:var(--hover-tint);color:var(--text-faint2);font-size:10px;font-weight:400;margin-left:4px;vertical-align:middle}
+tr.grp-parent-row{font-weight:600}
+tr.grp-child-row{display:none}
+tr.grp-child-row.grp-vis{display:table-row}
+tr.grp-child-row td{font-size:11.5px;background:rgba(0,0,0,.025)}
+:root[data-theme="dark"] tr.grp-child-row td{background:rgba(255,255,255,.04)}
+tr.grp-child-row td:first-child{padding-left:34px!important;color:var(--text-muted);font-weight:400}
+/* Diagnóstico alert table: desc child rows */
+tr.diag-desc-row td:first-child{padding-left:28px!important;font-size:11px;color:var(--text-muted)}
+tr.diag-desc-row td{font-size:11px;background:rgba(0,0,0,.02)}
+:root[data-theme="dark"] tr.diag-desc-row td{background:rgba(255,255,255,.03)}
+
 /* Mobile diag summary: grid 2×3 instead of horizontal scroll */
 @media(max-width:600px){
   .diag-summary-bar{display:grid!important;grid-template-columns:repeat(2,1fr)}
@@ -2099,23 +2116,49 @@ function renderTabRegionalFiltered(regData, audData){
   }).join('');
 }
 
-function renderTabGrupos(){ renderTabGruposData(DATA.grupos); }
-function renderTabGruposData(grupos){
+function renderTabGrupos(){ renderTabGruposData(DATA.grupos, DATA.grupos_desc||[]); }
+function toggleGrupoExpand(el, key){
+  const isOpen=el.classList.toggle('grp-open');
+  document.querySelectorAll('tr.grp-child-row[data-parent="'+key+'"]').forEach(r=>{
+    r.classList.toggle('grp-vis', isOpen);
+  });
+}
+function renderTabGruposData(grupos, gruposDesc){
   grupos=grupos||DATA.grupos;
+  gruposDesc=gruposDesc!=null?gruposDesc:(DATA.grupos_desc||[]);
   const totalDesp=grupos.reduce((s,g)=>s+g.DESP_REAL,0);
   const b=document.getElementById('body-grupos');
   if(!b) return;
-  b.innerHTML=grupos.map(g=>{
+  let html='';
+  grupos.forEach((g,gi)=>{
     const desvR=g.DESP_REAL-g.DESP_PREV;
-    return `<tr class="tr-click" data-grupo="${g.GRUPO_CONTA.replace(/"/g,'&quot;')}" onclick="openGrupoDetail(this.dataset.grupo)">
-      <td>${g.GRUPO_CONTA}</td>
+    const safe=g.GRUPO_CONTA.replace(/"/g,'&quot;');
+    const children=gruposDesc.filter(d=>d.GRUPO_CONTA===g.GRUPO_CONTA).sort((a,b)=>b.DESP_REAL-a.DESP_REAL);
+    const has=children.length>0;
+    html+=`<tr class="tr-click grp-parent-row" data-grupo="${safe}" onclick="openGrupoDetail(this.dataset.grupo)">
+      <td>${has?`<span class="grp-tree-toggle" onclick="event.stopPropagation();toggleGrupoExpand(this,${gi})" title="Expandir sub-contas">▶</span>`:'<span class="grp-tree-spacer"></span>'}${g.GRUPO_CONTA}${has?` <span class="grp-child-count">${children.length}</span>`:''}</td>
       <td class="num">${fmtM(g.DESP_REAL)}</td>
       <td class="num">${fmtM(g.DESP_PREV)}</td>
       <td class="num ${desvR>0?'tx-neg':'tx-pos'}">${fmtM(desvR)}</td>
       <td class="num ${g.DESVIO>20?'tx-neg':g.DESVIO>0?'tx-warn':'tx-pos'}">${fmtP(g.DESVIO)}</td>
       <td class="num">${totalDesp>0?((g.DESP_REAL/totalDesp)*100).toFixed(1)+'%':'—'}</td>
     </tr>`;
-  }).join('');
+    if(has){
+      children.forEach(c=>{
+        const cd=c.DESP_REAL-c.DESP_PREV;
+        const cv=c.DESVIO||0;
+        html+=`<tr class="grp-child-row" data-parent="${gi}">
+          <td>· ${c.DESCRICAO}</td>
+          <td class="num">${fmtM(c.DESP_REAL)}</td>
+          <td class="num">${fmtM(c.DESP_PREV)}</td>
+          <td class="num ${cd>0?'tx-neg':'tx-pos'}">${fmtM(cd)}</td>
+          <td class="num ${cv>20?'tx-neg':cv>0?'tx-warn':'tx-pos'}">${fmtP(cv)}</td>
+          <td class="num">${totalDesp>0?((c.DESP_REAL/totalDesp)*100).toFixed(1)+'%':'—'}</td>
+        </tr>`;
+      });
+    }
+  });
+  b.innerHTML=html;
 }
 
 // =========================================================
@@ -4162,11 +4205,13 @@ function applyGruFilters(){
   if(!DATA) return;
   const regs=new Set([...document.querySelectorAll('.chk-gru-reg:checked')].map(c=>c.value));
   const allR=!regs.size;
-  let grupos;
+  let grupos, gruposDesc;
   if(allR){
     grupos=DATA.grupos;
+    gruposDesc=DATA.grupos_desc||[];
   } else {
     const ids=new Set(DATA.filiais.filter(f=>regs.has(f.REGIONAL)).map(f=>+f.ID_FILIAL));
+    // Grupos filtrados
     const gfRows=(DATA.grupos_filial||[]).filter(r=>ids.has(+r.ID_FILIAL));
     const gMap={};
     gfRows.forEach(r=>{
@@ -4176,8 +4221,22 @@ function applyGruFilters(){
       gMap[gc].DESP_PREV+=r.DESP_PREV;
     });
     grupos=Object.values(gMap).map(g=>({...g,DESVIO:g.DESP_PREV>0?(g.DESP_REAL-g.DESP_PREV)/g.DESP_PREV*100:0})).sort((a,b)=>b.DESP_REAL-a.DESP_REAL);
+    // Sub-contas filtradas
+    if(DATA.grupos_filial_desc){
+      const gdfRows=(DATA.grupos_filial_desc||[]).filter(r=>ids.has(+r.ID_FILIAL));
+      const dMap={};
+      gdfRows.forEach(r=>{
+        const k=r.GRUPO_CONTA+'|||'+r.DESCRICAO;
+        if(!dMap[k]) dMap[k]={GRUPO_CONTA:r.GRUPO_CONTA,DESCRICAO:r.DESCRICAO,DESP_REAL:0,DESP_PREV:0};
+        dMap[k].DESP_REAL+=r.DESP_REAL;
+        dMap[k].DESP_PREV+=r.DESP_PREV;
+      });
+      gruposDesc=Object.values(dMap).map(d=>({...d,DESVIO:d.DESP_PREV>0?(d.DESP_REAL-d.DESP_PREV)/d.DESP_PREV*100:0}));
+    } else {
+      gruposDesc=DATA.grupos_desc||[];
+    }
   }
-  renderTabGruposData(grupos);
+  renderTabGruposData(grupos,gruposDesc);
   renderGruposBarData(grupos);
   renderGruposDesvData(grupos);
 }
@@ -4585,7 +4644,8 @@ function renderDiagAlertTable(selF){
 
   if(title) title.textContent = `⚠️ Gaps por Grupo de Conta — ${tableRows.length} grupos · ordenado pelo maior desvio`;
 
-  body.innerHTML = tableRows.map(row=>{
+  const hasDesc=!!(DATA.grupos_filial_desc&&DATA.grupos_filial_desc.length);
+  body.innerHTML = tableRows.map((row,ri)=>{
     const gapCls = row.gap>5?'diag-gap-high':row.gap>2?'diag-gap-mid':'diag-gap-low';
     const cells = row.filData.map(d=>{
       const isMax = d.perc===row.maxP && row.gap>0.5;
@@ -4593,11 +4653,35 @@ function renderDiagAlertTable(selF){
       return `<td class="num">${d.desp>0?fmtM(d.desp):'—'}</td>
               <td class="num ${isMax?'tx-neg':isMin?'tx-pos':''}" style="font-size:10px">${d.perc>0?fmtP(d.perc):'—'}</td>`;
     }).join('');
-    return `<tr class="tr-click" data-grupo="${row.grupo.replace(/"/g,'&quot;')}" onclick="openGrupoDetail(this.dataset.grupo)">
-      <td style="font-size:11px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${row.grupo}">${row.grupo}</td>
+    // Sub-conta child rows
+    let descRows='';
+    if(hasDesc){
+      const descData=(DATA.grupos_filial_desc||[]).filter(r=>r.GRUPO_CONTA===row.grupo&&idSet.has(r.ID_FILIAL));
+      const descUniq=[...new Set(descData.map(r=>r.DESCRICAO))].sort((a,b)=>{
+        const totA=descData.filter(r=>r.DESCRICAO===a).reduce((s,r)=>s+r.DESP_REAL,0);
+        const totB=descData.filter(r=>r.DESCRICAO===b).reduce((s,r)=>s+r.DESP_REAL,0);
+        return totB-totA;
+      });
+      descRows=descUniq.map(desc=>{
+        const dCells=selF.map(f=>{
+          const r=descData.find(x=>Number(x.ID_FILIAL)===Number(f.ID_FILIAL)&&x.DESCRICAO===desc);
+          const desp=r?r.DESP_REAL:0;
+          const perc=f.FAT_REAL>0?desp/f.FAT_REAL*100:0;
+          return `<td class="num" style="font-size:10.5px">${desp>0?fmtM(desp):'—'}</td>
+                  <td class="num" style="font-size:10px;opacity:.8">${perc>0?fmtP(perc):'—'}</td>`;
+        }).join('');
+        return `<tr class="diag-desc-row grp-child-row" data-parent="diag-${ri}">
+          <td title="${desc}">· ${desc.length>34?desc.slice(0,34)+'…':desc}</td>
+          ${dCells}<td></td>
+        </tr>`;
+      }).join('');
+    }
+    const toggleBtn=hasDesc?`<span class="grp-tree-toggle" onclick="event.stopPropagation();toggleGrupoExpand(this,'diag-${ri}')" title="Expandir sub-contas">▶</span>`:'';
+    return `<tr class="tr-click grp-parent-row" data-grupo="${row.grupo.replace(/"/g,'&quot;')}" onclick="openGrupoDetail(this.dataset.grupo)">
+      <td style="font-size:11px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${row.grupo}">${toggleBtn}${row.grupo}</td>
       ${cells}
       <td class="num">${row.gap>0.5?`<span class="diag-gap-pill ${gapCls}">${row.gap.toFixed(1)} p.p.</span>`:'—'}</td>
-    </tr>`;
+    </tr>${descRows}`;
   }).join('') || '<tr><td colspan="99" class="empty">Sem dados de grupos por filial</td></tr>';
 }
 
@@ -4832,30 +4916,56 @@ function openKpiDetail(type){
 // ---- Grupo de conta ----
 function openGrupoDetail(grupoNome){
   if(!DATA) return;
-  const g = DATA.grupos.find(x=>x.GRUPO_CONTA===grupoNome);
+  const g=DATA.grupos.find(x=>x.GRUPO_CONTA===grupoNome);
   if(!g) return;
   const dv=g.DESVIO||0;
+
+  // Sub-contas (DESCRICAO) deste grupo
+  let descHtml='';
+  if(DATA.grupos_desc){
+    const descs=(DATA.grupos_desc||[]).filter(d=>d.GRUPO_CONTA===grupoNome).sort((a,b)=>b.DESP_REAL-a.DESP_REAL);
+    if(descs.length){
+      const totD=descs.reduce((s,d)=>s+d.DESP_REAL,0);
+      descHtml=`<div class="dm-section">Sub-contas / Descrições (${descs.length})</div>`
+        +descs.map(d=>{
+          const pct=totD>0?((d.DESP_REAL/totD)*100).toFixed(1)+'%':'—';
+          const dvi=d.DESVIO||0;
+          const cd=d.DESP_REAL-d.DESP_PREV;
+          return `<div class="dm-row">
+            <span class="dm-label" style="font-size:11.5px">· ${d.DESCRICAO}</span>
+            <span class="dm-val" style="font-size:11.5px;flex-direction:column;align-items:flex-end;gap:1px">
+              <span>${fmtM(d.DESP_REAL)} <small style="opacity:.6">(${pct})</small></span>
+              <small class="${dvi<=0?'tx-pos':'tx-neg'}" style="opacity:.85">${cd>=0?'+':''}${fmtM(cd)} / ${dvi>=0?'+':''}${fmtP(dvi)}</small>
+            </span>
+          </div>`;
+        }).join('');
+    }
+  }
+
+  // Top filiais neste grupo
   let topFilHtml='';
   if(DATA.grupos_filial){
-    const rows=DATA.grupos_filial.filter(r=>r.GRUPO_CONTA===grupoNome).sort((a,b)=>b.DESP_REAL-a.DESP_REAL).slice(0,6);
+    const rows=(DATA.grupos_filial||[]).filter(r=>r.GRUPO_CONTA===grupoNome).sort((a,b)=>b.DESP_REAL-a.DESP_REAL).slice(0,6);
     if(rows.length){
       topFilHtml=`<div class="dm-section">Top filiais neste grupo</div>`
         +rows.map(r=>{
           const f=DATA.filiais.find(x=>Number(x.ID_FILIAL)===Number(r.ID_FILIAL));
           const perc=f&&f.FAT_REAL>0?(r.DESP_REAL/f.FAT_REAL*100):null;
-          return `<div class="dm-row"><span class="dm-label">${f?f.SIGLA:'#'+r.ID_FILIAL} — ${f?f.LOJA||'':'—'}</span><span class="dm-val">${fmtM(r.DESP_REAL)}${perc!==null?' ('+fmtP(perc)+')':''}</span></div>`;
+          return `<div class="dm-row"><span class="dm-label">${f?f.SIGLA:'#'+r.ID_FILIAL} — ${f?f.LOJA||'':'—'}</span><span class="dm-val">${fmtM(r.DESP_REAL)}${perc!==null?' <small style="opacity:.7">('+fmtP(perc)+')</small>':''}</span></div>`;
         }).join('');
     }
   }
-  openDetail('📂 '+grupoNome, `
+
+  openDetail('📂 '+grupoNome,`
     <div class="dm-section">Resumo do grupo</div>
     <div class="dm-row"><span class="dm-label">Desp. realizada</span><span class="dm-val">${fmt(g.DESP_REAL)}</span></div>
     <div class="dm-row"><span class="dm-label">Desp. planejada</span><span class="dm-val">${fmt(g.DESP_PREV)}</span></div>
     <div class="dm-row"><span class="dm-label">Desvio %</span><span class="dm-val ${dv<=0?'tx-pos':'tx-neg'}">${dv>=0?'+':''}${fmtP(dv)}</span></div>
     <div class="dm-row"><span class="dm-label">Variação R$</span><span class="dm-val ${(g.DESP_REAL-g.DESP_PREV)<=0?'tx-pos':'tx-neg'}">${fmt(g.DESP_REAL-g.DESP_PREV)}</span></div>
     <div class="dm-row"><span class="dm-label">% sobre fat. total</span><span class="dm-val">${DATA.meta.tot_fat_real>0?fmtP(g.DESP_REAL/DATA.meta.tot_fat_real*100):'—'}</span></div>
+    ${descHtml}
     ${topFilHtml}
-    <button class="dm-nav-btn" onclick="closeDetail();switchTab('tab-grupos')">Ver todos os grupos →</button>
+    <button class="dm-nav-btn" onclick="closeDetail();switchTab('tab-grupos')">Ver aba Grupos →</button>
   `);
 }
 
