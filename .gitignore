@@ -1,6 +1,8 @@
 # Dados financeiros reais — gerados localmente pelo gerar_json.py
 # Nunca devem ser versionados (contêm faturamento e despesas sensíveis)
 aqm_data.json
+Mapa_Despesa.xlsx
+Base_regionais.xlsx
 .claude/
 __pycache__/
 *.pyc
